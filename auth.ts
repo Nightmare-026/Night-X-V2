@@ -6,7 +6,7 @@ import Credentials from "next-auth/providers/credentials";
 import { compare } from "bcrypt-ts";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: FirestoreAdapter(adminDb),
+  adapter: adminDb ? FirestoreAdapter(adminDb) : undefined,
   session: { strategy: "jwt" },
   ...authConfig,
   providers: [
@@ -21,6 +21,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!credentials?.email || !credentials?.password) return null;
 
         try {
+          if (!adminDb) return null;
           const userRef = adminDb.collection("users").where("email", "==", credentials.email).limit(1);
           const snapshot = await userRef.get();
 

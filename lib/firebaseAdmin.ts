@@ -23,13 +23,17 @@ if (!admin.apps.length) {
   }
 }
 
-const adminAuth = admin.apps.length ? admin.auth() : null as any;
-const adminDb = admin.apps.length ? admin.firestore() : null as any;
+const adminAuth = admin.apps.length ? admin.auth() : null;
+const adminDb = admin.apps.length ? admin.firestore() : null;
+
+export { adminAuth, adminDb };
 
 /**
  * Increments the AI usage count for a user and tool on the current date.
  */
 export async function incrementAIUsage(userId: string, tool: string) {
+  if (!adminDb) return;
+  
   const today = new Date().toISOString().split('T')[0];
   const usageId = `${userId}_${tool}_${today}`;
   const usageRef = adminDb.collection('ai_usage').doc(usageId);

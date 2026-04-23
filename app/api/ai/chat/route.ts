@@ -17,6 +17,9 @@ export async function POST(req: Request) {
 
   try {
     // 1. Check Rate Limit
+    if (!adminDb) {
+      return NextResponse.json({ error: "Service unavailable (Firebase not initialized)" }, { status: 503 });
+    }
     const doc = await adminDb.collection("ai_usage").doc(usageId).get();
     const currentCount = doc.exists ? doc.data()?.count || 0 : 0;
 
