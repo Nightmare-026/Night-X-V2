@@ -58,5 +58,3 @@ export async function incrementAIUsage(userId: string, tool: string) {
     console.error('Error incrementing AI usage:', error);
   }
 }
-
-export { adminAuth, adminDb };
