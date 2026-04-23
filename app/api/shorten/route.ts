@@ -36,7 +36,8 @@ export async function POST(req: NextRequest) {
       clicks: 0
     });
 
-    const shortUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/u/${shortCode}`;
+    const origin = req.nextUrl.origin;
+    const shortUrl = `${origin}/u/${shortCode}`;
 
     return NextResponse.json({ shortUrl, shortCode });
   } catch (error) {
