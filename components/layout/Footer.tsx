@@ -60,7 +60,7 @@ export default function Footer() {
 
   const supportLinks = [
     { name: 'Feedback', href: '/feedback', icon: <MessageSquare className="h-4 w-4" /> },
-    { name: 'Report a Bug', href: 'mailto:sunlight002614@gmail.com', icon: <Mail className="h-4 w-4" /> },
+    { name: 'Report a Bug', href: `mailto:${process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'support@night-x.app'}`, icon: <Mail className="h-4 w-4" /> },
     { name: 'Support Us', href: '/support', icon: <Heart className="h-4 w-4 text-red-500" />, subtext: 'Help us grow' },
     { name: 'FAQ', href: '/faq', icon: null },
   ];
@@ -80,9 +80,6 @@ export default function Footer() {
             <div className="flex gap-4">
               <a href="https://github.com/Nightmare-026/Night-X-V2" target="_blank" rel="noopener noreferrer" className="rounded-lg bg-white/5 p-2 text-white/40 transition-all hover:bg-white/10 hover:text-white" aria-label="Visit the GitHub repository">
                 <Github className="h-5 w-5" />
-              </a>
-              <a href="https://instagram.com/nightmare_ff_26" target="_blank" rel="noopener noreferrer" className="rounded-lg bg-white/5 p-2 text-white/40 transition-all hover:bg-white/10 hover:text-white" aria-label="Visit the Instagram profile">
-                <Instagram className="h-5 w-5" />
               </a>
             </div>
           </div>
@@ -119,10 +116,16 @@ export default function Footer() {
             <ul className="space-y-4">
               {supportLinks.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} className="flex items-center gap-2 text-sm text-white/40 transition-colors hover:text-accent-purple">
-                    {link.icon}
-                    <span>{link.name}</span>
-                    {link.subtext && <span className="rounded bg-white/5 px-1.5 py-0.5 text-[10px] uppercase tracking-tighter text-white/30">{link.subtext}</span>}
+                  <Link href={link.href} className="group flex flex-col gap-0.5">
+                    <div className="flex items-center gap-2 text-sm text-white/40 transition-colors group-hover:text-accent-purple">
+                      {link.icon}
+                      <span>{link.name}</span>
+                    </div>
+                    {link.subtext && (
+                      <span className="pl-6 text-[10px] text-white/20 transition-colors group-hover:text-white/40">
+                        {link.subtext}
+                      </span>
+                    )}
                   </Link>
                 </li>
               ))}

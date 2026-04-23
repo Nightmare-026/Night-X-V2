@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Send, Copy, Check, RotateCcw, Sparkles, Loader2, Info, Languages, History } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import AIErrorMessage from '@/components/ui/AIErrorMessage';
 
 const AiParaphraser = () => {
   const [text, setText] = useState('');
@@ -151,7 +152,7 @@ const AiParaphraser = () => {
           </button>
           
           {error && (
-            <p className="text-xs text-red-400 text-center">{error}</p>
+            <AIErrorMessage error={error} />
           )}
         </div>
 

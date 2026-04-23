@@ -8,6 +8,9 @@ export default auth((req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
 
+  const publicTools = ['word-counter', 'password-generator', 'age-calculator', 'qr-generator'];
+  const isPublicTool = publicTools.some(slug => nextUrl.pathname === `/tools/${slug}`);
+
   const isPublicRoute = [
     "/",
     "/about",
@@ -18,7 +21,7 @@ export default auth((req) => {
     "/feedback",
     "/services",
     "/faq",
-  ].some(route => nextUrl.pathname === route);
+  ].some(route => nextUrl.pathname === route) || isPublicTool;
 
   const isAuthRoute = nextUrl.pathname.startsWith("/auth");
 

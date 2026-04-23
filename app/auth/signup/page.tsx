@@ -81,7 +81,7 @@ export default function SignupPage() {
         setError("Account created but failed to sign in. Please sign in manually.");
         router.push('/auth/signin');
       } else {
-        router.push('/dashboard');
+        router.push('/dashboard?welcome=true');
       }
     } catch (err: any) {
       setError(err.message);
@@ -91,7 +91,7 @@ export default function SignupPage() {
   };
 
   const benefits = [
-    "40+ Premium Tools for Free",
+    "40+ Utility Tools, Free to Use",
     "No Credit Card Required",
     "Privacy First Processing",
     "Lightning Fast Performance"
@@ -103,7 +103,7 @@ export default function SignupPage() {
     { icon: <ShieldCheck size={18} />, label: "Security" },
     { icon: <Cpu size={18} />, label: "Dev Tools" },
     { icon: <Globe size={18} />, label: "Web Utilities" },
-    { icon: <Lock size={18} />, label: "Crypto" },
+    { icon: <Zap size={18} />, label: "Daily Life" },
     { icon: <Sparkles size={18} />, label: "AI Magic" },
   ];
 

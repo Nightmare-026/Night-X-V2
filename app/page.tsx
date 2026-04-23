@@ -112,11 +112,8 @@ export default function LandingPage() {
             {CATEGORIES.filter((category) => category.id !== 'all').map((category) => (
               <Link key={category.id} href={`/dashboard?category=${category.id}`}>
                 <motion.div whileHover={{ y: -5 }} className="group relative h-full cursor-pointer overflow-hidden rounded-3xl border border-white/5 bg-white/5 p-8 transition-all hover:border-accent-purple/50">
-                  <div className="absolute right-0 top-0 p-4 opacity-5 transition-opacity group-hover:opacity-20">
-                    <span className="text-6xl">{category.icon}</span>
-                  </div>
                   <div className="relative z-10">
-                    <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-purple/10 text-2xl">
+                    <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-purple/10 text-2xl" aria-hidden="true">
                       {category.icon}
                     </div>
                     <h3 className="mb-2 text-xl font-bold text-white">{category.label}</h3>
@@ -151,30 +148,42 @@ export default function LandingPage() {
           </div>
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {featuredTools.map((tool: any, index) => (
-              <motion.div
-                key={tool.slug}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="group relative overflow-hidden rounded-2xl border border-white/5 bg-background p-6 transition-all hover:border-accent-cyan/30"
-              >
-                <Link href="/auth/signin" className="absolute inset-0 z-20 flex cursor-pointer flex-col items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100 backdrop-blur-[2px]">
-                  <Lock className="mb-2 h-8 w-8 text-white" />
-                  <span className="text-xs font-bold uppercase tracking-widest text-white">Sign in to use</span>
-                </Link>
+            {featuredTools.map((tool: any, index) => {
+              const isPublic = ['word-counter', 'password-generator', 'age-calculator', 'qr-generator'].includes(tool.slug);
+              return (
+                <motion.div
+                  key={tool.slug}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  className="group relative overflow-hidden rounded-2xl border border-white/5 bg-background p-6 transition-all hover:border-accent-cyan/30"
+                >
+                  <Link 
+                    href={isPublic ? `/tools/${tool.slug}` : "/auth/signin"} 
+                    className="absolute inset-0 z-20 flex cursor-pointer flex-col items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100 backdrop-blur-[2px]"
+                  >
+                    {isPublic ? (
+                      <ArrowRight className="mb-2 h-8 w-8 text-white" />
+                    ) : (
+                      <Lock className="mb-2 h-8 w-8 text-white" />
+                    )}
+                    <span className="text-xs font-bold uppercase tracking-widest text-white">
+                      {isPublic ? 'Try it free' : 'Sign in to use'}
+                    </span>
+                  </Link>
 
-                <div className="mb-4 inline-block text-3xl transition-transform duration-300 group-hover:scale-110">{tool.icon}</div>
-                <h4 className="mb-2 text-lg font-bold text-white">{tool.name}</h4>
-                <p className="line-clamp-2 text-xs leading-relaxed text-white/30">{tool.description}</p>
-                {tool.isAI && (
-                  <span className="absolute right-4 top-4 rounded-full bg-accent-purple/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-tighter text-accent-purple">
-                    AI Powered
-                  </span>
-                )}
-              </motion.div>
-            ))}
+                  <div className="mb-4 inline-block text-3xl transition-transform duration-300 group-hover:scale-110" aria-hidden="true">{tool.icon}</div>
+                  <h4 className="mb-2 text-lg font-bold text-white">{tool.name}</h4>
+                  <p className="line-clamp-2 text-xs leading-relaxed text-white/30">{tool.description}</p>
+                  {tool.isAI && (
+                    <span className="absolute right-4 top-4 rounded-full bg-accent-purple/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-tighter text-accent-purple">
+                      AI Powered
+                    </span>
+                  )}
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>

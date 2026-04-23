@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, Cpu } from "lucide-react";
+import { ArrowRight, Cpu, Lock } from "lucide-react";
 import Link from "next/link";
 import { CATEGORIES, TOOLS } from "@/lib/tools-registry";
 
@@ -48,13 +48,22 @@ export default function ServicesPage() {
                 <h2 className="text-xl font-bold text-white">{category.name}</h2>
               </div>
               <p className="mb-4 text-sm text-white/50">{category.description}</p>
-              <ul className="space-y-3">
-                {category.tools.slice(0, 6).map((tool) => (
-                  <li key={tool.slug} className="flex items-center gap-2 text-gray-300">
-                    <div className="h-1.5 w-1.5 rounded-full bg-accent-cyan" />
-                    {tool.name}
-                  </li>
-                ))}
+              <ul className="space-y-3 font-dm-sans">
+                {category.tools.slice(0, 8).map((tool) => {
+                  const isPublic = ['word-counter', 'password-generator', 'age-calculator', 'qr-generator'].includes(tool.slug);
+                  return (
+                    <li key={tool.slug}>
+                      <Link 
+                        href={isPublic ? `/tools/${tool.slug}` : "/auth/signin"}
+                        className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors group/tool"
+                      >
+                        <div className="h-1 w-1 rounded-full bg-white/20 group-hover/tool:bg-accent-cyan group-hover/tool:scale-125 transition-all" />
+                        <span className="text-sm">{tool.name}</span>
+                        {!isPublic && <Lock size={10} className="opacity-20 group-hover/tool:opacity-50" />}
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             </motion.div>
           ))}

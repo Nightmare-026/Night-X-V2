@@ -85,8 +85,10 @@ export default function SupportPage() {
             <Heart className="w-8 h-8" />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold mb-6 font-syne">Support Night X</h1>
-          <p className="text-xl text-white/50 leading-relaxed max-w-2xl mx-auto">
+          <p className="text-xl text-white/50 leading-relaxed max-w-2xl mx-auto font-dm-sans">
             If Night X saves you time, you can support hosting and development here. 
+            <br />
+            For sponsorship or business inquiries, contact <a href={`mailto:${process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@night-x.app"}`} className="text-accent-cyan hover:underline">{process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@night-x.app"}</a>.
             <br />
             <span className="text-amber-400 font-medium">(Payment System Coming Soon)</span>
           </p>

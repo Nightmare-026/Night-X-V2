@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Send, Copy, Check, RotateCcw, Sparkles, Loader2, Info, UserCircle, Share2, Instagram, Linkedin, Twitter, Globe } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import AIErrorMessage from '@/components/ui/AIErrorMessage';
 
 const AiBioGenerator = () => {
   const [keywords, setKeywords] = useState('');
@@ -172,7 +173,7 @@ const AiBioGenerator = () => {
           </button>
           
           {error && (
-            <p className="text-xs text-red-400 text-center">{error}</p>
+            <AIErrorMessage error={error} />
           )}
         </div>
 

@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import ToolGrid from '@/components/dashboard/ToolGrid';
 import AIChat from '@/components/dashboard/AIChat';
 import DashboardClient from '@/components/dashboard/DashboardClient';
+import WelcomeBanner from '@/components/dashboard/WelcomeBanner';
 import { ToastProvider } from '@/components/ui/Toast';
 
 export const metadata: Metadata = {
@@ -45,6 +46,10 @@ export default async function DashboardPage() {
               Explore the Night X dashboard, search across tools, and open the features that fit your workflow.
             </p>
           </div>
+
+          <Suspense fallback={null}>
+            <WelcomeBanner />
+          </Suspense>
 
           <DashboardClient>
             <Suspense fallback={<ToolGridSkeleton />}>

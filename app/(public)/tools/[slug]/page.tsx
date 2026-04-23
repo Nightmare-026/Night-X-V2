@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { TOOLS } from '@/lib/tools-registry';
+import { TOOLS, CATEGORIES } from '@/lib/tools-registry';
 import ToolPageLayout from '@/components/tools/ToolPageLayout';
 import dynamic from 'next/dynamic';
 
@@ -63,10 +63,18 @@ export async function generateMetadata({ params }: ToolPageProps) {
   const tool = TOOLS.find((t) => t.slug === params.slug);
   if (!tool) return { title: 'Tool Not Found' };
 
+  const categoryLabel = CATEGORIES.find(c => c.id === tool.category)?.label || tool.category;
+
   return {
-    title: `${tool.name} - Night X Utility Hub`,
-    description: tool.description,
-    keywords: tool.tags.join(', '),
+    title: `${tool.name} - Free Online ${categoryLabel} Tool | Night X`,
+    description: `${tool.description} Use this free online tool to ${tool.tags.slice(0, 3).join(', ')} easily and securely on Night X. No installation required.`,
+    keywords: [...tool.tags, 'night x', 'utility hub', 'free online tool', 'productivity'].join(', '),
+    openGraph: {
+      title: `${tool.name} | Night X`,
+      description: tool.description,
+      type: 'website',
+      url: `https://night-x-v2.vercel.app/tools/${tool.slug}`,
+    }
   };
 }
 
