@@ -1,0 +1,39 @@
+/* Mobile fixes for small screens */
+@media (max-width: 640px) {
+  /* Fix header overlapping content */
+  body {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  /* Prevent horizontal scrolling on mobile */
+  html, body {
+    overflow-x: hidden;
+  }
+
+  /* Make sure large inputs don't break layout */
+  input, textarea, select {
+    max-width: 100%;
+  }
+
+  /* Improve tap targets on mobile */
+  button, a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .sidebar-collapsed-on-tablet {
+    display: none;
+  }
+}
+
+/* Safe areas for notched phones */
+.safe-pb {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-pt {
+  padding-top: env(safe-area-inset-top);
+}

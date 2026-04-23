@@ -1,0 +1,129 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #06080F;
+  --foreground: #FFFFFF;
+  --font-syne: "Segoe UI", "Trebuchet MS", "Helvetica Neue", Arial, sans-serif;
+  --font-dm-sans: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-jetbrains-mono: "JetBrains Mono", Consolas, "Courier New", monospace;
+  --card-bg: rgba(10, 12, 20, 0.6);
+  --accent-purple: 124, 110, 250;
+  --accent-cyan: 0, 229, 255;
+  --accent-green: 0, 255, 148;
+  --accent-gold: 255, 184, 0;
+  --accent-red: 255, 77, 109;
+  --accent-orange: 255, 140, 66;
+  --accent-pink: 224, 64, 251;
+  --text-secondary: rgba(255, 255, 255, 0.6);
+  --border: rgba(255, 255, 255, 0.1);
+  --border-hover: rgba(255, 255, 255, 0.2);
+  --radius-lg: 1rem;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground antialiased font-dm-sans selection:bg-accent-purple/30;
+    background-image: 
+      radial-gradient(circle at 50% 0%, rgba(var(--accent-purple), 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 100% 100%, rgba(var(--accent-cyan), 0.1) 0%, transparent 40%);
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-syne font-bold tracking-tight;
+  }
+
+  a {
+    @apply outline-none;
+  }
+
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    @apply ring-2 ring-accent-cyan/50 ring-offset-2 ring-offset-background;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/5 border border-white/10 backdrop-blur-xl rounded-2xl transition-all duration-300;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  }
+
+  .glass-card:hover {
+    @apply border-white/20 bg-white/[0.08] -translate-y-1;
+  }
+
+  .glass-effect {
+    @apply backdrop-blur-md bg-white/5 border border-white/10;
+  }
+
+  .btn-primary {
+    @apply relative px-6 py-2.5 bg-accent-purple text-white font-semibold rounded-xl 
+    transition-all duration-300 hover:shadow-[0_0_20px_rgba(124,110,250,0.5)] 
+    active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden;
+  }
+
+  .btn-ghost {
+    @apply px-6 py-2.5 bg-white/5 text-white font-semibold rounded-xl 
+    border border-white/10 transition-all duration-300 
+    hover:bg-white/10 hover:border-white/20 active:scale-95;
+  }
+
+  .text-glow-purple {
+    text-shadow: 0 0 15px rgba(var(--accent-purple), 0.5);
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-background;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-white/10 rounded-full transition-colors hover:bg-white/20;
+}
+
+/* Utilities */
+.shimmer-bg {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite linear;
+}
+
+@keyframes meshMove {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  100% {
+    transform: translate3d(-2%, 2%, 0) scale(1.03);
+  }
+}
+
+@keyframes meshMove {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 100% 100%; }
+}
+
+.checkerboard {
+  background-image: linear-gradient(45deg, #111 25%, transparent 25%),
+    linear-gradient(-45deg, #111 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #111 75%),
+    linear-gradient(-45deg, transparent 75%, #111 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  background-color: #000;
+}

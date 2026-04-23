@@ -1,0 +1,57 @@
+import NextAuth from "next-auth";
+import authConfig from "./auth.config";
+import { NextResponse } from "next/server";
+
+const { auth } = NextAuth(authConfig);
+
+export default auth((req) => {
+  const { nextUrl } = req;
+  const isLoggedIn = !!req.auth;
+
+  const isPublicRoute = [
+    "/",
+    "/about",
+    "/privacy",
+    "/terms",
+    "/contact",
+    "/support",
+    "/feedback",
+    "/services",
+    "/faq",
+  ].some(route => nextUrl.pathname === route);
+
+  const isAuthRoute = nextUrl.pathname.startsWith("/auth");
+
+  const isProtectedRoute = 
+    nextUrl.pathname.startsWith("/dashboard") || 
+    nextUrl.pathname.startsWith("/settings") ||
+    nextUrl.pathname.startsWith("/tools");
+
+  // Redirect authenticated users away from auth pages
+  if (isAuthRoute) {
+    if (isLoggedIn) {
+      return NextResponse.redirect(new URL("/dashboard", nextUrl));
+    }
+    return;
+  }
+
+  // Redirect unauthenticated users from protected routes
+  if (isProtectedRoute && !isLoggedIn) {
+    let callbackUrl = nextUrl.pathname;
+    if (nextUrl.search) {
+      callbackUrl += nextUrl.search;
+    }
+
+    const encodedCallbackUrl = encodeURIComponent(callbackUrl);
+    return NextResponse.redirect(
+      new URL(`/auth/signin?callbackUrl=${encodedCallbackUrl}`, nextUrl)
+    );
+  }
+
+  return;
+});
+
+// See "Matching Paths" below to learn more
+export const config = {
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+};

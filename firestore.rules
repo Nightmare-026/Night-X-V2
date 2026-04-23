@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Users collection — Each user can only read/update their own profile
+    match /users/{userId} {
+      allow read, update: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null;
+      allow delete: if false;
+    }
+
+    // AI Usage — Users can only read their own usage stats
+    match /ai_usage/{docId} {
+      allow read: if request.auth != null && resource.data.user_id == request.auth.uid;
+      allow write: if false; // Only server-side admin SDK should write usage
+    }
+
+    // Shortened URLs — Publicly readable for redirection, but only owner can manage
+    match /short_urls/{code} {
+      allow read: if true;
+      allow create: if true; // Allow anonymous shortening
+      allow update, delete: if request.auth != null && resource.data.user_id == request.auth.uid;
+    }
+
+    // Contact messages — Publicly createable
+    match /contact_messages/{docId} {
+      allow create: if request.resource.data.keys().hasAll(['name', 'email', 'message', 'createdAt']);
+      allow read, update, delete: if false;
+    }
+
+    // Newsletter subscribers — Publicly createable
+    match /newsletter_subscribers/{docId} {
+      allow create: if request.resource.data.keys().hasAll(['email', 'subscribedAt']);
+      allow read, update, delete: if false;
+    }
+
+    // Default deny for everything else
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,38 @@
+.logo-gradient {
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.search-glow:focus-within {
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.2);
+  border-color: var(--accent-1);
+}
+
+.profile-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  padding: 2px;
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-avatar img {
+  border-radius: 50%;
+  background: var(--bg-dark);
+}
+
+.mobile-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 8, 15, 0.95);
+  backdrop-filter: blur(10px);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  padding: 80px 24px;
+}
