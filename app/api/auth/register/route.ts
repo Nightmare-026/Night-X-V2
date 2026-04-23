@@ -37,6 +37,9 @@ export async function POST(req: Request) {
     }
 
     // Check if user already exists
+    if (!adminDb) {
+      return NextResponse.json({ message: "Service unavailable" }, { status: 503 });
+    }
     const userRef = adminDb.collection("users").where("email", "==", email).limit(1);
     const snapshot = await userRef.get();
 

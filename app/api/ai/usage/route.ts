@@ -21,6 +21,9 @@ export async function GET(req: Request) {
   const usageId = `${session.user.id}_${tool}_${today}`;
 
   try {
+    if (!adminDb) {
+      return NextResponse.json({ count: 0, limit: 30, remaining: 30 });
+    }
     const doc = await adminDb.collection("ai_usage").doc(usageId).get();
     const count = doc.exists ? doc.data()?.count || 0 : 0;
 

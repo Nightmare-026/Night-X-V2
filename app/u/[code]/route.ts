@@ -15,6 +15,9 @@ export async function GET(
   }
 
   try {
+    if (!adminDb) {
+      return NextResponse.redirect(new URL('/', req.url));
+    }
     // Fetch original URL from Firestore
     const docRef = adminDb.collection('short_urls').doc(code);
     const doc = await docRef.get();

@@ -24,6 +24,10 @@ export async function POST(req: NextRequest) {
     const shortCode = nanoid(7);
     const originalUrl = url.startsWith('http') ? url : `https://${url}`;
 
+    if (!adminDb) {
+      return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
+    }
+
     await adminDb.collection('short_urls').doc(shortCode).set({
       original_url: originalUrl,
       short_code: shortCode,

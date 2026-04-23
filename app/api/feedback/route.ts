@@ -10,6 +10,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
+    if (!adminDb) {
+      return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
+    }
+
     await adminDb.collection('feedback').add({
       type,
       message,

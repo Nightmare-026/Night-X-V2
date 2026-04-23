@@ -45,6 +45,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid email format' }, { status: 400 });
     }
 
+    if (!adminDb) {
+      return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
+    }
+
     await adminDb.collection('contact_messages').add({
       name,
       email,

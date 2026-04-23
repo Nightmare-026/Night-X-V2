@@ -39,6 +39,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid email format' }, { status: 400 });
     }
 
+    if (!adminDb) {
+      return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
+    }
+
     // Check if already subscribed
     const existingSub = await adminDb.collection('newsletter_subscribers')
       .where('email', '==', email)
