@@ -44,10 +44,12 @@ export default function MarkdownLive() {
   const [sanitizedCount, setSanitizedCount] = useState(0);
 
   // Configure marked options
-  marked.setOptions({
-    breaks: true,
-    gfm: true,
-  });
+  useMemo(() => {
+    marked.use({
+      breaks: true,
+      gfm: true,
+    });
+  }, []);
 
   const renderedHTML = useMemo(() => {
     try {

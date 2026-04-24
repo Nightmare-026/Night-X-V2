@@ -83,9 +83,9 @@ export default function PrivacyPage() {
           <p className="text-white/55 mb-4">
             To request account deletion or ask a privacy question, contact the Night X support inbox from the email address tied to your account.
           </p>
-          <a href="mailto:sunlight002614@gmail.com" className="text-blue-400 hover:text-blue-300 font-medium transition-colors">
-            sunlight002614@gmail.com
-          </a>
+          <a href="mailto:support@night-x.app" className="text-blue-400 hover:text-blue-300 font-medium transition-colors">
+            support@night-x.app
+</a>
         </motion.div>
       </div>
     </div>

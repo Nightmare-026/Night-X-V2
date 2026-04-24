@@ -13,17 +13,21 @@ import {
   ArrowRight, 
   ShieldCheck, 
   Cpu, 
-  Image as ImageIcon, 
+  ImageIcon, 
   Type, 
   Lock, 
   Globe, 
   Sparkles,
-  Loader2
+  Loader2,
+  AlertCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/components/ui/Toast';
+import { AnimatePresence } from 'framer-motion';
 
 export default function SignupPage() {
   const router = useRouter();
+  const { addToast } = useToast();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -35,6 +39,13 @@ export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [strength, setStrength] = useState(0); // 0-4
+
+  const shakeVariants = {
+    error: {
+      x: [0, -10, 10, -10, 10, 0],
+      transition: { duration: 0.4 }
+    }
+  };
 
   // Password strength logic
   useEffect(() => {
@@ -79,12 +90,15 @@ export default function SignupPage() {
 
       if (result?.error) {
         setError("Account created but failed to sign in. Please sign in manually.");
+        addToast("Account created! Please sign in.", "success");
         router.push('/auth/signin');
       } else {
+        addToast("Welcome to Night X! Your account is ready.", "success");
         router.push('/dashboard?welcome=true');
       }
     } catch (err: any) {
       setError(err.message);
+      addToast(err.message || "Registration failed", "error");
     } finally {
       setIsLoading(false);
     }
@@ -153,7 +167,7 @@ export default function SignupPage() {
       </div>
 
       {/* Right Side: Signup Form */}
-      <div className="flex-1 flex flex-col justify-center items-center p-6 md:p-12 relative">
+      <div className="flex-1 flex flex-col justify-center items-center px-8 py-12 md:p-12 relative">
         {/* Mobile-only background elements */}
         <div className="lg:hidden absolute inset-0 -z-10 opacity-10">
           <div className="absolute top-0 left-0 w-full h-full bg-accent-purple/20 blur-[100px]" />
@@ -198,7 +212,12 @@ export default function SignupPage() {
           </div>
 
           {/* Registration Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <motion.form 
+            onSubmit={handleSubmit} 
+            className="space-y-4"
+            animate={error ? "error" : ""}
+            variants={shakeVariants}
+          >
             <div>
               <label className="block text-sm font-medium text-white/60 mb-1.5 ml-1">Full Name</label>
               <input 
@@ -288,15 +307,19 @@ export default function SignupPage() {
               </label>
             </div>
 
-            {error && (
-              <motion.div 
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                className="text-red-400 text-sm bg-red-500/10 p-3 rounded-lg border border-red-500/20"
-              >
-                {error}
-              </motion.div>
-            )}
+            <AnimatePresence mode="wait">
+              {error && (
+                <motion.div 
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="text-red-400 text-sm bg-red-500/10 p-4 rounded-xl border border-red-500/20 flex items-center gap-3"
+                >
+                  <AlertCircle size={16} className="shrink-0" />
+                  <span>{error}</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <button 
               type="submit"

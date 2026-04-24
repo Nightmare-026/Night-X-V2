@@ -29,6 +29,14 @@ export default function RegexTester() {
   const [matches, setMatches] = useState<RegexMatch[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  
+  const overlayRef = React.useRef<HTMLDivElement>(null);
+
+  const handleScroll = (e: React.UIEvent<HTMLTextAreaElement>) => {
+    if (overlayRef.current) {
+      overlayRef.current.scrollTop = e.currentTarget.scrollTop;
+    }
+  };
 
   // Common Regex Snippets
   const snippets = [
@@ -200,12 +208,14 @@ export default function RegexTester() {
               <textarea
                 value={testText}
                 onChange={(e) => setTestText(e.target.value)}
+                onScroll={handleScroll}
                 placeholder="Enter text to test your regex..."
                 className="w-full h-[300px] bg-black/40 border border-white/10 rounded-3xl p-6 font-mono text-base focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all resize-none text-transparent caret-white z-10"
               />
               {/* This is the overlay that shows highlighting */}
               <div 
-                className="absolute inset-0 p-6 font-mono text-base pointer-events-none whitespace-pre-wrap break-all overflow-y-auto"
+                ref={overlayRef}
+                className="absolute inset-0 p-6 font-mono text-base pointer-events-none whitespace-pre-wrap break-all overflow-y-auto no-scrollbar"
                 aria-hidden="true"
               >
                 {highlightedText}

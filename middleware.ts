@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import authConfig from "./auth.config";
 import { NextResponse } from "next/server";
+import { TOOLS } from "./lib/tools-registry";
 
 const { auth } = NextAuth(authConfig);
 
@@ -8,8 +9,11 @@ export default auth((req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
 
-  const publicTools = ['word-counter', 'password-generator', 'age-calculator', 'qr-generator', 'text-obfuscator', 'markdown-live'];
+  // Dynamically get public tool slugs from registry
+  const publicTools = TOOLS.filter(t => t.isPublic).map(t => t.slug);
+  
   const isPublicTool = publicTools.some(slug => nextUrl.pathname === `/tools/${slug}`);
+  const isToolsCatalog = nextUrl.pathname === "/tools" || nextUrl.pathname === "/tools/";
 
   const isPublicRoute = [
     "/",
@@ -20,9 +24,11 @@ export default auth((req) => {
     "/support",
     "/feedback",
     "/services",
-    "/faq",
     "/security",
-  ].some(route => nextUrl.pathname === route) || isPublicTool;
+    "/auth/signin",
+    "/auth/signup",
+    "/auth/error"
+  ].some(route => nextUrl.pathname === route) || isPublicTool || isToolsCatalog;
 
   const isAuthRoute = nextUrl.pathname.startsWith("/auth");
 

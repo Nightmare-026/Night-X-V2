@@ -26,6 +26,9 @@ export default function ImageCompressor() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      if (inputPreview) URL.revokeObjectURL(inputPreview);
+      if (outputPreview) URL.revokeObjectURL(outputPreview);
+
       setInputFile(file);
       setInputPreview(URL.createObjectURL(file));
       setOutputBlob(null);
@@ -39,6 +42,9 @@ export default function ImageCompressor() {
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const file = e.dataTransfer.files[0];
       if (file.type.startsWith('image/')) {
+        if (inputPreview) URL.revokeObjectURL(inputPreview);
+        if (outputPreview) URL.revokeObjectURL(outputPreview);
+
         setInputFile(file);
         setInputPreview(URL.createObjectURL(file));
         setOutputBlob(null);
@@ -48,7 +54,7 @@ export default function ImageCompressor() {
         setError("Please drop a valid image file.");
       }
     }
-  }, []);
+  }, [inputPreview, outputPreview]);
 
   const compressImage = async () => {
     if (!inputFile) return;
@@ -64,6 +70,7 @@ export default function ImageCompressor() {
 
     try {
       const compressedFile = await imageCompression(inputFile, options);
+      if (outputPreview) URL.revokeObjectURL(outputPreview);
       setOutputBlob(compressedFile);
       setOutputPreview(URL.createObjectURL(compressedFile));
     } catch (err: any) {
@@ -86,6 +93,8 @@ export default function ImageCompressor() {
   };
 
   const reset = () => {
+    if (inputPreview) URL.revokeObjectURL(inputPreview);
+    if (outputPreview) URL.revokeObjectURL(outputPreview);
     setInputFile(null);
     setInputPreview(null);
     setOutputBlob(null);
@@ -94,6 +103,14 @@ export default function ImageCompressor() {
     setMaxWidth('');
     setError(null);
   };
+
+  // Cleanup on unmount
+  React.useEffect(() => {
+    return () => {
+      if (inputPreview) URL.revokeObjectURL(inputPreview);
+      if (outputPreview) URL.revokeObjectURL(outputPreview);
+    };
+  }, [inputPreview, outputPreview]);
 
   const savingsPercentage = outputBlob && inputFile 
     ? Math.round(((inputFile.size - outputBlob.size) / inputFile.size) * 100) 

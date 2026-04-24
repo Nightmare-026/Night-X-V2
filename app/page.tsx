@@ -119,13 +119,15 @@ export default function LandingPage() {
                     <h3 className="mb-2 text-xl font-bold text-white">{category.label}</h3>
                     <p className="mb-6 text-sm text-white/40">{category.description}</p>
                     <div className="flex flex-wrap gap-2">
-                      {TOOLS.filter((tool) => tool.category === category.id)
-                        .slice(0, 3)
-                        .map((tool) => (
-                          <span key={tool.slug} className="rounded-md border border-white/5 bg-white/5 px-2 py-1 text-[10px] font-bold uppercase text-white/30">
-                            {tool.name.split(' ')[0]}
+                      {(() => {
+                        const categoryTools = TOOLS.filter((tool) => tool.category === category.id);
+                        const uniqueTags = Array.from(new Set(categoryTools.map((t) => t.tags[0])));
+                        return uniqueTags.slice(0, 3).map((tag) => (
+                          <span key={tag} className="rounded-md border border-white/5 bg-white/5 px-2 py-1 text-[10px] font-bold uppercase text-white/30">
+                            {tag}
                           </span>
-                        ))}
+                        ));
+                      })()}
                     </div>
                   </div>
                 </motion.div>
@@ -149,7 +151,7 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {featuredTools.map((tool: any, index) => {
-              const isPublic = ['word-counter', 'password-generator', 'age-calculator', 'qr-generator'].includes(tool.slug);
+              const isPublic = tool.isPublic;
               return (
                 <motion.div
                   key={tool.slug}

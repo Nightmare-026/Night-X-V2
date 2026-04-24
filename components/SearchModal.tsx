@@ -2,29 +2,34 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X, Zap, ArrowRight, Command } from 'lucide-react';
+import { Search, X, Zap, ArrowRight, Command, Lock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { TOOLS } from '@/lib/tools-registry';
 import { cn } from '@/lib/utils';
+import { signIn, useSession } from 'next-auth/react';
 
 interface SearchModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+const PUBLIC_TOOLS = ['word-counter', 'password-generator', 'age-calculator', 'qr-generator', 'image-compressor', 'json-formatter', 'unit-converter', 'text-obfuscator', 'markdown-live'];
+
 export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const router = useRouter();
+  const { status } = useSession();
   const inputRef = useRef<HTMLInputElement>(null);
 
   const filteredTools = query.trim() === '' 
-    ? TOOLS.slice(0, 5) 
+    ? TOOLS.slice(0, 6) 
     : TOOLS.filter(tool => 
         tool.name.toLowerCase().includes(query.toLowerCase()) || 
         tool.description.toLowerCase().includes(query.toLowerCase()) ||
-        tool.category.toLowerCase().includes(query.toLowerCase())
-      ).slice(0, 8);
+        tool.category.toLowerCase().includes(query.toLowerCase()) ||
+        (tool.tags && tool.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase())))
+      ).slice(0, 10);
 
   useEffect(() => {
     if (isOpen) {
@@ -34,30 +39,37 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
     }
   }, [isOpen]);
 
+  const handleSelect = (slug: string) => {
+    const isPublic = PUBLIC_TOOLS.includes(slug);
+    if (!isPublic && status !== 'authenticated') {
+      router.push(`/auth/signin?callbackUrl=/tools/${slug}`);
+    } else {
+      router.push(`/tools/${slug}`);
+    }
+    onClose();
+  };
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) return;
 
       if (e.key === 'Escape') onClose();
       if (e.key === 'ArrowDown') {
+        e.preventDefault();
         setSelectedIndex(prev => (prev + 1) % filteredTools.length);
       }
       if (e.key === 'ArrowUp') {
+        e.preventDefault();
         setSelectedIndex(prev => (prev - 1 + filteredTools.length) % filteredTools.length);
       }
       if (e.key === 'Enter' && filteredTools[selectedIndex]) {
-        handleSelect(`/tools/${filteredTools[selectedIndex].slug}`);
+        handleSelect(filteredTools[selectedIndex].slug);
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, filteredTools, selectedIndex]);
-
-  const handleSelect = (href: string) => {
-    router.push(href);
-    onClose();
-  };
+  }, [isOpen, filteredTools, selectedIndex, status]);
 
   return (
     <AnimatePresence>
@@ -68,9 +80,9 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm"
           />
-          <div className="fixed inset-0 z-[70] flex items-start justify-center pt-24 px-4 pointer-events-none">
+          <div className="fixed inset-0 z-[110] flex items-start justify-center pt-24 px-4 pointer-events-none">
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: -20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -107,37 +119,53 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                     <p className="px-4 py-2 text-[10px] uppercase tracking-widest font-bold text-white/20">
                       {query.trim() === '' ? 'Recommended Tools' : 'Search Results'}
                     </p>
-                    {filteredTools.map((tool, index) => (
-                      <button
-                        key={tool.slug}
-                        onClick={() => handleSelect(`/tools/${tool.slug}`)}
-                        onMouseEnter={() => setSelectedIndex(index)}
-                        className={cn(
-                          "w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all group",
-                          selectedIndex === index ? "bg-accent-purple/20 border border-accent-purple/30" : "hover:bg-white/5 border border-transparent"
-                        )}
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className={cn(
-                            "w-10 h-10 rounded-xl flex items-center justify-center transition-colors",
-                            selectedIndex === index ? "bg-accent-purple/20 text-accent-purple" : "bg-white/5 text-white/40"
-                          )}>
-                            <Zap size={18} />
-                          </div>
-                          <div className="text-left">
-                            <p className={cn(
-                              "text-sm font-bold transition-colors",
-                              selectedIndex === index ? "text-white" : "text-white/70"
-                            )}>{tool.name}</p>
-                            <p className="text-xs text-white/30 truncate max-w-[300px]">{tool.description}</p>
-                          </div>
-                        </div>
-                        <ArrowRight size={14} className={cn(
-                          "transition-all",
-                          selectedIndex === index ? "text-accent-purple translate-x-0 opacity-100" : "text-white/0 -translate-x-2 opacity-0"
-                        )} />
-                      </button>
-                    ))}
+                        {filteredTools.map((tool, index) => {
+                          const isPublic = PUBLIC_TOOLS.includes(tool.slug);
+                          return (
+                            <button
+                              key={tool.slug}
+                              onClick={() => handleSelect(tool.slug)}
+                              onMouseEnter={() => setSelectedIndex(index)}
+                              className={cn(
+                                "w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all group",
+                                selectedIndex === index ? "bg-accent-purple/20 border border-accent-purple/30" : "hover:bg-white/5 border border-transparent"
+                              )}
+                            >
+                              <div className="flex items-center gap-4">
+                                <div className={cn(
+                                  "w-10 h-10 rounded-xl flex items-center justify-center transition-colors relative",
+                                  selectedIndex === index ? "bg-accent-purple/20 text-accent-purple" : "bg-white/5 text-white/40"
+                                )}>
+                                  <Zap size={18} />
+                                  {!isPublic && (
+                                    <div className="absolute -top-1 -right-1 bg-background p-0.5 rounded-full">
+                                      <Lock size={8} className="text-white/40" />
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="text-left">
+                                  <div className="flex items-center gap-2">
+                                    <p className={cn(
+                                      "text-sm font-bold transition-colors",
+                                      selectedIndex === index ? "text-white" : "text-white/70"
+                                    )}>{tool.name}</p>
+                                    <span className={cn(
+                                      "text-[8px] font-black uppercase px-1.5 py-0.5 rounded-md",
+                                      isPublic ? "bg-accent-cyan/20 text-accent-cyan" : "bg-accent-purple/20 text-accent-purple"
+                                    )}>
+                                      {isPublic ? 'Free' : 'Pro'}
+                                    </span>
+                                  </div>
+                                  <p className="text-xs text-white/30 truncate max-w-[200px] sm:max-w-[300px]">{tool.description}</p>
+                                </div>
+                              </div>
+                              <ArrowRight size={14} className={cn(
+                                "transition-all",
+                                selectedIndex === index ? "text-accent-purple translate-x-0 opacity-100" : "text-white/0 -translate-x-2 opacity-0"
+                              )} />
+                            </button>
+                          );
+                        })}
                   </div>
                 ) : (
                   <div className="py-12 text-center">

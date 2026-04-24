@@ -51,6 +51,9 @@ export default function JPGPNGConverter() {
   }, []);
 
   const processFile = (file: File) => {
+    if (inputPreview) URL.revokeObjectURL(inputPreview);
+    if (outputPreview) URL.revokeObjectURL(outputPreview);
+    
     setInputFile(file);
     const url = URL.createObjectURL(file);
     setInputPreview(url);
@@ -89,6 +92,7 @@ export default function JPGPNGConverter() {
       
       canvas.toBlob((blob) => {
         if (blob) {
+          if (outputPreview) URL.revokeObjectURL(outputPreview);
           setOutputBlob(blob);
           setOutputPreview(URL.createObjectURL(blob));
         } else {
@@ -120,12 +124,22 @@ export default function JPGPNGConverter() {
   };
 
   const reset = () => {
+    if (inputPreview) URL.revokeObjectURL(inputPreview);
+    if (outputPreview) URL.revokeObjectURL(outputPreview);
     setInputFile(null);
     setInputPreview(null);
     setOutputBlob(null);
     setOutputPreview(null);
     setError(null);
   };
+
+  // Cleanup on unmount
+  React.useEffect(() => {
+    return () => {
+      if (inputPreview) URL.revokeObjectURL(inputPreview);
+      if (outputPreview) URL.revokeObjectURL(outputPreview);
+    };
+  }, [inputPreview, outputPreview]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

@@ -30,6 +30,8 @@ export default function ImageToBase64() {
   }, []);
 
   const output = format === 'dataurl' ? dataUrl : base64;
+  const isTooLong = (output?.length || 0) > 50000;
+  const displayedOutput = isTooLong ? output?.slice(0, 50000) + '... [Truncated for performance. Use Copy or Download for full content]' : output;
 
   const handleCopy = async () => {
     if (!output) return;
@@ -99,11 +101,30 @@ export default function ImageToBase64() {
                 <Download size={13} />Save .txt
               </button>
             </div>
-            <textarea
-              readOnly value={output || ''}
-              rows={8}
-              className="w-full bg-transparent text-emerald-300/80 text-xs font-mono p-4 resize-none outline-none"
-            />
+            <div className="relative group/text">
+              <textarea
+                readOnly value={displayedOutput || ''}
+                rows={8}
+                className="w-full bg-transparent text-emerald-300/80 text-xs font-mono p-4 resize-none outline-none"
+              />
+              {isTooLong && (
+                <div className="absolute bottom-4 right-4 px-2 py-1 bg-red-500/20 border border-red-500/30 rounded text-[10px] text-red-400 font-bold uppercase tracking-widest backdrop-blur-sm">
+                  Full content available via Copy/Download
+                </div>
+              )}
+              <AnimatePresence>
+                {copiedFull && (
+                  <motion.div 
+                    initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                    className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-10"
+                  >
+                    <p className="text-emerald-400 font-bold flex items-center gap-2">
+                      <Check size={18} /> Copied to Clipboard
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

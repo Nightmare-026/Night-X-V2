@@ -39,21 +39,13 @@ export async function incrementAIUsage(userId: string, tool: string) {
   const usageRef = adminDb.collection('ai_usage').doc(usageId);
 
   try {
-    const doc = await usageRef.get();
-    if (!doc.exists) {
-      await usageRef.set({
-        user_id: userId,
-        tool: tool,
-        usage_date: today,
-        count: 1,
-        last_used: new Date().toISOString()
-      });
-    } else {
-      await usageRef.update({
-        count: admin.firestore.FieldValue.increment(1),
-        last_used: new Date().toISOString()
-      });
-    }
+    await usageRef.set({
+      user_id: userId,
+      tool: tool,
+      usage_date: today,
+      count: admin.firestore.FieldValue.increment(1),
+      last_used: new Date().toISOString()
+    }, { merge: true });
   } catch (error) {
     console.error('Error incrementing AI usage:', error);
   }

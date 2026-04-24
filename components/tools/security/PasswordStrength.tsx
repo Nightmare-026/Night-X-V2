@@ -56,7 +56,14 @@ const PasswordStrength = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Enter password to check..."
-            className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-4 pr-24 focus:outline-none focus:ring-2 focus:ring-red-500/50 transition-all text-lg font-mono"
+            className={`w-full bg-black/20 border border-white/10 rounded-xl px-4 py-4 pr-24 focus:outline-none focus:ring-2 transition-all text-lg font-mono ${
+              !result ? 'focus:ring-white/20' : 
+              result.score === 0 ? 'focus:ring-red-500/50' :
+              result.score === 1 ? 'focus:ring-orange-500/50' :
+              result.score === 2 ? 'focus:ring-yellow-500/50' :
+              result.score === 3 ? 'focus:ring-blue-500/50' :
+              'focus:ring-green-500/50'
+            }`}
           />
           <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
             <button

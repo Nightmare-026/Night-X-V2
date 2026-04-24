@@ -40,5 +40,5 @@
   background: rgba(6, 8, 15, 0.8);
   backdrop-filter: blur(12px);
   height: 70px;
-  border-bottom: 1px border-white/5;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }

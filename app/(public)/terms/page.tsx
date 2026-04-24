@@ -74,7 +74,7 @@ export default function TermsPage() {
           viewport={{ once: true }}
           className="mt-12 text-center text-white/35"
         >
-          <p>If you have questions about these terms, contact <a href="mailto:sunlight002614@gmail.com" className="text-accent-cyan hover:underline">sunlight002614@gmail.com</a>.</p>
+          <p>If you have questions about these terms, contact <a href="mailto:support@night-x.app" className="text-accent-cyan hover:underline">support@night-x.app</a>.</p>
         </motion.div>
       </div>
     </div>

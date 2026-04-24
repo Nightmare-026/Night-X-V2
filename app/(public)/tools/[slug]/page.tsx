@@ -454,8 +454,10 @@ export default function ToolPage({ params }: ToolPageProps) {
     }
   };
 
+  const isFullWidth = tool.isPublic;
+
   return (
-    <ToolPageLayout tool={tool} howToUse={getHowToUse()}>
+    <ToolPageLayout tool={tool} howToUse={getHowToUse()} fullWidth={isFullWidth}>
       {renderTool()}
     </ToolPageLayout>
   );

@@ -118,13 +118,23 @@ export default function BackgroundRemover() {
     }
   };
 
-  const reset = () => {
+  const reset = useCallback(() => {
+    if (inputPreview) URL.revokeObjectURL(inputPreview);
+    if (outputPreview) URL.revokeObjectURL(outputPreview);
     setInputFile(null);
     setInputPreview(null);
     setOutputBlob(null);
     setOutputPreview(null);
     setError(null);
-  };
+  }, [inputPreview, outputPreview]);
+
+  // Clean up blob URLs on unmount
+  useEffect(() => {
+    return () => {
+      if (inputPreview) URL.revokeObjectURL(inputPreview);
+      if (outputPreview) URL.revokeObjectURL(outputPreview);
+    };
+  }, [inputPreview, outputPreview]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 relative">

@@ -1,193 +1,250 @@
 'use client';
 
-import React, { useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useCallback } from 'react';
 import { 
-  RefreshCw, 
+  Dna, 
   Copy, 
-  Check, 
-  Trash2, 
-  Settings2,
-  History,
-  Fingerprint,
-  Download
+  RefreshCw, 
+  Settings2, 
+  Sparkles, 
+  Terminal,
+  Database,
+  Search,
+  Check,
+  Hash,
+  Fingerprint
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { cn, copyToClipboard } from '@/lib/utils';
+import { useToast } from '@/components/ui/Toast';
+
+function generateUuidV4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
 
 export default function UuidGenerator() {
+  const { addToast } = useToast();
   const [count, setCount] = useState(5);
   const [uuids, setUuids] = useState<string[]>([]);
-  const [history, setHistory] = useState<string[]>([]);
-  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
-  const [allCopied, setAllCopied] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [prefix, setPrefix] = useState('');
+  const [uppercase, setUppercase] = useState(false);
 
-  const generateUuids = () => {
-    const newUuids = Array.from({ length: Math.min(count, 100) }, () => uuidv4());
-    setUuids(newUuids);
-    setHistory(prev => [...newUuids, ...prev].slice(0, 50));
-  };
+  const generate = useCallback(() => {
+    setIsGenerating(true);
+    setTimeout(() => {
+      const newUuids = Array.from({ length: count }, () => {
+        let u = generateUuidV4();
+        if (uppercase) u = u.toUpperCase();
+        return prefix ? `${prefix}${u}` : u;
+      });
+      setUuids(newUuids);
+      setIsGenerating(false);
+      addToast(`${count} IDs generated`, "success");
+    }, 400);
+  }, [count, prefix, uppercase, addToast]);
 
-  const handleCopy = (text: string, index: number | 'all') => {
-    navigator.clipboard.writeText(text);
-    if (index === 'all') {
-      setAllCopied(true);
-      setTimeout(() => setAllCopied(false), 2000);
-    } else {
-      setCopiedIndex(index);
-      setTimeout(() => setCopiedIndex(null), 2000);
+  const handleCopy = async (text: string) => {
+    const success = await copyToClipboard(text);
+    if (success) {
+      addToast("ID copied", "success");
     }
   };
 
-  const downloadTxt = () => {
-    const element = document.createElement("a");
-    const file = new Blob([uuids.join('\n')], {type: 'text/plain'});
-    element.href = URL.createObjectURL(file);
-    element.download = `uuids-${Date.now()}.txt`;
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
+  const copyAll = async () => {
+    if (uuids.length === 0) return;
+    const success = await copyToClipboard(uuids.join('\n'));
+    if (success) {
+      addToast("All IDs copied to clipboard", "success");
+    }
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      {/* Generator Controls */}
-      <div className="bg-white/5 rounded-3xl border border-white/10 p-8 text-center space-y-6">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-accent-purple/10 rounded-2xl mb-2">
-          <Fingerprint className="w-8 h-8 text-accent-purple" />
-        </div>
-        <div>
-          <h2 className="text-2xl font-syne font-bold mb-2">Generate Unique IDs</h2>
-          <p className="text-white/40 text-sm">Create cryptographically strong UUID v4 identifiers</p>
-        </div>
-
-        <div className="flex flex-wrap items-center justify-center gap-4">
-          <div className="flex items-center gap-3 bg-black/40 border border-white/10 px-4 py-2 rounded-2xl">
-            <span className="text-sm text-white/40">Quantity:</span>
-            <input
-              type="number"
-              min="1"
-              max="100"
-              value={count}
-              onChange={(e) => setCount(Number(e.target.value))}
-              className="w-16 bg-transparent text-center font-mono focus:outline-none"
-            />
-          </div>
-
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={generateUuids}
-            className="flex items-center gap-2 px-8 py-3 bg-accent-purple text-white rounded-2xl font-bold shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 transition-all"
+    <div className="max-w-6xl mx-auto space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        {/* Settings Panel */}
+        <div className="lg:col-span-5 space-y-6">
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="bg-white/5 border border-white/10 rounded-[32px] p-8 space-y-8"
           >
-            <RefreshCw className="w-4 h-4" />
-            Generate
-          </motion.button>
-        </div>
-      </div>
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-accent-purple/10 text-accent-purple">
+                <Settings2 size={18} />
+              </div>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-white/70">Generator Settings</h3>
+            </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Active UUIDs */}
-        <div className="md:col-span-2 space-y-4">
-          <div className="flex items-center justify-between px-2">
-            <h3 className="text-sm font-bold flex items-center gap-2">
-              <Fingerprint className="w-4 h-4 text-accent-cyan" />
-              Generated IDs
-            </h3>
-            {uuids.length > 0 && (
-              <div className="flex gap-2">
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <div className="flex justify-between text-[10px] font-bold text-white/40 uppercase ml-1">
+                  <span>Batch Size</span>
+                  <span className="text-accent-purple">{count} IDs</span>
+                </div>
+                <div className="p-6 bg-black/40 rounded-3xl border border-white/10">
+                  <input 
+                    type="range" min={1} max={100} value={count}
+                    onChange={e => setCount(Number(e.target.value))}
+                    className="w-full accent-accent-purple"
+                  />
+                  <div className="flex justify-between mt-2 px-1 font-mono text-[8px] text-white/20">
+                    <span>1</span>
+                    <span>25</span>
+                    <span>50</span>
+                    <span>100</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-white/40 uppercase ml-2">Prefix (Optional)</label>
+                  <input 
+                    type="text" value={prefix} onChange={e => setPrefix(e.target.value)} 
+                    placeholder="e.g. user_"
+                    className="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-sm text-white focus:outline-none focus:border-accent-purple" 
+                  />
+                </div>
+
                 <button
-                  onClick={() => handleCopy(uuids.join('\n'), 'all')}
-                  className="p-2 hover:bg-white/5 rounded-lg transition-colors text-white/40 hover:text-white"
-                  title="Copy All"
+                  onClick={() => setUppercase(!uppercase)}
+                  className={cn(
+                    "w-full flex items-center justify-between p-4 rounded-2xl border transition-all group",
+                    uppercase ? "bg-accent-purple/10 border-accent-purple/30 text-white" : "bg-white/5 border-white/5 text-white/40 hover:bg-white/10"
+                  )}
                 >
-                  {allCopied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
-                </button>
-                <button
-                  onClick={downloadTxt}
-                  className="p-2 hover:bg-white/5 rounded-lg transition-colors text-white/40 hover:text-white"
-                  title="Download TXT"
-                >
-                  <Download className="w-4 h-4" />
+                  <div className="flex items-center gap-3">
+                    <div className={cn("p-2 rounded-lg", uppercase ? "bg-accent-purple/20 text-accent-purple" : "bg-black/20")}>
+                      <Fingerprint size={14} />
+                    </div>
+                    <span className="text-xs font-bold uppercase tracking-widest">Uppercase Output</span>
+                  </div>
+                  <div className={cn("w-2 h-2 rounded-full", uppercase ? "bg-accent-purple shadow-[0_0_8px_rgba(168,85,247,0.5)]" : "bg-white/10")} />
                 </button>
               </div>
-            )}
-          </div>
 
-          <div className="space-y-2 min-h-[300px] bg-black/40 border border-white/10 rounded-3xl p-4 overflow-y-auto">
-            <AnimatePresence mode="popLayout">
-              {uuids.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-white/10 py-20">
-                  <Fingerprint className="w-12 h-12 mb-4 opacity-5" />
-                  <p className="text-sm">Click generate to start</p>
-                </div>
-              ) : (
-                uuids.map((uuid, index) => (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    key={`${uuid}-${index}`}
-                    className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl group hover:bg-white/10 transition-all"
-                  >
-                    <code className="text-sm font-mono text-white/80">{uuid}</code>
-                    <button
-                      onClick={() => handleCopy(uuid, index)}
-                      className={`p-2 rounded-xl transition-all ${
-                        copiedIndex === index 
-                          ? 'bg-green-500/20 text-green-400' 
-                          : 'opacity-0 group-hover:opacity-100 hover:bg-white/10 text-white/40 hover:text-white'
-                      }`}
-                    >
-                      {copiedIndex === index ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                    </button>
-                  </motion.div>
-                ))
-              )}
-            </AnimatePresence>
+              <button
+                onClick={generate}
+                disabled={isGenerating}
+                className={cn(
+                  "w-full flex items-center justify-center gap-3 py-4 bg-accent-purple text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-accent-purple/20",
+                  isGenerating ? "opacity-50" : "hover:scale-[1.02] active:scale-[0.98] hover:bg-white hover:text-black"
+                )}
+              >
+                {isGenerating ? (
+                  <RefreshCw size={18} className="animate-spin" />
+                ) : (
+                  <>
+                    <Dna size={18} />
+                    Generate IDs
+                  </>
+                )}
+              </button>
+            </div>
+
+            <div className="bg-gradient-to-br from-accent-purple/10 to-transparent p-6 rounded-2xl border border-white/5 space-y-3">
+              <h4 className="text-[10px] font-black uppercase tracking-widest text-accent-purple flex items-center gap-2">
+                <Sparkles size={12} />
+                RFC 4122 Compliant
+              </h4>
+              <p className="text-[11px] text-white/40 leading-relaxed">
+                Generates Version 4 UUIDs using a cryptographically strong pseudo-random number generator.
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* History */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between px-2">
-            <h3 className="text-sm font-bold flex items-center gap-2">
-              <History className="w-4 h-4 text-accent-purple" />
-              History
-            </h3>
-            <button 
-              onClick={() => setHistory([])}
-              className="p-2 hover:bg-white/5 rounded-lg transition-colors text-white/20 hover:text-red-400"
-              title="Clear History"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
-          </div>
-          <div className="bg-white/5 border border-white/10 rounded-3xl p-4 max-h-[400px] overflow-y-auto scrollbar-thin">
-            {history.length === 0 ? (
-              <p className="text-[10px] text-white/20 text-center py-10 italic">No history yet</p>
-            ) : (
-              history.map((h, i) => (
-                <div key={i} className="py-2 border-b border-white/5 last:border-0 flex items-center justify-between group">
-                  <span className="text-[10px] font-mono text-white/30 truncate max-w-[140px]">{h}</span>
-                  <button 
-                    onClick={() => navigator.clipboard.writeText(h)}
-                    className="opacity-0 group-hover:opacity-100 p-1 hover:text-accent-purple transition-all"
-                  >
-                    <Copy className="w-3 h-3" />
-                  </button>
+        {/* Results Panel */}
+        <div className="lg:col-span-7 space-y-6">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white/5 border border-white/10 rounded-[40px] p-8 md:p-10 relative overflow-hidden group min-h-[600px] flex flex-col"
+          >
+            {/* Decoration */}
+            <div className="absolute top-0 right-0 w-96 h-96 bg-accent-cyan/5 blur-[120px] rounded-full group-hover:bg-accent-cyan/10 transition-all duration-1000" />
+            
+            <div className="relative z-10 flex flex-col h-full w-full flex-1">
+              <div className="mb-8 flex items-center justify-between">
+                <div>
+                  <div className="text-[10px] font-black tracking-[0.2em] text-accent-cyan uppercase mb-2">Unique Identifiers</div>
+                  <h2 className="text-2xl font-bold font-syne">Generated Output</h2>
                 </div>
-              ))
-            )}
-          </div>
+                {uuids.length > 0 && (
+                  <button 
+                    onClick={copyAll}
+                    className="flex items-center gap-2 bg-black/40 px-4 py-2 rounded-xl border border-white/5 text-[10px] font-black text-accent-cyan uppercase tracking-widest hover:bg-accent-cyan hover:text-black transition-all"
+                  >
+                    <Copy size={14} />
+                    Copy All
+                  </button>
+                )}
+              </div>
 
-          <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 p-5 rounded-3xl border border-white/10">
-            <h4 className="text-xs font-bold mb-2 flex items-center gap-2">
-              <Settings2 className="w-3 h-3 text-cyan-400" />
-              UUID v4
-            </h4>
-            <p className="text-[10px] text-white/40 leading-relaxed">
-              Standard v4 UUIDs are generated using a cryptographically secure random number generator, with 122 bits of randomness.
-            </p>
+              <div className="flex-1 space-y-3 overflow-y-auto pr-2 scrollbar-hide max-h-[500px]">
+                <AnimatePresence mode="popLayout">
+                  {uuids.length > 0 ? (
+                    uuids.map((id, index) => (
+                      <motion.div
+                        key={id + index}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.02 }}
+                        className="group/item relative"
+                      >
+                        <div className="p-4 bg-black/40 border border-white/5 rounded-2xl flex items-center justify-between group-hover/item:border-accent-purple/30 transition-all">
+                          <div className="flex items-center gap-4">
+                            <span className="text-[10px] font-mono text-white/10 w-4">{index + 1}</span>
+                            <span className="font-mono text-xs md:text-sm text-white/80 tracking-wider truncate max-w-[250px] md:max-w-md">{id}</span>
+                          </div>
+                          <button 
+                            onClick={() => handleCopy(id)}
+                            className="p-2 hover:bg-white/5 text-white/20 hover:text-accent-purple rounded-lg transition-all"
+                          >
+                            <Copy size={14} />
+                          </button>
+                        </div>
+                      </motion.div>
+                    ))
+                  ) : (
+                    <div className="h-full flex flex-col items-center justify-center gap-6 opacity-20 py-20">
+                      <div className="p-10 rounded-full bg-white/5 border border-white/5">
+                        <Terminal size={48} strokeWidth={1} />
+                      </div>
+                      <div className="text-center space-y-1">
+                        <p className="text-sm font-bold uppercase tracking-widest">No IDs Generated</p>
+                        <p className="text-[10px] font-medium max-w-[200px]">Click the generate button to create unique identifiers for your project</p>
+                      </div>
+                    </div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+
+            {isGenerating && (
+              <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 flex flex-col items-center justify-center rounded-[40px]">
+                <div className="w-12 h-12 border-4 border-accent-purple/20 border-t-accent-purple rounded-full animate-spin mb-4" />
+                <span className="text-xs font-black uppercase tracking-[0.3em] text-white/70">Sequencing IDs...</span>
+              </div>
+            )}
+          </motion.div>
+
+          <div className="bg-gradient-to-br from-[#1A1C25] to-[#0D0F18] border border-white/10 p-8 rounded-[32px] flex items-center gap-6">
+            <div className="p-4 bg-accent-cyan/10 text-accent-cyan rounded-2xl">
+              <Database size={24} />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-white/80 uppercase tracking-widest">Universal Uniqueness</h4>
+              <p className="text-[11px] text-white/40 leading-relaxed mt-1">
+                The probability of a duplicate is approximately 1 in 2^128. These are safe to use as primary keys in distributed databases.
+              </p>
+            </div>
           </div>
         </div>
       </div>

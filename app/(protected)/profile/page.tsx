@@ -18,14 +18,33 @@ import Link from 'next/link';
 
 export default function ProfilePage() {
   const { data: session } = useSession();
+  const [data, setData] = React.useState<any>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
 
-  if (!session) return null; // Middleware handles this, but safety first
+  React.useEffect(() => {
+    async function fetchStats() {
+      try {
+        const res = await fetch('/api/user/stats');
+        if (res.ok) {
+          const json = await res.json();
+          setData(json);
+        }
+      } catch (err) {
+        console.error("Failed to fetch stats", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    if (session) fetchStats();
+  }, [session]);
+
+  if (!session) return null;
 
   const stats = [
-    { label: 'Security Level', value: 'Alpha-04', icon: <Shield size={18} />, color: 'text-accent-cyan' },
-    { label: 'Tools Used', value: '12', icon: <Zap size={18} />, color: 'text-accent-purple' },
-    { label: 'Agent Status', value: 'Verified', icon: <Trophy size={18} />, color: 'text-accent-gold' },
-    { label: 'Session Time', value: '2h 15m', icon: <Clock size={18} />, color: 'text-accent-pink' },
+    { label: 'Security Level', value: data?.stats?.securityLevel || 'Alpha-04', icon: <Shield size={18} />, color: 'text-accent-cyan' },
+    { label: 'Total Operations', value: data?.stats?.totalToolsUsed || '0', icon: <Zap size={18} />, color: 'text-accent-purple' },
+    { label: 'Active Tools', value: data?.stats?.activeTools || '0', icon: <Trophy size={18} />, color: 'text-accent-gold' },
+    { label: 'Last Activity', value: data?.stats?.lastActivity ? new Date(data.stats.lastActivity).toLocaleDateString() : 'None', icon: <Clock size={18} />, color: 'text-accent-pink' },
   ];
 
   return (
@@ -119,11 +138,7 @@ export default function ProfilePage() {
           </div>
 
           <div className="space-y-6">
-            {[
-              { action: 'Optimized 4 images', tool: 'Image Compressor', time: '2 hours ago' },
-              { action: 'Generated 12 passwords', tool: 'Strong Password', time: 'Yesterday' },
-              { action: 'Converted PDF to JPG', tool: 'PDF to Image', time: '2 days ago' },
-            ].map((item, i) => (
+            {(data?.activity || []).length > 0 ? data.activity.map((item: any, i: number) => (
               <div key={i} className="flex items-center justify-between group cursor-pointer">
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white/40 group-hover:bg-accent-purple/20 group-hover:text-accent-purple transition-all">
@@ -135,11 +150,17 @@ export default function ProfilePage() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-[10px] text-white/20 font-mono">{item.time}</p>
+                  <p className="text-[10px] text-white/20 font-mono">
+                    {new Date(item.last_used).toLocaleDateString()}
+                  </p>
                   <ArrowRight size={14} className="ml-auto mt-1 text-white/0 group-hover:text-accent-purple transition-all -translate-x-2 group-hover:translate-x-0" />
                 </div>
               </div>
-            ))}
+            )) : (
+              <div className="py-10 text-center text-white/20 text-sm font-dm-sans">
+                No recent activity recorded.
+              </div>
+            )}
           </div>
         </motion.div>
 

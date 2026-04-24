@@ -14,9 +14,12 @@ import {
   Clock,
   Zap as ZapIcon,
   Shield,
-  LayoutDashboard
+  LayoutDashboard,
+  AlertCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/components/ui/Toast';
+import { AnimatePresence } from 'framer-motion';
 
 function SigninForm() {
   const router = useRouter();
@@ -24,6 +27,7 @@ function SigninForm() {
   const { status } = useSession();
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
 
+  const { addToast } = useToast();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -31,6 +35,13 @@ function SigninForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const shakeVariants = {
+    error: {
+      x: [0, -10, 10, -10, 10, 0],
+      transition: { duration: 0.4 }
+    }
+  };
 
   // Redirect if already logged in
   React.useEffect(() => {
@@ -54,15 +65,19 @@ function SigninForm() {
       if (result?.error) {
         if (result.error === 'CredentialsSignin') {
           setError("Invalid email or password");
+          addToast("Login failed. Please check your credentials.", "error");
         } else {
           setError("Something went wrong. Please try again.");
+          addToast("An unexpected error occurred during sign in.", "error");
         }
       } else {
+        addToast("Welcome back! Redirecting...", "success");
         router.push(callbackUrl);
         router.refresh();
       }
     } catch (err: any) {
       setError("An unexpected error occurred");
+      addToast("Connection error. Please check your internet.", "error");
     } finally {
       setIsLoading(false);
     }
@@ -109,7 +124,7 @@ function SigninForm() {
       </div>
 
       {/* Right Side: Signin Form */}
-      <div className="flex-1 flex flex-col justify-center items-center p-6 md:p-12 w-full">
+      <div className="flex-1 flex flex-col justify-center items-center px-8 py-12 md:p-12 w-full">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -149,7 +164,12 @@ function SigninForm() {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <motion.form 
+            onSubmit={handleSubmit} 
+            className="space-y-4"
+            animate={error ? "error" : ""}
+            variants={shakeVariants}
+          >
             <div>
               <label className="block text-sm font-medium text-white/60 mb-1.5 ml-1">Email Address</label>
               <input 
@@ -188,15 +208,19 @@ function SigninForm() {
               </div>
             </div>
 
-            {error && (
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="text-red-400 text-sm bg-red-500/10 p-3 rounded-lg border border-red-500/20 text-center"
-              >
-                {error}
-              </motion.div>
-            )}
+            <AnimatePresence mode="wait">
+              {error && (
+                <motion.div 
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="text-red-400 text-sm bg-red-500/10 p-4 rounded-xl border border-red-500/20 flex items-center gap-3"
+                >
+                  <AlertCircle size={16} className="shrink-0" />
+                  <span>{error}</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <button 
               type="submit"

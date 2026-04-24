@@ -38,7 +38,25 @@ export default function ImageToPDF() {
     addFiles(e.dataTransfer.files);
   }, []);
 
-  const removeImage = (id: string) => setImages(prev => prev.filter(img => img.id !== id));
+  const removeImage = (id: string) => {
+    setImages(prev => {
+      const target = prev.find(img => img.id === id);
+      if (target) URL.revokeObjectURL(target.url);
+      return prev.filter(img => img.id !== id);
+    });
+  };
+
+  const clearAll = () => {
+    images.forEach(img => URL.revokeObjectURL(img.url));
+    setImages([]);
+  };
+
+  // Cleanup on unmount
+  React.useEffect(() => {
+    return () => {
+      images.forEach(img => URL.revokeObjectURL(img.url));
+    };
+  }, [images]);
 
   const generatePDF = async () => {
     if (images.length === 0) return;
@@ -171,7 +189,7 @@ export default function ImageToPDF() {
                     <><Download size={20} /> Create PDF</>
                   )}
                 </button>
-                <button onClick={() => setImages([])} className="w-full py-2 text-xs text-white/30 hover:text-red-400 transition-colors">Clear All Images</button>
+                <button onClick={clearAll} className="w-full py-2 text-xs text-white/30 hover:text-red-400 transition-colors">Clear All Images</button>
               </div>
             </div>
           </div>

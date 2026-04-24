@@ -45,9 +45,9 @@ export default function ForgotPasswordPage() {
               <Mail className="mt-0.5 h-4 w-4 text-accent-cyan" />
               <div>
                 <p className="font-medium text-white">Support email</p>
-                <a href="mailto:sunlight002614@gmail.com" className="text-accent-cyan hover:underline">
-                  sunlight002614@gmail.com
-                </a>
+                <a href="mailto:support@night-x.app" className="text-accent-cyan hover:underline">
+                  support@night-x.app
+</a>
               </div>
             </div>
           </div>

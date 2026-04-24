@@ -35,12 +35,20 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Text is required" }, { status: 400 });
     }
 
-    const prompt = `Rewrite the input text while maintaining the original meaning but changing the structure and vocabulary.
-    Tone requested: ${tone || 'Standard'}.
-    
-    Input Text: ${text}
+    // Basic sanitization to prevent common prompt injection markers
+    const sanitizedText = text.replace(/([#*`])/g, '\\$1').substring(0, 5000);
+    const sanitizedTone = (tone || 'Standard').substring(0, 50);
 
-    Return ONLY a JSON object in this format:
+    const prompt = `INSTRUCTION: Rewrite the following input text while maintaining the original meaning but changing the structure and vocabulary.
+    TONE: ${sanitizedTone}
+    
+    ### INPUT TEXT START ###
+    ${sanitizedText}
+    ### INPUT TEXT END ###
+
+    IMPORTANT: Return ONLY a valid JSON object. No conversational text, no markdown backticks unless requested, and no explanations.
+    
+    EXPECTED FORMAT:
     {
       "variations": [
         { "tone": "Formal", "text": "..." },

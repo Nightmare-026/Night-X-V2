@@ -119,9 +119,14 @@ export default function ImageCropper() {
       canvas.height
     );
 
-    const base64Image = canvas.toDataURL('image/png');
-    setOutputUrl(base64Image);
-    setIsProcessing(false);
+    canvas.toBlob((blob) => {
+      if (blob) {
+        if (outputUrl) URL.revokeObjectURL(outputUrl);
+        const url = URL.createObjectURL(blob);
+        setOutputUrl(url);
+      }
+      setIsProcessing(false);
+    }, 'image/png');
   };
 
   const handleDownload = () => {
@@ -133,11 +138,19 @@ export default function ImageCropper() {
   };
 
   const handleReset = () => {
+    if (outputUrl) URL.revokeObjectURL(outputUrl);
     setImgSrc('');
     setCrop(undefined);
     setCompletedCrop(undefined);
     setOutputUrl(null);
   };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (outputUrl) URL.revokeObjectURL(outputUrl);
+    };
+  }, [outputUrl]);
 
   return (
     <div className="space-y-8">

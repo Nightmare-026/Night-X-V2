@@ -69,11 +69,31 @@ export default function Header() {
     setIsProfileOpen(false);
   }, [pathname]);
 
+  // Body scroll lock
+  useEffect(() => {
+    if (isMobileMenuOpen || isSearchModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isMobileMenuOpen, isSearchModalOpen]);
+
+  // Scroll height for header shimmer
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   if (pathname?.startsWith('/auth')) return null;
 
   const navLinks = [
     { name: 'Dashboard', href: '/dashboard', protected: true },
-    { name: 'Tools', href: '/tools' },
+    { name: 'Tools', href: '/services' },
     { name: 'AI Features', href: '/dashboard?category=ai' },
     { name: 'Support', href: '/support' },
   ];
@@ -85,7 +105,20 @@ export default function Header() {
         linkText="Try it now"
         link="/tools/ai-bio-generator"
       />
-      <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[#06080F]/85 backdrop-blur-[20px]">
+      <header className={cn(
+        "sticky top-0 z-50 w-full border-b transition-all duration-300",
+        scrolled 
+          ? "border-white/10 bg-[#06080F]/80 backdrop-blur-[20px] py-2" 
+          : "border-transparent bg-transparent py-4"
+      )}>
+        {scrolled && (
+          <motion.div 
+            initial={{ x: '-100%' }}
+            animate={{ x: '100%' }}
+            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+            className="absolute bottom-[-1px] left-0 h-[1px] w-full bg-gradient-to-r from-transparent via-accent-cyan/30 to-transparent"
+          />
+        )}
         <div className="container mx-auto flex h-16 items-center justify-between px-4 lg:px-8">
           <Link href="/" className="flex items-center gap-2 group">
             <div className="rounded-lg bg-accent-purple/20 p-1.5 transition-colors group-hover:bg-accent-purple/30">
@@ -111,7 +144,7 @@ export default function Header() {
             >
               <div className="flex items-center gap-2">
                 <Search className="h-4 w-4" />
-                <span>Protocol Search...</span>
+                <span>Search 40+ tools...</span>
               </div>
               <div className="flex items-center gap-1 px-1.5 py-0.5 rounded border border-white/10 bg-white/5 text-[10px]">
                 <Command size={10} />
@@ -220,14 +253,15 @@ export default function Header() {
             {isMobileMenuOpen ? <X className="h-6 w-6" aria-hidden="true" /> : <Menu className="h-6 w-6" aria-hidden="true" />}
           </button>
         </div>
+      </header>
 
-        <AnimatePresence>
+      <AnimatePresence>
           {isMobileMenuOpen && (
             <motion.div
               initial={{ opacity: 0, x: '100%' }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300, mass: 0.8 }}
               className={cn(
                 "fixed inset-0 z-[200] flex flex-col bg-[#06080F] px-6 pt-24 pb-12 overflow-y-auto",
                 styles['mobile-menu-container']
@@ -238,7 +272,7 @@ export default function Header() {
                   <Search className="mr-3 h-5 w-5 text-white/40" aria-hidden="true" />
                   <input
                     type="text"
-                    placeholder="Search tools..."
+                    placeholder="Search 40+ tools..."
                     className="w-full border-none bg-transparent text-lg text-white outline-none placeholder:text-white/20"
                     value={searchQuery}
                     onChange={(event) => setSearchQuery(event.target.value)}
@@ -331,11 +365,10 @@ export default function Header() {
             </motion.div>
           )}
         </AnimatePresence>
-      </header>
-      <SearchModal 
-        isOpen={isSearchModalOpen} 
-        onClose={() => setIsSearchModalOpen(false)} 
-      />
-    </>
-  );
+    <SearchModal 
+      isOpen={isSearchModalOpen} 
+      onClose={() => setIsSearchModalOpen(false)} 
+    />
+  </>
+);
 }

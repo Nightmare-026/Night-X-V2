@@ -10,6 +10,7 @@ export interface Tool {
   isAI: boolean;
   isPro: boolean;
   isNew: boolean;
+  isPublic: boolean;
   processingType: 'client' | 'server' | 'api';
   relatedTools: string[];
 }
@@ -41,7 +42,7 @@ export const TOOLS: Tool[] = [
     category: 'image',
     icon: '🗜️',
     tags: ['compress', 'optimize', 'reduce size', 'jpg', 'png', 'image'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: true,
     processingType: 'client',
     relatedTools: ['image-resizer', 'jpg-png-converter', 'background-remover']
   },
@@ -52,7 +53,7 @@ export const TOOLS: Tool[] = [
     category: 'image',
     icon: '↔️',
     tags: ['resize', 'dimensions', 'width', 'height'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: false,
     processingType: 'client',
     relatedTools: ['image-compressor', 'image-cropper']
   },
@@ -63,7 +64,7 @@ export const TOOLS: Tool[] = [
     category: 'image',
     icon: '🔄',
     tags: ['convert', 'jpg', 'png', 'format'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: false,
     processingType: 'client',
     relatedTools: ['image-compressor', 'image-to-base64']
   },
@@ -74,7 +75,7 @@ export const TOOLS: Tool[] = [
     category: 'image',
     icon: '✂️',
     tags: ['background', 'remove', 'transparent', 'ai'],
-    isAI: true, isPro: true, isNew: true,
+    isAI: true, isPro: true, isNew: true, isPublic: false,
     processingType: 'client',
     relatedTools: ['image-compressor', 'ai-paraphraser']
   },
@@ -85,7 +86,7 @@ export const TOOLS: Tool[] = [
     category: 'image',
     icon: '✂️',
     tags: ['crop', 'trim', 'aspect ratio'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: false,
     processingType: 'client',
     relatedTools: ['image-resizer', 'watermark-adder']
   },
@@ -96,7 +97,7 @@ export const TOOLS: Tool[] = [
     category: 'image',
     icon: '📦',
     tags: ['base64', 'encode', 'data url'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: false,
     processingType: 'client',
     relatedTools: ['jpg-png-converter', 'base64-codec']
   },
@@ -107,7 +108,7 @@ export const TOOLS: Tool[] = [
     category: 'image',
     icon: '🔏',
     tags: ['watermark', 'brand', 'protect'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: false,
     processingType: 'client',
     relatedTools: ['image-cropper', 'image-compressor']
   },
@@ -118,7 +119,7 @@ export const TOOLS: Tool[] = [
     category: 'image',
     icon: '📄',
     tags: ['pdf', 'images', 'convert'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: false,
     processingType: 'client',
     relatedTools: ['jpg-png-converter', 'image-to-base64']
   },
@@ -129,7 +130,7 @@ export const TOOLS: Tool[] = [
     category: 'security',
     icon: '🔑',
     tags: ['password', 'generate', 'secure', 'random'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: true,
     processingType: 'client',
     relatedTools: ['password-strength', 'text-obfuscator']
   },
@@ -140,7 +141,7 @@ export const TOOLS: Tool[] = [
     category: 'security',
     icon: '💪',
     tags: ['password', 'strength', 'check', 'security'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: false,
     processingType: 'client',
     relatedTools: ['password-generator', 'hash-generator']
   },
@@ -151,7 +152,7 @@ export const TOOLS: Tool[] = [
     category: 'security',
     icon: '🔒',
     tags: ['encrypt', 'decrypt', 'aes', 'secure', 'obfuscate'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: false,
     processingType: 'client',
     relatedTools: ['password-generator', 'base64-codec']
   },
@@ -162,7 +163,7 @@ export const TOOLS: Tool[] = [
     category: 'security',
     icon: '⚡',
     tags: ['base64', 'encode', 'decode'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: false,
     processingType: 'client',
     relatedTools: ['url-encoder', 'text-obfuscator']
   },
@@ -173,7 +174,7 @@ export const TOOLS: Tool[] = [
     category: 'security',
     icon: '#️⃣',
     tags: ['hash', 'md5', 'sha256', 'sha512'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: false,
     processingType: 'client',
     relatedTools: ['password-strength', 'jwt-decoder']
   },
@@ -184,7 +185,7 @@ export const TOOLS: Tool[] = [
     category: 'security',
     icon: '🔗',
     tags: ['url', 'encode', 'decode', 'percent'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: false,
     processingType: 'client',
     relatedTools: ['base64-codec', 'utm-generator']
   },
@@ -195,7 +196,7 @@ export const TOOLS: Tool[] = [
     category: 'security',
     icon: '🎫',
     tags: ['jwt', 'token', 'decode', 'json web token'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: false,
     processingType: 'client',
     relatedTools: ['json-formatter', 'hash-generator']
   },
@@ -206,7 +207,7 @@ export const TOOLS: Tool[] = [
     category: 'text',
     icon: '📝',
     tags: ['word', 'count', 'characters', 'reading time'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: true,
     processingType: 'client',
     relatedTools: ['character-counter', 'case-converter']
   },
@@ -217,7 +218,7 @@ export const TOOLS: Tool[] = [
     category: 'text',
     icon: '🔢',
     tags: ['character', 'count', 'letters', 'length'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: false,
     processingType: 'client',
     relatedTools: ['word-counter', 'remove-spaces']
   },
@@ -228,7 +229,7 @@ export const TOOLS: Tool[] = [
     category: 'text',
     icon: 'Aa',
     tags: ['case', 'upper', 'lower', 'title', 'camel', 'snake'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: true,
     processingType: 'client',
     relatedTools: ['word-counter', 'remove-spaces']
   },
@@ -239,7 +240,7 @@ export const TOOLS: Tool[] = [
     category: 'text',
     icon: '⎵',
     tags: ['spaces', 'trim', 'clean', 'whitespace'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: false,
     processingType: 'client',
     relatedTools: ['case-converter', 'text-sorter']
   },
@@ -250,7 +251,7 @@ export const TOOLS: Tool[] = [
     category: 'text',
     icon: '↕️',
     tags: ['sort', 'lines', 'alphabetical', 'order'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: false,
     processingType: 'client',
     relatedTools: ['duplicate-remover', 'remove-spaces']
   },
@@ -261,7 +262,7 @@ export const TOOLS: Tool[] = [
     category: 'text',
     icon: '🗑️',
     tags: ['duplicate', 'remove', 'unique', 'lines'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: false,
     processingType: 'client',
     relatedTools: ['text-sorter', 'word-counter']
   },
@@ -272,7 +273,7 @@ export const TOOLS: Tool[] = [
     category: 'text',
     icon: '⚖️',
     tags: ['diff', 'compare', 'difference', 'text'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: false,
     processingType: 'client',
     relatedTools: ['word-counter', 'text-sorter']
   },
@@ -283,7 +284,7 @@ export const TOOLS: Tool[] = [
     category: 'text',
     icon: '📝',
     tags: ['markdown', 'preview', 'editor', 'xss', 'sanitize'],
-    isAI: false, isPro: false, isNew: true,
+    isAI: false, isPro: false, isNew: true, isPublic: false,
     processingType: 'client',
     relatedTools: ['word-counter', 'text-diff']
   },
@@ -294,7 +295,7 @@ export const TOOLS: Tool[] = [
     category: 'text',
     icon: '📜',
     tags: ['lorem', 'ipsum', 'placeholder', 'dummy text'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: false,
     processingType: 'client',
     relatedTools: ['word-counter', 'case-converter']
   },
@@ -305,7 +306,7 @@ export const TOOLS: Tool[] = [
     category: 'developer',
     icon: '{}',
     tags: ['json', 'format', 'validate', 'pretty print'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: true,
     processingType: 'client',
     relatedTools: ['json-csv-converter', 'jwt-decoder']
   },
@@ -316,7 +317,7 @@ export const TOOLS: Tool[] = [
     category: 'developer',
     icon: '📊',
     tags: ['json', 'csv', 'convert', 'table'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: false,
     processingType: 'client',
     relatedTools: ['json-formatter', 'code-beautifier']
   },
@@ -327,7 +328,7 @@ export const TOOLS: Tool[] = [
     category: 'developer',
     icon: '✨',
     tags: ['beautify', 'format', 'html', 'css', 'js', 'prettier'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: false,
     processingType: 'client',
     relatedTools: ['code-minifier', 'json-formatter']
   },
@@ -338,7 +339,7 @@ export const TOOLS: Tool[] = [
     category: 'developer',
     icon: '📦',
     tags: ['minify', 'compress', 'js', 'css', 'html'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: false,
     processingType: 'client',
     relatedTools: ['code-beautifier', 'uuid-generator']
   },
@@ -349,7 +350,7 @@ export const TOOLS: Tool[] = [
     category: 'developer',
     icon: '🔍',
     tags: ['regex', 'regexp', 'pattern', 'test', 'match'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: false,
     processingType: 'client',
     relatedTools: ['code-beautifier', 'uuid-generator']
   },
@@ -360,7 +361,7 @@ export const TOOLS: Tool[] = [
     category: 'developer',
     icon: '🆔',
     tags: ['uuid', 'guid', 'unique id', 'generate'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: false,
     processingType: 'client',
     relatedTools: ['code-minifier', 'random-number']
   },
@@ -371,7 +372,7 @@ export const TOOLS: Tool[] = [
     category: 'developer',
     icon: '🎨',
     tags: ['color', 'hex', 'rgb', 'hsl', 'picker'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: false,
     processingType: 'client',
     relatedTools: ['code-beautifier', 'image-cropper']
   },
@@ -382,7 +383,7 @@ export const TOOLS: Tool[] = [
     category: 'utility',
     icon: '📱',
     tags: ['qr', 'code', 'generate', 'scan'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: true,
     processingType: 'client',
     relatedTools: ['qr-scanner', 'url-shortener']
   },
@@ -393,7 +394,7 @@ export const TOOLS: Tool[] = [
     category: 'utility',
     icon: '📸',
     tags: ['qr', 'scan', 'camera', 'decode'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: false,
     processingType: 'client',
     relatedTools: ['qr-generator', 'url-encoder']
   },
@@ -404,7 +405,7 @@ export const TOOLS: Tool[] = [
     category: 'utility',
     icon: '✂️',
     tags: ['url', 'shorten', 'link', 'short'],
-    isAI: false, isPro: true, isNew: true,
+    isAI: false, isPro: true, isNew: true, isPublic: false,
     processingType: 'api',
     relatedTools: ['qr-generator', 'utm-generator']
   },
@@ -415,7 +416,7 @@ export const TOOLS: Tool[] = [
     category: 'utility',
     icon: '📈',
     tags: ['utm', 'link', 'tracking', 'marketing'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: false,
     processingType: 'client',
     relatedTools: ['url-shortener', 'url-encoder']
   },
@@ -426,7 +427,7 @@ export const TOOLS: Tool[] = [
     category: 'utility',
     icon: '🎲',
     tags: ['random', 'number', 'generate', 'dice'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: false,
     processingType: 'client',
     relatedTools: ['uuid-generator', 'password-generator']
   },
@@ -437,7 +438,7 @@ export const TOOLS: Tool[] = [
     category: 'life',
     icon: '🎂',
     tags: ['age', 'birthday', 'calculate', 'years'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: true,
     processingType: 'client',
     relatedTools: ['emi-calculator', 'percentage-calculator']
   },
@@ -448,7 +449,7 @@ export const TOOLS: Tool[] = [
     category: 'life',
     icon: '💰',
     tags: ['emi', 'loan', 'interest', 'calculator', 'india'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: false,
     processingType: 'client',
     relatedTools: ['percentage-calculator', 'age-calculator']
   },
@@ -459,7 +460,7 @@ export const TOOLS: Tool[] = [
     category: 'life',
     icon: '%',
     tags: ['percentage', 'percent', 'calculate', 'math'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: false,
     processingType: 'client',
     relatedTools: ['unit-converter', 'emi-calculator']
   },
@@ -470,7 +471,7 @@ export const TOOLS: Tool[] = [
     category: 'life',
     icon: '⚖️',
     tags: ['unit', 'convert', 'length', 'weight', 'temperature'],
-    isAI: false, isPro: false, isNew: false,
+    isAI: false, isPro: false, isNew: false, isPublic: false,
     processingType: 'client',
     relatedTools: ['percentage-calculator', 'random-number']
   },
@@ -481,7 +482,7 @@ export const TOOLS: Tool[] = [
     category: 'ai',
     icon: '🤖',
     tags: ['paraphrase', 'rewrite', 'ai', 'rephrase'],
-    isAI: true, isPro: true, isNew: true,
+    isAI: true, isPro: true, isNew: true, isPublic: false,
     processingType: 'api',
     relatedTools: ['ai-bio-generator', 'word-counter']
   },
@@ -492,7 +493,7 @@ export const TOOLS: Tool[] = [
     category: 'ai',
     icon: '✍️',
     tags: ['bio', 'caption', 'ai', 'generate', 'instagram', 'linkedin'],
-    isAI: true, isPro: true, isNew: true,
+    isAI: true, isPro: true, isNew: true, isPublic: false,
     processingType: 'api',
     relatedTools: ['ai-paraphraser', 'word-counter']
   }
