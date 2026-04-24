@@ -14,10 +14,9 @@ import {
   LayoutDashboard,
   AlertCircle
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { signInWithEmail, signInWithGoogle } from '@/lib/auth';
+import { motion } from 'framer-motion';
+import { signIn } from 'next-auth/react';
 import { useToast } from '@/components/ui/Toast';
-import { cn } from '@/lib/utils';
 
 function SigninForm() {
   const router = useRouter();
@@ -30,11 +29,11 @@ function SigninForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const redirectPath = searchParams.get('redirect') || '/dashboard';
+  const redirectPath = searchParams.get('callbackUrl') || '/dashboard';
 
   useEffect(() => {
     if (searchParams.get('error')) {
-      setError('Authentication failed. Please try again.');
+      setError('Authentication failed. Please check your credentials and try again.');
     }
   }, [searchParams]);
 
@@ -44,10 +43,15 @@ function SigninForm() {
     setError(null);
 
     try {
-      const { error: signInError } = await signInWithEmail(email, password);
-      if (signInError) {
-        setError(signInError.message);
-        toast(signInError.message, "error");
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError("Invalid email or password");
+        toast("Invalid credentials", "error");
       } else {
         toast("Welcome back!", "success");
         router.push(redirectPath);
@@ -64,18 +68,10 @@ function SigninForm() {
     setIsLoading(true);
     setError(null);
     try {
-      const { error: signInError } = await signInWithGoogle();
-      if (signInError) {
-        setError(signInError.message);
-        toast(signInError.message, "error");
-      } else {
-        toast("Welcome back!", "success");
-        router.push(redirectPath);
-      }
+      await signIn('google', { callbackUrl: redirectPath });
     } catch (err: any) {
       setError(err.message);
       toast(err.message, "error");
-    } finally {
       setIsLoading(false);
     }
   };
@@ -230,12 +226,14 @@ function SigninForm() {
             </form>
           </div>
 
-          <p className="text-center text-white/40 text-sm">
-            Don&apos;t have an account?{' '}
-            <Link href="/auth/signup" className="text-accent-purple font-bold hover:underline">
-              Create Account
-            </Link>
-          </p>
+          <div className="text-center">
+            <p className="text-white/40 text-sm">
+              Don&apos;t have an account?{' '}
+              <Link href="/auth/signup" className="text-accent-purple font-bold hover:underline transition-all">
+                Create Account
+              </Link>
+            </p>
+          </div>
         </div>
 
         <motion.div 
@@ -244,8 +242,8 @@ function SigninForm() {
           transition={{ delay: 0.5 }}
           className="absolute bottom-8 text-center"
         >
-          <p className="text-center text-white/25 text-[10px] uppercase font-bold tracking-widest mb-2">Powered by NightX infrastructure</p>
-          <p className="text-center text-white/25 text-xs">
+          <p className="text-white/25 text-[10px] uppercase font-bold tracking-widest mb-2">Powered by NightX infrastructure</p>
+          <p className="text-white/25 text-xs">
             Google sign-in is the fastest option. Password resets are handled manually for now.
           </p>
         </motion.div>
@@ -256,7 +254,11 @@ function SigninForm() {
 
 export default function SigninPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-background"><Loader2 className="w-8 h-8 animate-spin text-accent-purple" /></div>}>
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-8 h-8 animate-spin text-accent-purple" />
+      </div>
+    }>
       <SigninForm />
     </Suspense>
   );
