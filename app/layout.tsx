@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import "../styles/responsive-fixes.css";
 import SessionProvider from "@/components/providers/SessionProvider";
+import { SearchProvider } from "@/components/providers/SearchProvider";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 

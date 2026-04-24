@@ -240,16 +240,16 @@ export default function Header() {
               )}
             >
               <div className="mb-10">
-                <div className="flex items-center rounded-2xl border border-white/10 bg-white/5 px-4 py-4" role="search">
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    openSearch();
+                  }}
+                  className="flex w-full items-center rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-left transition-all hover:bg-white/10"
+                >
                   <Search className="mr-3 h-5 w-5 text-white/40" aria-hidden="true" />
-                  <input
-                    type="text"
-                    placeholder="Search 40+ tools..."
-                    className="w-full border-none bg-transparent text-lg text-white outline-none placeholder:text-white/20"
-                    value={searchQuery}
-                    onChange={(event) => setSearchQuery(event.target.value)}
-                  />
-                </div>
+                  <span className="text-lg text-white/20">Search 40+ tools...</span>
+                </button>
               </div>
 
               <nav className="flex flex-col gap-6 mb-12">
