@@ -33,7 +33,7 @@ export default function ServicesPage() {
           </motion.p>
         </div>
 
-        <div className="mb-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 md:gap-8">
           {categories.map((category, index) => (
             <motion.div
               key={category.id}

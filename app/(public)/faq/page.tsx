@@ -1,7 +1,9 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import { useState } from "react";
+import { ChevronDown } from "lucide-react";
 
 const items = [
   {
@@ -30,6 +32,43 @@ const items = [
       "Manual support is available, but a self-serve password reset flow is not enabled on this deployment yet.",
   },
 ];
+function FaqItem({ item, index }: { item: any, index: number }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: index * 0.05 }}
+      className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl"
+    >
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex w-full items-center justify-between p-6 text-left"
+      >
+        <h2 className="pr-8 text-lg font-semibold text-white">{item.question}</h2>
+        <ChevronDown 
+          className={`h-5 w-5 text-white/30 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} 
+        />
+      </button>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+          >
+            <div className="border-t border-white/5 p-6 pt-0">
+              <p className="leading-relaxed text-white/60">{item.answer}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
 
 export default function FaqPage() {
   return (
@@ -46,19 +85,9 @@ export default function FaqPage() {
           </p>
         </motion.div>
 
-        <div className="space-y-5">
+        <div className="space-y-4">
           {items.map((item, index) => (
-            <motion.div
-              key={item.question}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.05 }}
-              className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl"
-            >
-              <h2 className="mb-3 text-xl font-semibold text-white">{item.question}</h2>
-              <p className="leading-relaxed text-white/60">{item.answer}</p>
-            </motion.div>
+            <FaqItem key={item.question} item={item} index={index} />
           ))}
         </div>
 

@@ -108,7 +108,7 @@ export default function SignupPage() {
   ];
 
   return (
-    <div className="min-h-screen flex bg-background">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-background">
       
       {/* Left Side: Benefits (Desktop only) */}
       <div className="hidden lg:flex flex-1 relative overflow-hidden bg-[#06080F] border-r border-white/5">

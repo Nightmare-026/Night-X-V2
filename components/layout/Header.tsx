@@ -224,31 +224,34 @@ export default function Header() {
         <AnimatePresence>
           {isMobileMenuOpen && (
             <motion.div
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
+              initial={{ opacity: 0, x: '100%' }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className={styles['mobile-overlay']}
+              className={cn(
+                "fixed inset-0 z-[100] flex flex-col bg-[#06080F] px-6 pt-24 pb-12 overflow-y-auto",
+                styles['mobile-menu-container']
+              )}
             >
-              <div className="mb-8">
-                <div className="flex items-center rounded-xl border border-white/10 bg-white/5 px-4 py-3" role="search">
+              <div className="mb-10">
+                <div className="flex items-center rounded-2xl border border-white/10 bg-white/5 px-4 py-4" role="search">
                   <Search className="mr-3 h-5 w-5 text-white/40" aria-hidden="true" />
                   <input
                     type="text"
                     placeholder="Search tools..."
-                    className="w-full border-none bg-transparent text-white outline-none"
+                    className="w-full border-none bg-transparent text-lg text-white outline-none placeholder:text-white/20"
                     value={searchQuery}
                     onChange={(event) => setSearchQuery(event.target.value)}
                   />
                 </div>
               </div>
 
-              <nav className="flex flex-col gap-6">
+              <nav className="flex flex-col gap-6 mb-12">
                 {navLinks.map((link) => (
                   <Link
                     key={link.name}
                     href={link.href}
-                    className="text-2xl font-semibold text-white/70 transition-colors hover:text-white"
+                    className="text-3xl font-bold text-white transition-colors hover:text-accent-purple"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     {link.name}
@@ -256,45 +259,73 @@ export default function Header() {
                 ))}
               </nav>
 
-              <div className="mt-auto flex flex-col gap-4 border-t border-white/10 pt-8">
+              <div className="mt-auto flex flex-col gap-4 border-t border-white/10 pt-10">
                 {status === 'authenticated' ? (
                   <>
-                    <div className="mb-4 flex items-center gap-4">
+                    <div className="mb-6 flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/10">
                       <div className={styles['profile-avatar']}>
                         {session.user?.image ? (
                           <Image
                             src={session.user.image}
                             alt={session.user.name || 'User avatar'}
-                            width={32}
-                            height={32}
+                            width={40}
+                            height={40}
                             className="h-full w-full object-cover"
                             unoptimized
                           />
                         ) : (
-                          <User className="h-full w-full p-1 text-white" />
+                          <User className="h-full w-full p-1.5 text-white" />
                         )}
                       </div>
-                      <div>
-                        <p className="font-medium text-white">{session.user?.name}</p>
-                        <p className="text-sm text-white/40">{session.user?.email}</p>
+                      <div className="overflow-hidden">
+                        <p className="font-bold text-white truncate">{session.user?.name}</p>
+                        <p className="text-sm text-white/40 truncate">{session.user?.email}</p>
                       </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <button
+                        onClick={() => {
+                          router.push('/dashboard');
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className="flex items-center justify-center gap-2 rounded-xl bg-white/5 py-4 font-bold text-white border border-white/10"
+                      >
+                        <Zap size={18} /> Hub
+                      </button>
+                      <button
+                        onClick={() => {
+                          router.push('/settings');
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className="flex items-center justify-center gap-2 rounded-xl bg-white/5 py-4 font-bold text-white border border-white/10"
+                      >
+                        <Settings size={18} /> Settings
+                      </button>
                     </div>
                     <button
                       onClick={() => signOut()}
-                      className="flex w-full items-center justify-center gap-3 rounded-xl bg-red-500/10 py-4 font-medium text-red-400"
+                      className="flex w-full items-center justify-center gap-3 rounded-2xl bg-red-500/10 py-5 font-bold text-red-400 border border-red-500/20"
                     >
                       <LogOut className="h-5 w-5" /> Sign Out
                     </button>
                   </>
                 ) : (
-                  <>
-                    <Link href="/auth/signin" className="flex w-full items-center justify-center rounded-xl bg-white/5 py-4 font-medium text-white" onClick={() => setIsMobileMenuOpen(false)}>
+                  <div className="flex flex-col gap-4">
+                    <Link 
+                      href="/auth/signin" 
+                      className="flex w-full items-center justify-center rounded-2xl bg-white/5 py-5 text-lg font-bold text-white border border-white/10" 
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
                       Sign In
                     </Link>
-                    <Link href="/auth/signup" className="flex w-full items-center justify-center rounded-xl bg-accent-purple py-4 font-medium text-white shadow-lg shadow-accent-purple/20" onClick={() => setIsMobileMenuOpen(false)}>
-                      Sign Up
+                    <Link 
+                      href="/auth/signup" 
+                      className="flex w-full items-center justify-center rounded-2xl bg-accent-purple py-5 text-lg font-bold text-white shadow-2xl shadow-accent-purple/20" 
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Sign Up Now
                     </Link>
-                  </>
+                  </div>
                 )}
               </div>
             </motion.div>

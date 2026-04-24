@@ -31,18 +31,29 @@ export default function ContactPage() {
           <div className="space-y-8">
             <div className="bg-white/5 border border-white/10 rounded-2xl p-8 backdrop-blur-xl">
               <h3 className="text-xl font-bold mb-6 font-syne">Contact Information</h3>
-              <div className="space-y-4 font-dm-sans">
+              <div className="space-y-6 font-dm-sans">
                 <div className="flex items-center gap-4 text-white/70">
                   <div className="p-3 bg-accent-cyan/10 rounded-lg text-accent-cyan">
                     <Mail className="w-5 h-5" />
                   </div>
-                  <div>
+                  <div className="overflow-hidden">
                     <p className="font-medium text-white">Email Us</p>
-                    <p>{supportEmail}</p>
+                    <p className="truncate">{supportEmail}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 text-white/70">
                   <div className="p-3 bg-accent-purple/10 rounded-lg text-accent-purple">
+                    <Instagram className="w-5 h-5" />
+                  </div>
+                  <div className="overflow-hidden">
+                    <p className="font-medium text-white">Instagram</p>
+                    <a href="https://instagram.com/nightmare_ff_26" target="_blank" rel="noopener noreferrer" className="truncate block hover:text-white transition-colors">
+                      @nightmare_ff_26
+                    </a>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 text-white/70">
+                  <div className="p-3 bg-accent-cyan/10 rounded-lg text-accent-cyan">
                     <MapPin className="w-5 h-5" />
                   </div>
                   <div>

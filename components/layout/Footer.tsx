@@ -68,7 +68,7 @@ export default function Footer() {
   return (
     <footer className="border-t border-white/5 bg-[#0A0D18] pb-8 pt-16">
       <div className="container mx-auto px-4 lg:px-8">
-        <div className="mb-16 grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-5">
+        <div className="mb-16 grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-5">
           <div className="lg:col-span-1">
             <Link href="/" className="group mb-4 flex items-center gap-2">
               <Zap className="h-6 w-6 fill-accent-purple/20 text-accent-purple" />
@@ -120,12 +120,8 @@ export default function Footer() {
                     <div className="flex items-center gap-2 text-sm text-white/40 transition-colors group-hover:text-accent-purple">
                       {link.icon}
                       <span>{link.name}</span>
+                      {link.subtext && <span className="text-[10px] opacity-40 ml-1 group-hover:opacity-100 transition-opacity">— {link.subtext}</span>}
                     </div>
-                    {link.subtext && (
-                      <span className="pl-6 text-[10px] text-white/20 transition-colors group-hover:text-white/40">
-                        {link.subtext}
-                      </span>
-                    )}
                   </Link>
                 </li>
               ))}

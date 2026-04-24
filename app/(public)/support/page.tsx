@@ -100,7 +100,7 @@ export default function SupportPage() {
           transition={{ delay: 0.1 }}
           className="bg-white/5 border border-white/10 rounded-3xl p-8 max-w-xl mx-auto backdrop-blur-xl"
         >
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-3 gap-3 mb-6">
             {amounts.map((amt) => (
               <button
                 key={amt.value}
