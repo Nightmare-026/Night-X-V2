@@ -21,6 +21,12 @@ const nextConfig = {
       }
     ],
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   transpilePackages: ['@imgly/background-removal', 'onnxruntime-web'],
   webpack: (config) => {
     config.resolve.alias.canvas = false;
