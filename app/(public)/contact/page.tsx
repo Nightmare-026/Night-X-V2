@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { Mail, MapPin, MessageSquare } from "lucide-react";
+import { Instagram, Mail, MapPin, MessageSquare } from "lucide-react";
 import ContactForm from "./ContactForm";
 
 export const metadata: Metadata = {
