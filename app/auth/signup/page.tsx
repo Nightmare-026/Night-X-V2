@@ -98,7 +98,7 @@ export default function SignupPage() {
       }
     } catch (err: any) {
       setError(err.message);
-      addToast(err.message || "Registration failed", "error");
+      toast(err.message || "Registration failed", "error");
     } finally {
       setIsLoading(false);
     }
