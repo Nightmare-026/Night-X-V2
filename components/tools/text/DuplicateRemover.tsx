@@ -11,41 +11,37 @@ const DuplicateRemover = () => {
   const [stats, setStats] = useState({ original: 0, unique: 0, removed: 0 });
   const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    const lines = text.split('\n').filter(l => l !== '');
-    setStats(prev => ({ ...prev, original: lines.length }));
-  }, [text]);
+  // Real-time stats based on current input
+  const getLines = (val: string) => val.split('\n').filter(l => l.trim() !== '');
+  const currentTotal = getLines(text).length;
 
   const handleRemove = () => {
-    if (!text) return;
+    if (!text.trim()) return;
 
-    let lines = text.split('\n');
-    
-    if (trimLines) {
-      lines = lines.map(l => l.trim());
-    }
-
+    const lines = text.split('\n');
     const uniqueLines: string[] = [];
     const seen = new Set<string>();
 
     lines.forEach(line => {
-      if (line === '') return;
-      const compareVal = caseSensitive ? line : line.toLowerCase();
+      const processedLine = trimLines ? line.trim() : line;
+      if (processedLine === '') return;
+      
+      const compareVal = caseSensitive ? processedLine : processedLine.toLowerCase();
       if (!seen.has(compareVal)) {
         seen.add(compareVal);
-        uniqueLines.push(line);
+        uniqueLines.push(processedLine);
       }
     });
 
     const newText = uniqueLines.join('\n');
     const uniqueCount = uniqueLines.length;
     
-    setText(newText);
     setStats({
-      original: stats.original,
+      original: currentTotal,
       unique: uniqueCount,
-      removed: stats.original - uniqueCount
+      removed: Math.max(0, currentTotal - uniqueCount)
     });
+    setText(newText);
   };
 
   const handleCopy = () => {
@@ -116,15 +112,15 @@ const DuplicateRemover = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 text-center">
-          <p className="text-2xl font-mono font-bold text-white mb-1">{stats.original}</p>
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 text-center group hover:bg-white/10 transition-colors">
+          <p className="text-2xl font-mono font-bold text-white mb-1">{currentTotal}</p>
           <p className="text-[10px] text-white/40 uppercase tracking-widest font-bold">Total Items</p>
         </div>
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 text-center">
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 text-center group hover:bg-white/10 transition-colors">
           <p className="text-2xl font-mono font-bold text-green-400 mb-1">{stats.unique}</p>
           <p className="text-[10px] text-white/40 uppercase tracking-widest font-bold">Unique Items</p>
         </div>
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 text-center">
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 text-center group hover:bg-white/10 transition-colors">
           <p className="text-2xl font-mono font-bold text-red-400 mb-1">{stats.removed}</p>
           <p className="text-[10px] text-white/40 uppercase tracking-widest font-bold">Duplicates Removed</p>
         </div>

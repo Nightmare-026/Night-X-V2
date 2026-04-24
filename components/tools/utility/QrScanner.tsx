@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, CameraOff, Copy, Check, ExternalLink, RefreshCw, Maximize2, ShieldCheck } from 'lucide-react';
+import { Camera, CameraOff, Copy, Check, ExternalLink, RefreshCw, Maximize2, ShieldCheck, Upload, Image as ImageIcon } from 'lucide-react';
 import jsQR from 'jsqr';
 
 export default function QrScanner() {
@@ -13,6 +13,7 @@ export default function QrScanner() {
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const requestRef = useRef<number>();
 
   const startScanner = async () => {
@@ -46,6 +47,35 @@ export default function QrScanner() {
       stream.getTracks().forEach(track => track.stop());
       videoRef.current.srcObject = null;
     }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        if (context) {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          context.drawImage(img, 0, 0);
+          const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+          const code = jsQR(imageData.data, imageData.width, imageData.height);
+          if (code) {
+            setResult(code.data);
+            setError(null);
+          } else {
+            setError('No QR code found in this image.');
+          }
+        }
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
   };
 
   const scanFrame = () => {
@@ -114,12 +144,29 @@ export default function QrScanner() {
                 <p className="text-white/40 mb-8 max-w-xs">
                   Grant permission to your camera to scan QR codes directly from your browser.
                 </p>
-                <button
-                  onClick={startScanner}
-                  className="px-8 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-purple-900/20"
-                >
-                  Start Scanning
-                </button>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <button
+                    onClick={startScanner}
+                    className="px-8 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-purple-900/20 flex items-center justify-center gap-2"
+                  >
+                    <Camera size={18} />
+                    Start Scanning
+                  </button>
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-8 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold transition-all border border-white/10 flex items-center justify-center gap-2"
+                  >
+                    <Upload size={18} />
+                    Upload Image
+                  </button>
+                  <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    className="hidden" 
+                    accept="image/*" 
+                    onChange={handleFileUpload}
+                  />
+                </div>
               </motion.div>
             )}
 

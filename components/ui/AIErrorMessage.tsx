@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { AlertCircle, Terminal, LifeBuoy } from 'lucide-react';
+import { AlertCircle, Terminal, LifeBuoy, UserCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface AIErrorMessageProps {
@@ -11,6 +11,7 @@ interface AIErrorMessageProps {
 export default function AIErrorMessage({ error }: AIErrorMessageProps) {
   const isKeyMissing = error.toLowerCase().includes('api key') || error.toLowerCase().includes('token');
   const isLimitReached = error.toLowerCase().includes('limit reached');
+  const isUnauthorized = error.toLowerCase().includes('unauthorized') || error.toLowerCase().includes('login');
 
   return (
     <motion.div
@@ -24,29 +25,49 @@ export default function AIErrorMessage({ error }: AIErrorMessageProps) {
         </div>
         <div className="flex-1 space-y-2">
           <h3 className="font-syne font-bold text-red-200">
-            {isKeyMissing ? "Service Configuration Error" : isLimitReached ? "Daily Limit Reached" : "AI Service Interruption"}
+            {isKeyMissing 
+              ? "Service Configuration Error" 
+              : isLimitReached 
+                ? "Daily Limit Reached" 
+                : isUnauthorized 
+                  ? "Authentication Required" 
+                  : "AI Service Interruption"}
           </h3>
           <p className="text-sm text-red-300/70 leading-relaxed font-dm-sans">
             {isKeyMissing 
               ? "The AI provider keys are currently not configured on this environment. If you are the administrator, please check your Vercel secrets." 
-              : error}
+              : isUnauthorized
+                ? "You need to be logged in to use AI-powered tools. This helps us manage usage and provide a personalized experience."
+                : error}
           </p>
           
           <div className="pt-4 flex flex-wrap gap-3">
-            <a 
-              href="/feedback" 
-              className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-red-300 hover:text-white transition-colors"
-            >
-              <LifeBuoy size={14} />
-              Report Issue
-            </a>
-            <button 
-              onClick={() => window.location.reload()}
-              className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-red-300 hover:text-white transition-colors"
-            >
-              <Terminal size={14} />
-              Retry Connection
-            </button>
+            {isUnauthorized ? (
+              <a 
+                href="/login" 
+                className="flex items-center gap-2 px-4 py-2 bg-red-500/20 rounded-lg text-xs font-bold uppercase tracking-wider text-red-100 hover:bg-red-500/30 transition-all border border-red-500/30"
+              >
+                <UserCircle size={14} />
+                Sign In to Continue
+              </a>
+            ) : (
+              <>
+                <a 
+                  href="/feedback" 
+                  className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-red-300 hover:text-white transition-colors"
+                >
+                  <LifeBuoy size={14} />
+                  Report Issue
+                </a>
+                <button 
+                  onClick={() => window.location.reload()}
+                  className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-red-300 hover:text-white transition-colors"
+                >
+                  <Terminal size={14} />
+                  Retry Connection
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>

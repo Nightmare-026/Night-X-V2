@@ -14,7 +14,7 @@ interface ImageFile {
   id: string;
 }
 
-export default function ScreenshotToPDF() {
+export default function ImageToPDF() {
   const [images, setImages] = useState<ImageFile[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState({ current: 0, total: 0 });

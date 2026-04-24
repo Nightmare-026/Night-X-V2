@@ -72,6 +72,7 @@ export default function EmiCalculator() {
                 type="number"
                 value={loanAmount}
                 onChange={(e) => setLoanAmount(parseInt(e.target.value) || 0)}
+                onFocus={(e) => e.target.select()}
                 className="w-full px-4 py-2 bg-black/40 border border-white/10 rounded-xl text-white text-right focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
               />
             </div>
@@ -94,6 +95,7 @@ export default function EmiCalculator() {
                 type="number"
                 value={interestRate}
                 onChange={(e) => setInterestRate(parseFloat(e.target.value) || 0)}
+                onFocus={(e) => e.target.select()}
                 className="w-full px-4 py-2 bg-black/40 border border-white/10 rounded-xl text-white text-right focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
               />
             </div>
@@ -103,13 +105,23 @@ export default function EmiCalculator() {
                 <label className="text-sm font-medium text-white/60">Loan Tenure</label>
                 <div className="flex bg-black/40 rounded-lg p-0.5 border border-white/10">
                   <button
-                    onClick={() => setTenureType('years')}
+                    onClick={() => {
+                      if (tenureType === 'months') {
+                        setTenure(Math.max(1, Math.round(tenure / 12)));
+                        setTenureType('years');
+                      }
+                    }}
                     className={`px-3 py-1 text-xs rounded-md transition-all ${tenureType === 'years' ? 'bg-emerald-500 text-white' : 'text-white/40'}`}
                   >
                     Yr
                   </button>
                   <button
-                    onClick={() => setTenureType('months')}
+                    onClick={() => {
+                      if (tenureType === 'years') {
+                        setTenure(tenure * 12);
+                        setTenureType('months');
+                      }
+                    }}
                     className={`px-3 py-1 text-xs rounded-md transition-all ${tenureType === 'months' ? 'bg-emerald-500 text-white' : 'text-white/40'}`}
                   >
                     Mo
@@ -128,6 +140,7 @@ export default function EmiCalculator() {
                 type="number"
                 value={tenure}
                 onChange={(e) => setTenure(parseInt(e.target.value) || 0)}
+                onFocus={(e) => e.target.select()}
                 className="w-full px-4 py-2 bg-black/40 border border-white/10 rounded-xl text-white text-right focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
               />
             </div>

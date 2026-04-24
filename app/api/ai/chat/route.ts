@@ -47,8 +47,11 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ response: aiResponse });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("AI Chat API Error:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ 
+      error: error.message || "Internal Server Error",
+      details: "Check AI service status or API configuration"
+    }, { status: 500 });
   }
 }

@@ -112,12 +112,12 @@ export const TOOLS: Tool[] = [
     relatedTools: ['image-cropper', 'image-compressor']
   },
   {
-    slug: 'screenshot-to-pdf',
-    name: 'Screenshot to PDF',
+    slug: 'image-to-pdf',
+    name: 'Image to PDF',
     description: 'Convert screenshots or images into a clean PDF document.',
     category: 'image',
     icon: '📄',
-    tags: ['pdf', 'screenshot', 'convert'],
+    tags: ['pdf', 'images', 'convert'],
     isAI: false, isPro: false, isNew: false,
     processingType: 'client',
     relatedTools: ['jpg-png-converter', 'image-to-base64']

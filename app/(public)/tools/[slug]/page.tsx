@@ -11,7 +11,7 @@ const BackgroundRemover = dynamic(() => import('@/components/tools/image/Backgro
 const ImageCropper = dynamic(() => import('@/components/tools/image/ImageCropper'), { ssr: false });
 const ImageToBase64 = dynamic(() => import('@/components/tools/image/ImageToBase64'), { ssr: false });
 const WatermarkAdder = dynamic(() => import('@/components/tools/image/WatermarkAdder'), { ssr: false });
-const ScreenshotToPDF = dynamic(() => import('@/components/tools/image/ScreenshotToPDF'), { ssr: false });
+const ImageToPDF = dynamic(() => import('@/components/tools/image/ImageToPDF'), { ssr: false });
 
 // Security Tools
 const PasswordGenerator = dynamic(() => import('@/components/tools/security/PasswordGenerator'), { ssr: false });
@@ -110,8 +110,8 @@ export default function ToolPage({ params }: ToolPageProps) {
         return <ImageToBase64 />;
       case 'watermark-adder':
         return <WatermarkAdder />;
-      case 'screenshot-to-pdf':
-        return <ScreenshotToPDF />;
+      case 'image-to-pdf':
+        return <ImageToPDF />;
       case 'password-generator':
         return <PasswordGenerator />;
       case 'password-strength':

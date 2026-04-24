@@ -51,23 +51,38 @@ export async function POST(req: Request) {
 
     const aiResponseText = await generateAIResponse(
       prompt,
-      "You are a professional paraphrasing expert. Always respond in valid JSON format."
+      "You are a professional paraphrasing expert. Always respond in valid JSON format. Do not include any conversational text before or after the JSON."
     );
 
     try {
-      // Clean the response in case of markdown blocks
-      const cleanedJson = aiResponseText.replace(/```json|```/g, "").trim();
-      const parsedResponse = JSON.parse(cleanedJson);
+      // More robust JSON extraction
+      let jsonContent = aiResponseText.trim();
+      if (jsonContent.includes('```')) {
+        const match = jsonContent.match(/```(?:json)?([\s\S]*?)```/);
+        if (match) jsonContent = match[1].trim();
+      }
       
+      const parsedResponse = JSON.parse(jsonContent);
+      
+      if (!parsedResponse.variations || !Array.isArray(parsedResponse.variations)) {
+        throw new Error("Invalid paraphrase format from AI");
+      }
+
       await incrementAIUsage(session.user.id, tool);
       return NextResponse.json(parsedResponse);
-    } catch (parseError) {
-      console.error("Failed to parse AI response:", aiResponseText);
-      return NextResponse.json({ error: "Invalid response from AI" }, { status: 500 });
+    } catch (parseError: any) {
+      console.error("AI Paraphrase Parse Error:", parseError.message, "Response:", aiResponseText);
+      return NextResponse.json({ 
+        error: `AI Response Format Error: ${parseError.message}`,
+        rawResponse: aiResponseText.substring(0, 200) 
+      }, { status: 500 });
     }
 
-  } catch (error) {
-    console.error("AI Paraphrase API Error:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  } catch (error: any) {
+    console.error("AI Paraphrase API General Error:", error);
+    return NextResponse.json({ 
+      error: error.message || "Internal Server Error",
+      details: "Check AI service status or API configuration"
+    }, { status: 500 });
   }
 }

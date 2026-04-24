@@ -61,7 +61,10 @@ export default function QrGenerator() {
   }, [input, type, color, bgColor, size, ssid, password, encryption]);
 
   useEffect(() => {
-    generateQR();
+    const timer = setTimeout(() => {
+      generateQR();
+    }, 300);
+    return () => clearTimeout(timer);
   }, [generateQR]);
 
   const downloadQR = () => {
