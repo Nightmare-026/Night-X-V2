@@ -26,7 +26,7 @@ import { useToast } from '@/components/ui/Toast';
 type QRType = 'url' | 'text' | 'wifi';
 
 export default function QrGenerator() {
-  const { addToast } = useToast();
+  const { toast } = useToast();
   const [type, setType] = useState<QRType>('url');
   const [input, setInput] = useState('');
   const [qrUrl, setQrUrl] = useState('');
@@ -69,11 +69,11 @@ export default function QrGenerator() {
       setQrUrl(url);
     } catch (err) {
       console.error(err);
-      addToast("Failed to generate QR code", "error");
+      toast("Failed to generate QR code", "error");
     } finally {
       setIsGenerating(false);
     }
-  }, [input, type, color, bgColor, size, ssid, password, encryption, addToast]);
+  }, [input, type, color, bgColor, size, ssid, password, encryption, toast]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -85,14 +85,14 @@ export default function QrGenerator() {
   const handleDownload = () => {
     if (!qrUrl) return;
     downloadFile(qrUrl, `nightx-qr-${Date.now()}.png`);
-    addToast("QR Code downloaded successfully!", "success");
+    toast("QR Code downloaded successfully!", "success");
   };
 
   const handleCopyContent = async () => {
     const content = type === 'wifi' ? `SSID: ${ssid}` : input;
     const success = await copyToClipboard(content);
     if (success) {
-      addToast("Content copied to clipboard", "success");
+      toast("Content copied to clipboard", "success");
     }
   };
 
@@ -101,7 +101,7 @@ export default function QrGenerator() {
     setSsid('');
     setPassword('');
     setQrUrl('');
-    addToast("Fields cleared", "info");
+    toast("Fields cleared", "info");
   };
 
   return (

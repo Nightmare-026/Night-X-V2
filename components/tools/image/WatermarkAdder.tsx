@@ -24,7 +24,7 @@ type WatermarkType = 'text' | 'image';
 type Position = 'top-left' | 'top-center' | 'top-right' | 'middle-left' | 'center' | 'middle-right' | 'bottom-left' | 'bottom-center' | 'bottom-right' | 'tile';
 
 export default function WatermarkAdder() {
-  const { addToast } = useToast();
+  const { toast } = useToast();
   const [inputFile, setInputFile] = useState<File | null>(null);
   const [inputPreview, setInputPreview] = useState<string | null>(null);
   const [outputUrl, setOutputUrl] = useState<string | null>(null);
@@ -46,7 +46,7 @@ export default function WatermarkAdder() {
 
   const processMainFile = (file: File) => {
     if (!file.type.startsWith('image/')) {
-      addToast("Please upload an image file", "error");
+      toast("Please upload an image file", "error");
       return;
     }
     // Cleanup old preview if it exists
@@ -55,12 +55,12 @@ export default function WatermarkAdder() {
     setInputFile(file);
     setInputPreview(URL.createObjectURL(file));
     setOutputUrl(null);
-    addToast("Image uploaded", "success");
+    toast("Image uploaded", "success");
   };
 
   const processWatermarkFile = (file: File) => {
     if (!file.type.startsWith('image/')) {
-      addToast("Please upload an image file for watermark", "error");
+      toast("Please upload an image file for watermark", "error");
       return;
     }
     // Cleanup old preview if it exists
@@ -68,7 +68,7 @@ export default function WatermarkAdder() {
 
     setWatermarkImage(file);
     setWatermarkImagePreview(URL.createObjectURL(file));
-    addToast("Watermark logo ready", "success");
+    toast("Watermark logo ready", "success");
   };
 
   // Cleanup on unmount
@@ -83,7 +83,7 @@ export default function WatermarkAdder() {
   const applyWatermark = async () => {
     if (!inputPreview) return;
     if (type === 'image' && !watermarkImagePreview) {
-      addToast("Please upload a watermark logo", "error");
+      toast("Please upload a watermark logo", "error");
       return;
     }
 
@@ -144,13 +144,13 @@ export default function WatermarkAdder() {
         if (blob) {
           if (outputUrl) URL.revokeObjectURL(outputUrl);
           setOutputUrl(URL.createObjectURL(blob));
-          addToast("Watermark applied successfully!", "success");
+          toast("Watermark applied successfully!", "success");
         }
         setIsProcessing(false);
       }, 'image/png');
     } catch (err) {
       console.error(err);
-      addToast("Failed to process image", "error");
+      toast("Failed to process image", "error");
       setIsProcessing(false);
     }
   };
@@ -184,7 +184,7 @@ export default function WatermarkAdder() {
   const handleDownload = () => {
     if (!outputUrl) return;
     downloadFile(outputUrl, `watermarked_${inputFile?.name || 'image.png'}`);
-    addToast("Image downloaded", "success");
+    toast("Image downloaded", "success");
   };
 
   const positions: { key: Position; label: string }[] = [

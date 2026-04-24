@@ -27,7 +27,7 @@ function SigninForm() {
   const { status } = useSession();
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
 
-  const { addToast } = useToast();
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -65,19 +65,19 @@ function SigninForm() {
       if (result?.error) {
         if (result.error === 'CredentialsSignin') {
           setError("Invalid email or password");
-          addToast("Login failed. Please check your credentials.", "error");
+          toast("Login failed. Please check your credentials.", "error");
         } else {
           setError("Something went wrong. Please try again.");
-          addToast("An unexpected error occurred during sign in.", "error");
+          toast("An unexpected error occurred during sign in.", "error");
         }
       } else {
-        addToast("Welcome back! Redirecting...", "success");
+        toast("Welcome back! Redirecting...", "success");
         router.push(callbackUrl);
         router.refresh();
       }
     } catch (err: any) {
       setError("An unexpected error occurred");
-      addToast("Connection error. Please check your internet.", "error");
+      toast("Connection error. Please check your internet.", "error");
     } finally {
       setIsLoading(false);
     }

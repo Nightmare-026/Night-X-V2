@@ -21,7 +21,7 @@ import { useToast } from '@/components/ui/Toast';
 import AIErrorMessage from '@/components/ui/AIErrorMessage';
 
 export default function UrlShortener() {
-  const { addToast } = useToast();
+  const { toast } = useToast();
   const [url, setUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ shortUrl: string; shortCode: string } | null>(null);
@@ -49,10 +49,10 @@ export default function UrlShortener() {
       }
 
       setResult(data);
-      addToast("URL shortened successfully!", "success");
+      toast("URL shortened successfully!", "success");
     } catch (err: any) {
       setError(err.message);
-      addToast(err.message || "Something went wrong", "error");
+      toast(err.message || "Something went wrong", "error");
     } finally {
       setLoading(false);
     }
@@ -62,7 +62,7 @@ export default function UrlShortener() {
     if (result) {
       const success = await copyToClipboard(result.shortUrl);
       if (success) {
-        addToast("Shortened link copied!", "success");
+        toast("Shortened link copied!", "success");
       }
     }
   };
@@ -71,7 +71,7 @@ export default function UrlShortener() {
     setUrl('');
     setResult(null);
     setError(null);
-    addToast("Form cleared", "info");
+    toast("Form cleared", "info");
   };
 
   return (

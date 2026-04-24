@@ -19,7 +19,7 @@ import { cn, copyToClipboard } from '@/lib/utils';
 import { useToast } from '@/components/ui/Toast';
 
 export default function JsonFormatter() {
-  const { addToast } = useToast();
+  const { toast } = useToast();
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -49,7 +49,7 @@ export default function JsonFormatter() {
     setTimeout(() => {
       format(input, indentSize);
       setIsFormatting(false);
-      if (!error && input) addToast("JSON Formatted", "success");
+      if (!error && input) toast("JSON Formatted", "success");
     }, 300);
   };
 
@@ -57,7 +57,7 @@ export default function JsonFormatter() {
     if (!output) return;
     const success = await copyToClipboard(output);
     if (success) {
-      addToast("Formatted JSON copied", "success");
+      toast("Formatted JSON copied", "success");
     }
   };
 
@@ -66,7 +66,7 @@ export default function JsonFormatter() {
       const parsed = JSON.parse(input);
       setOutput(JSON.stringify(parsed));
       setError(null);
-      addToast("JSON Minified", "success");
+      toast("JSON Minified", "success");
     } catch (e: any) {
       setError(e.message);
     }

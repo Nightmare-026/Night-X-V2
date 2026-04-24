@@ -33,7 +33,7 @@ const ALGORITHMS = [
 ];
 
 export default function HashGenerator() {
-  const { addToast } = useToast();
+  const { toast } = useToast();
   const [input, setInput] = useState('');
   const [hashes, setHashes] = useState<Record<string, string>>({});
   const [isProcessing, setIsProcessing] = useState(false);
@@ -93,7 +93,7 @@ export default function HashGenerator() {
   const handleCopy = async (text: string, algo: string) => {
     const success = await copyToClipboard(text);
     if (success) {
-      addToast(`${algo} hash copied`, "success");
+      toast(`${algo} hash copied`, "success");
     }
   };
 

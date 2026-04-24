@@ -54,7 +54,7 @@ function getStrength(pw: string) {
 }
 
 export default function PasswordGenerator() {
-  const { addToast } = useToast();
+  const { toast } = useToast();
   const [length, setLength] = useState(16);
   const [upper, setUpper] = useState(true);
   const [lower, setLower] = useState(true);
@@ -68,7 +68,7 @@ export default function PasswordGenerator() {
 
   const generate = useCallback(() => {
     if (!isValid) {
-      addToast("Please select at least one character set", "error");
+      toast("Please select at least one character set", "error");
       return;
     }
     setIsGenerating(true);
@@ -76,15 +76,15 @@ export default function PasswordGenerator() {
       const pw = generatePassword(length, { upper, lower, numbers, symbols });
       setPassword(pw);
       setIsGenerating(false);
-      addToast("Secure password generated", "success");
+      toast("Secure password generated", "success");
     }, 400);
-  }, [length, upper, lower, numbers, symbols, isValid, addToast]);
+  }, [length, upper, lower, numbers, symbols, isValid, toast]);
 
   const handleCopy = async () => {
     if (!password) return;
     const success = await copyToClipboard(password);
     if (success) {
-      addToast("Password copied to clipboard", "success");
+      toast("Password copied to clipboard", "success");
     }
   };
 

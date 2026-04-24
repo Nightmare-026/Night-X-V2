@@ -19,7 +19,7 @@ import { cn, copyToClipboard } from '@/lib/utils';
 import { useToast } from '@/components/ui/Toast';
 
 export default function RandomNumber() {
-  const { addToast } = useToast();
+  const { toast } = useToast();
   const [min, setMin] = useState(1);
   const [max, setMax] = useState(100);
   const [count, setCount] = useState(1);
@@ -30,7 +30,7 @@ export default function RandomNumber() {
 
   const generate = useCallback(() => {
     if (min >= max) {
-      addToast("Min must be less than Max", "error");
+      toast("Min must be less than Max", "error");
       return;
     }
 
@@ -79,22 +79,22 @@ export default function RandomNumber() {
 
       setResults(newResults);
       setIsRolling(false);
-      addToast(`Generated ${newResults.length} random numbers`, "success");
+      toast(`Generated ${newResults.length} random numbers`, "success");
     }, 600);
-  }, [min, max, count, allowDuplicates, sort, addToast]);
+  }, [min, max, count, allowDuplicates, sort, toast]);
 
   const handleCopy = async () => {
     if (results.length > 0) {
       const success = await copyToClipboard(results.join(', '));
       if (success) {
-        addToast("Copied to clipboard", "success");
+        toast("Copied to clipboard", "success");
       }
     }
   };
 
   const clearResults = () => {
     setResults([]);
-    addToast("Results cleared", "info");
+    toast("Results cleared", "info");
   };
 
   return (

@@ -27,7 +27,7 @@ import { AnimatePresence } from 'framer-motion';
 
 export default function SignupPage() {
   const router = useRouter();
-  const { addToast } = useToast();
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -90,10 +90,10 @@ export default function SignupPage() {
 
       if (result?.error) {
         setError("Account created but failed to sign in. Please sign in manually.");
-        addToast("Account created! Please sign in.", "success");
+        toast("Account created! Please sign in.", "success");
         router.push('/auth/signin');
       } else {
-        addToast("Welcome to Night X! Your account is ready.", "success");
+        toast("Welcome to Night X! Your account is ready.", "success");
         router.push('/dashboard?welcome=true');
       }
     } catch (err: any) {

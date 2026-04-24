@@ -27,7 +27,7 @@ function generateUuidV4() {
 }
 
 export default function UuidGenerator() {
-  const { addToast } = useToast();
+  const { toast } = useToast();
   const [count, setCount] = useState(5);
   const [uuids, setUuids] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -51,7 +51,7 @@ export default function UuidGenerator() {
   const handleCopy = async (text: string) => {
     const success = await copyToClipboard(text);
     if (success) {
-      addToast("ID copied", "success");
+      toast("ID copied", "success");
     }
   };
 
@@ -59,11 +59,12 @@ export default function UuidGenerator() {
     if (uuids.length === 0) return;
     const success = await copyToClipboard(uuids.join('\n'));
     if (success) {
-      addToast("All IDs copied to clipboard", "success");
+      toast("All IDs copied to clipboard", "success");
     }
   };
 
-  return <div className="max-w-6xl mx-auto space-y-8">
+  return (
+    <div className="max-w-6xl mx-auto space-y-8">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
         {/* Settings Panel */}
@@ -248,5 +249,5 @@ export default function UuidGenerator() {
         </div>
       </div>
     </div>
-  ;
+  );
 }

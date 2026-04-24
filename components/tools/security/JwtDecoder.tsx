@@ -70,7 +70,7 @@ function decodeToken(token: string): DecodedToken | null {
 }
 
 export default function JwtDecoder() {
-  const { addToast } = useToast();
+  const { toast } = useToast();
   const [token, setToken] = useState('');
   const [decoded, setDecoded] = useState<DecodedToken | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -96,7 +96,7 @@ export default function JwtDecoder() {
     const text = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
     const success = await copyToClipboard(text);
     if (success) {
-      addToast(`${label} copied to clipboard`, "success");
+      toast(`${label} copied to clipboard`, "success");
     }
   };
 
