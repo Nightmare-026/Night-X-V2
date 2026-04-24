@@ -37,26 +37,57 @@ export default function HashGenerator() {
   const [input, setInput] = useState('');
   const [hashes, setHashes] = useState<Record<string, string>>({});
   const [isProcessing, setIsProcessing] = useState(false);
-  const [selectedAlgo, setSelectedAlgo] = useState('SHA-256');
+
+  const generateHash = async (text: string, algorithm: string) => {
+    if (!text) return '';
+    try {
+      const msgUint8 = new TextEncoder().encode(text);
+      const hashBuffer = await crypto.subtle.digest(algorithm, msgUint8);
+      
+      // Efficient hex conversion
+      return Array.from(new Uint8Array(hashBuffer))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+    } catch (e) {
+      console.error(`Hash failed for ${algorithm}:`, e);
+      return 'Error generating hash';
+    }
+  };
 
   const compute = useCallback(async (val: string) => {
     if (!val) {
-      setHashes({});
+      setHashes(ALGORITHMS.reduce((acc, algo) => ({ ...acc, [algo.id]: '' }), {}));
       return;
     }
+
     setIsProcessing(true);
     const results: Record<string, string> = {};
-    for (const algo of ALGORITHMS) {
-      results[algo.id] = await generateHash(val, algo.id);
+    
+    try {
+      // Parallelize hash generation for all algorithms
+      const hashPromises = ALGORITHMS.map(async (algo) => {
+        results[algo.id] = await generateHash(val, algo.id);
+      });
+      
+      await Promise.all(hashPromises);
+      setHashes(results);
+    } catch (err) {
+      console.error("Batch hash calculation failed:", err);
+    } finally {
+      setIsProcessing(false);
     }
-    setHashes(results);
-    setIsProcessing(false);
   }, []);
 
+  // Use an effect for debounced computation
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      compute(input);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [input, compute]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const val = e.target.value;
-    setInput(val);
-    compute(val);
+    setInput(e.target.value);
   };
 
   const handleCopy = async (text: string, algo: string) => {

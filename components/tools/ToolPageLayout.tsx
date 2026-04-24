@@ -7,6 +7,7 @@ import Link from 'next/link';
 import ToolCard from '@/components/dashboard/ToolCard';
 import AIChat from '@/components/dashboard/AIChat';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 
 interface ToolPageLayoutProps {
   tool: Tool;
@@ -14,6 +15,28 @@ interface ToolPageLayoutProps {
   howToUse?: string[];
   fullWidth?: boolean;
 }
+
+const containerVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { 
+      duration: 0.6, 
+      ease: [0.22, 1, 0.36, 1],
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { duration: 0.4, ease: "easeOut" }
+  }
+};
 
 export default function ToolPageLayout({ tool, children, howToUse, fullWidth = false }: ToolPageLayoutProps) {
   const relatedTools = getRelatedTools(tool.slug);
@@ -48,21 +71,35 @@ export default function ToolPageLayout({ tool, children, howToUse, fullWidth = f
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen relative overflow-hidden">
+      {/* Premium Background Glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[500px] bg-gradient-to-b from-accent-purple/5 via-transparent to-transparent pointer-events-none -z-10 blur-[100px]" />
+
       <main className="flex-grow py-12">
-        <div className="container mx-auto px-4 lg:px-8">
+        <motion.div 
+          className="container mx-auto px-4 lg:px-8"
+          initial="hidden"
+          animate="visible"
+          variants={containerVariants}
+        >
           
           {/* Breadcrumbs */}
-          <nav className="flex items-center gap-2 text-[10px] font-black text-white/20 mb-10 uppercase tracking-[0.2em]">
+          <motion.nav 
+            variants={itemVariants}
+            className="flex items-center gap-2 text-[10px] font-black text-white/20 mb-10 uppercase tracking-[0.2em]"
+          >
             <Link href="/dashboard" className="hover:text-white transition-colors">Dashboard</Link>
             <ChevronRight size={10} className="text-white/10" />
             <span className="text-white/20">{tool.category}</span>
             <ChevronRight size={10} className="text-white/10" />
             <span className="text-accent-purple">{tool.name}</span>
-          </nav>
+          </motion.nav>
 
           {/* Header Section */}
-          <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-8">
+          <motion.div 
+            variants={itemVariants}
+            className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-8"
+          >
             <div className="space-y-4 max-w-3xl">
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-3xl shadow-2xl relative group overflow-hidden">
@@ -91,15 +128,18 @@ export default function ToolPageLayout({ tool, children, howToUse, fullWidth = f
                 Share Tool
               </button>
             </div>
-          </div>
+          </motion.div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
             
             {/* Main Content Area */}
-            <div className={cn(
-              "space-y-12",
-              fullWidth ? "lg:col-span-12" : "lg:col-span-8"
-            )}>
+            <motion.div 
+              variants={itemVariants}
+              className={cn(
+                "space-y-12",
+                fullWidth ? "lg:col-span-12" : "lg:col-span-8"
+              )}
+            >
               {/* Tool Canvas */}
               <div className={cn(
                 "relative",
@@ -135,11 +175,14 @@ export default function ToolPageLayout({ tool, children, howToUse, fullWidth = f
                   </div>
                 </div>
               )}
-            </div>
+            </motion.div>
 
             {/* Sidebar (Only shown if not fullWidth) */}
             {!fullWidth && (
-              <div className="lg:col-span-4 space-y-8 sticky top-24">
+              <motion.div 
+                variants={itemVariants}
+                className="lg:col-span-4 space-y-8 sticky top-24"
+              >
                 <div className="bg-white/5 border border-white/10 rounded-[32px] p-8 space-y-8 shadow-2xl">
                   <h3 className="font-syne font-black text-sm uppercase tracking-[0.2em] text-white/40">Technical Specs</h3>
                   
@@ -177,7 +220,7 @@ export default function ToolPageLayout({ tool, children, howToUse, fullWidth = f
 
                   <div className="pt-8 border-t border-white/5">
                     <p className="text-[10px] text-white/20 font-medium leading-relaxed italic">
-                      "Engineered for speed, privacy, and precision. Night X utilities are built using the latest web standards."
+                      &quot;Engineered for speed, privacy, and precision. Night X utilities are built using the latest web standards.&quot;
                     </p>
                   </div>
                 </div>
@@ -192,10 +235,10 @@ export default function ToolPageLayout({ tool, children, howToUse, fullWidth = f
                     </div>
                   </div>
                 )}
-              </div>
+              </motion.div>
             )}
           </div>
-        </div>
+        </motion.div>
       </main>
 
       <AIChat />

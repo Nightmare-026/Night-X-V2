@@ -247,7 +247,7 @@ export default function SignupPage() {
               <div className="relative">
                 <input 
                   type={showPassword ? "text" : "password"} 
-                  placeholder="••••••••"
+                  placeholder="........"
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 pr-12 text-white focus:outline-none focus:border-accent-purple transition-colors"
                   required
                   value={formData.password}
@@ -285,7 +285,7 @@ export default function SignupPage() {
               <label className="block text-sm font-medium text-white/60 mb-1.5 ml-1">Confirm Password</label>
               <input 
                 type="password" 
-                placeholder="••••••••"
+                placeholder="........"
                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-accent-purple transition-colors"
                 required
                 value={formData.confirmPassword}
@@ -331,7 +331,7 @@ export default function SignupPage() {
             >
               {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Create Account <ArrowRight size={18} /></>}
             </button>
-          </form>
+          </motion.form>
 
           <p className="text-center text-white/40 text-sm mt-8">
             Already have an account? <Link href="/auth/signin" className="text-white hover:text-accent-purple font-semibold hover:underline">Sign In</Link>

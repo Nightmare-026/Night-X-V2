@@ -1,19 +1,17 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X, Zap, ArrowRight, Command, Lock } from 'lucide-react';
+import { Search, X, ArrowRight, Command, Lock, Sparkles, History } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { TOOLS } from '@/lib/tools-registry';
+import { TOOLS, Tool } from '@/lib/tools-registry';
 import { cn } from '@/lib/utils';
-import { signIn, useSession } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 
 interface SearchModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
-
-const PUBLIC_TOOLS = ['word-counter', 'password-generator', 'age-calculator', 'qr-generator', 'image-compressor', 'json-formatter', 'unit-converter', 'text-obfuscator', 'markdown-live'];
 
 export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const [query, setQuery] = useState('');
@@ -22,14 +20,26 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const { status } = useSession();
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const filteredTools = query.trim() === '' 
-    ? TOOLS.slice(0, 6) 
-    : TOOLS.filter(tool => 
-        tool.name.toLowerCase().includes(query.toLowerCase()) || 
-        tool.description.toLowerCase().includes(query.toLowerCase()) ||
-        tool.category.toLowerCase().includes(query.toLowerCase()) ||
-        (tool.tags && tool.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase())))
-      ).slice(0, 10);
+  // High-performance fuzzy-ish search
+  const filteredTools = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (q === '') return TOOLS.filter(t => t.isPublic).slice(0, 6); // Show popular/public tools by default
+
+    return TOOLS.filter(tool => {
+      const nameMatch = tool.name.toLowerCase().includes(q);
+      const descMatch = tool.description.toLowerCase().includes(q);
+      const tagMatch = tool.tags.some(tag => tag.toLowerCase().includes(q));
+      const categoryMatch = tool.category.toLowerCase().includes(q);
+      return nameMatch || descMatch || tagMatch || categoryMatch;
+    }).sort((a, b) => {
+      // Prioritize name matches
+      const aName = a.name.toLowerCase().startsWith(q);
+      const bName = b.name.toLowerCase().startsWith(q);
+      if (aName && !bName) return -1;
+      if (!aName && bName) return 1;
+      return 0;
+    }).slice(0, 8);
+  }, [query]);
 
   useEffect(() => {
     if (isOpen) {
@@ -39,8 +49,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
     }
   }, [isOpen]);
 
-  const handleSelect = (slug: string) => {
-    const isPublic = PUBLIC_TOOLS.includes(slug);
+  const handleSelect = (slug: string, isPublic: boolean) => {
     if (!isPublic && status !== 'authenticated') {
       router.push(`/auth/signin?callbackUrl=/tools/${slug}`);
     } else {
@@ -53,17 +62,23 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) return;
 
-      if (e.key === 'Escape') onClose();
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        setSelectedIndex(prev => (prev + 1) % filteredTools.length);
-      }
-      if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        setSelectedIndex(prev => (prev - 1 + filteredTools.length) % filteredTools.length);
-      }
-      if (e.key === 'Enter' && filteredTools[selectedIndex]) {
-        handleSelect(filteredTools[selectedIndex].slug);
+      switch (e.key) {
+        case 'Escape':
+          onClose();
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          setSelectedIndex(prev => (prev + 1) % Math.max(1, filteredTools.length));
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          setSelectedIndex(prev => (prev - 1 + filteredTools.length) % Math.max(1, filteredTools.length));
+          break;
+        case 'Enter':
+          if (filteredTools[selectedIndex]) {
+            handleSelect(filteredTools[selectedIndex].slug, filteredTools[selectedIndex].isPublic);
+          }
+          break;
       }
     };
 
@@ -74,120 +89,161 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   return (
     <AnimatePresence>
       {isOpen && (
-        <>
+        <div className="fixed inset-0 z-[100] flex items-start justify-center pt-24 px-4 sm:px-6">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 bg-[#06080F]/80 backdrop-blur-md"
           />
-          <div className="fixed inset-0 z-[110] flex items-start justify-center pt-24 px-4 pointer-events-none">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: -20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -20 }}
-              className="w-full max-w-2xl overflow-hidden glass-card border border-white/10 shadow-2xl pointer-events-auto"
-            >
-              <div className="flex items-center px-6 py-4 border-b border-white/10">
-                <Search className="w-5 h-5 text-white/40 mr-4" />
-                <input
-                  ref={inputRef}
-                  type="text"
-                  placeholder="Search protocol tools, AI features, or utilities..."
-                  className="flex-1 bg-transparent border-none text-white outline-none placeholder:text-white/30 text-lg"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                />
-                <div className="flex items-center gap-2">
-                  <div className="hidden sm:flex items-center gap-1 px-2 py-1 rounded border border-white/10 bg-white/5 text-[10px] text-white/40">
-                    <Command size={10} />
-                    <span>K</span>
-                  </div>
-                  <button 
-                    onClick={onClose}
-                    className="p-1 hover:bg-white/5 rounded-lg text-white/40 hover:text-white transition-colors"
-                  >
-                    <X size={20} />
-                  </button>
+          
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: -20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: -20 }}
+            className="w-full max-w-2xl overflow-hidden glass-card border border-white/10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)] relative z-[110]"
+          >
+            {/* Search Input Area */}
+            <div className="relative flex items-center px-6 py-5 border-b border-white/10 bg-white/[0.02]">
+              <Search className="w-5 h-5 text-accent-purple/60 mr-4" />
+              <input
+                ref={inputRef}
+                type="text"
+                placeholder="Search tools, AI models, or utilities..."
+                className="flex-1 bg-transparent border-none text-white outline-none placeholder:text-white/20 text-lg font-medium"
+                value={query}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  setSelectedIndex(0);
+                }}
+              />
+              <div className="flex items-center gap-3">
+                <div className="hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-md border border-white/10 bg-white/5 text-[10px] text-white/40 font-bold uppercase tracking-wider">
+                  <span className="opacity-50">ESC to close</span>
                 </div>
+                <button 
+                  onClick={onClose}
+                  className="p-2 hover:bg-white/10 rounded-full text-white/30 hover:text-white transition-all"
+                >
+                  <X size={18} />
+                </button>
               </div>
+            </div>
 
-              <div className="max-h-[400px] overflow-y-auto p-2">
-                {filteredTools.length > 0 ? (
-                  <div className="space-y-1">
-                    <p className="px-4 py-2 text-[10px] uppercase tracking-widest font-bold text-white/20">
-                      {query.trim() === '' ? 'Recommended Tools' : 'Search Results'}
+            {/* Results Area */}
+            <div className="max-h-[440px] overflow-y-auto custom-scrollbar bg-gradient-to-b from-transparent to-black/20">
+              {filteredTools.length > 0 ? (
+                <div className="p-2">
+                  <div className="px-4 py-3 flex items-center justify-between">
+                    <p className="text-[10px] uppercase tracking-[0.2em] font-black text-white/30 flex items-center gap-2">
+                      {query.trim() === '' ? <Sparkles size={10} className="text-accent-purple" /> : <Search size={10} />}
+                      {query.trim() === '' ? 'Recommended for you' : `Found ${filteredTools.length} tools`}
                     </p>
-                        {filteredTools.map((tool, index) => {
-                          const isPublic = PUBLIC_TOOLS.includes(tool.slug);
-                          return (
-                            <button
-                              key={tool.slug}
-                              onClick={() => handleSelect(tool.slug)}
-                              onMouseEnter={() => setSelectedIndex(index)}
-                              className={cn(
-                                "w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all group",
-                                selectedIndex === index ? "bg-accent-purple/20 border border-accent-purple/30" : "hover:bg-white/5 border border-transparent"
-                              )}
-                            >
-                              <div className="flex items-center gap-4">
-                                <div className={cn(
-                                  "w-10 h-10 rounded-xl flex items-center justify-center transition-colors relative",
-                                  selectedIndex === index ? "bg-accent-purple/20 text-accent-purple" : "bg-white/5 text-white/40"
-                                )}>
-                                  <Zap size={18} />
-                                  {!isPublic && (
-                                    <div className="absolute -top-1 -right-1 bg-background p-0.5 rounded-full">
-                                      <Lock size={8} className="text-white/40" />
-                                    </div>
-                                  )}
-                                </div>
-                                <div className="text-left">
-                                  <div className="flex items-center gap-2">
-                                    <p className={cn(
-                                      "text-sm font-bold transition-colors",
-                                      selectedIndex === index ? "text-white" : "text-white/70"
-                                    )}>{tool.name}</p>
-                                    <span className={cn(
-                                      "text-[8px] font-black uppercase px-1.5 py-0.5 rounded-md",
-                                      isPublic ? "bg-accent-cyan/20 text-accent-cyan" : "bg-accent-purple/20 text-accent-purple"
-                                    )}>
-                                      {isPublic ? 'Free' : 'Pro'}
-                                    </span>
-                                  </div>
-                                  <p className="text-xs text-white/30 truncate max-w-[200px] sm:max-w-[300px]">{tool.description}</p>
-                                </div>
-                              </div>
-                              <ArrowRight size={14} className={cn(
-                                "transition-all",
-                                selectedIndex === index ? "text-accent-purple translate-x-0 opacity-100" : "text-white/0 -translate-x-2 opacity-0"
-                              )} />
-                            </button>
-                          );
-                        })}
                   </div>
-                ) : (
-                  <div className="py-12 text-center">
-                    <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white/20">
-                      <Search size={24} />
-                    </div>
-                    <p className="text-white/60 font-medium">No results found for &quot;{query}&quot;</p>
-                    <p className="text-white/30 text-xs mt-1">Try searching for &quot;image&quot;, &quot;text&quot;, or &quot;security&quot;</p>
-                  </div>
-                )}
-              </div>
+                  
+                  <div className="space-y-1">
+                    {filteredTools.map((tool, index) => (
+                      <button
+                        key={tool.slug}
+                        onClick={() => handleSelect(tool.slug, tool.isPublic)}
+                        onMouseEnter={() => setSelectedIndex(index)}
+                        className={cn(
+                          "w-full flex items-center justify-between px-4 py-3.5 rounded-xl transition-all duration-200 group relative overflow-hidden",
+                          selectedIndex === index 
+                            ? "bg-accent-purple/10 border border-accent-purple/30 shadow-[0_0_20px_-10px_rgba(168,85,247,0.4)]" 
+                            : "hover:bg-white/[0.03] border border-transparent"
+                        )}
+                      >
+                        {/* Selected Indicator Glow */}
+                        {selectedIndex === index && (
+                          <motion.div 
+                            layoutId="search-glow"
+                            className="absolute inset-0 bg-gradient-to-r from-accent-purple/5 via-transparent to-transparent opacity-50"
+                          />
+                        )}
 
-              <div className="p-4 bg-white/5 border-t border-white/5 flex items-center justify-between text-[10px] text-white/30 uppercase tracking-widest font-bold">
-                <div className="flex gap-4">
-                  <span className="flex items-center gap-1"><Command size={10} /> + K to Open</span>
-                  <span className="flex items-center gap-1">↑↓ to Navigate</span>
+                        <div className="flex items-center gap-4 relative z-10">
+                          <div className={cn(
+                            "w-11 h-11 rounded-xl flex items-center justify-center text-xl transition-all duration-300",
+                            selectedIndex === index 
+                              ? "bg-accent-purple/20 scale-110 shadow-inner" 
+                              : "bg-white/5 grayscale-[0.5] opacity-60 group-hover:opacity-100 group-hover:grayscale-0"
+                          )}>
+                            {tool.icon}
+                          </div>
+                          
+                          <div className="text-left">
+                            <div className="flex items-center gap-2 mb-0.5">
+                              <span className={cn(
+                                "text-sm font-bold transition-colors",
+                                selectedIndex === index ? "text-white" : "text-white/70 group-hover:text-white"
+                              )}>
+                                {tool.name}
+                              </span>
+                              
+                              {tool.isAI && (
+                                <span className="bg-gradient-to-r from-accent-purple to-accent-cyan px-1.5 py-0.5 rounded text-[8px] font-black uppercase text-white shadow-sm">
+                                  AI
+                                </span>
+                              )}
+                              
+                              {!tool.isPublic && (
+                                <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-white/5 border border-white/10 text-[8px] font-black uppercase text-white/40">
+                                  <Lock size={8} />
+                                  Pro
+                                </div>
+                              )}
+                            </div>
+                            <p className="text-xs text-white/30 truncate max-w-[200px] sm:max-w-[360px] font-medium leading-relaxed">
+                              {tool.description}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className={cn(
+                          "flex items-center gap-2 transition-all duration-300 relative z-10",
+                          selectedIndex === index ? "translate-x-0 opacity-100" : "translate-x-4 opacity-0"
+                        )}>
+                          <span className="text-[9px] font-bold text-accent-purple/60 uppercase tracking-widest hidden sm:inline">Open Tool</span>
+                          <ArrowRight size={14} className="text-accent-purple" />
+                        </div>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <span>Night X Search Protocol v2.0</span>
+              ) : (
+                <div className="py-20 text-center animate-in fade-in zoom-in duration-300">
+                  <div className="w-20 h-20 bg-white/[0.03] rounded-[2rem] flex items-center justify-center mx-auto mb-6 text-white/10 border border-white/5 rotate-12">
+                    <Search size={32} strokeWidth={1.5} />
+                  </div>
+                  <h3 className="text-white/80 font-bold text-lg">No tools matched your search</h3>
+                  <p className="text-white/30 text-sm mt-2 max-w-[280px] mx-auto leading-relaxed">
+                    We couldn&apos;t find any tools matching &quot;<span className="text-accent-purple">{query}</span>&quot;. Try checking the spelling or use broader keywords.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Footer / Shortcuts */}
+            <div className="px-6 py-4 bg-white/[0.02] border-t border-white/5 flex items-center justify-between text-[10px] text-white/30 font-bold uppercase tracking-[0.15em]">
+              <div className="flex items-center gap-6">
+                <span className="flex items-center gap-2">
+                  <kbd className="px-1.5 py-0.5 rounded border border-white/10 bg-white/5 text-[9px]">↑↓</kbd> 
+                  to navigate
+                </span>
+                <span className="flex items-center gap-2">
+                  <kbd className="px-1.5 py-0.5 rounded border border-white/10 bg-white/5 text-[9px]">ENTER</kbd> 
+                  to select
+                </span>
               </div>
-            </motion.div>
-          </div>
-        </>
+              <div className="hidden sm:flex items-center gap-2 text-accent-purple/40">
+                <History size={12} />
+                <span>Quick Access Protocol</span>
+              </div>
+            </div>
+          </motion.div>
+        </div>
       )}
     </AnimatePresence>
   );

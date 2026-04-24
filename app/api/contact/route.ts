@@ -1,25 +1,16 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebaseAdmin';
 import { headers } from 'next/headers';
-
-// Simple in-memory rate limiter (per-instance)
-const rateLimitMap = new Map<string, { count: number; lastReset: number }>();
-const RATE_LIMIT_WINDOW = 3600000; // 1 hour
-const MAX_REQUESTS = 5; // 5 messages per hour
+import { firestoreRateLimit, sanitizeInput } from '@/lib/utils';
 
 export async function POST(request: Request) {
   try {
     const ip = headers().get('x-forwarded-for')?.split(',')[0] || 'anonymous';
-    const now = Date.now();
     
-    // Rate limit check
-    const rateData = rateLimitMap.get(ip) || { count: 0, lastReset: now };
-    if (now - rateData.lastReset > RATE_LIMIT_WINDOW) {
-      rateData.count = 0;
-      rateData.lastReset = now;
-    }
+    // Persistent Firestore Rate Limit (5 messages per hour)
+    const { success } = await firestoreRateLimit(adminDb, ip, 'contact', 5, 3600000);
     
-    if (rateData.count >= MAX_REQUESTS) {
+    if (!success) {
       return NextResponse.json(
         { error: 'Too many messages. Please try again later.' },
         { status: 429 }
@@ -32,12 +23,18 @@ export async function POST(request: Request) {
     // Honeypot check
     if (website_url) {
       console.warn(`Spam detected from IP: ${ip}`);
-      return NextResponse.json({ success: true }); // Silent fail for bots
+      return NextResponse.json({ success: true });
     }
 
     if (!name || !email || !message) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
+
+    // Server-side Sanitization
+    const cleanName = sanitizeInput(name.slice(0, 100));
+    const cleanEmail = sanitizeInput(email.slice(0, 255));
+    const cleanSubject = sanitizeInput((subject || 'No Subject').slice(0, 200));
+    const cleanMessage = sanitizeInput(message.slice(0, 5000));
 
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -50,17 +47,14 @@ export async function POST(request: Request) {
     }
 
     await adminDb.collection('contact_messages').add({
-      name,
-      email,
-      subject: subject || 'No Subject',
-      message,
+      name: cleanName,
+      email: cleanEmail,
+      subject: cleanSubject,
+      message: cleanMessage,
       ip,
       createdAt: new Date().toISOString(),
+      status: 'new'
     });
-
-    // Update rate limit
-    rateData.count++;
-    rateLimitMap.set(ip, rateData);
 
     return NextResponse.json({ success: true });
   } catch (error) {

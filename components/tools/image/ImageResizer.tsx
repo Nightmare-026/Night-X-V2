@@ -1,3 +1,4 @@
+'use client';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Upload, Download, RefreshCw, Loader2, Image as ImageIcon, Settings, Link as LinkIcon, Unlink, FileImage, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';

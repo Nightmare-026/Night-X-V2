@@ -29,13 +29,32 @@ interface DecodedToken {
   isExpired?: boolean;
 }
 
+function decodeBase64Url(str: string) {
+  try {
+    // Replace non-url safe characters and add padding
+    const base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+    const pad = base64.length % 4;
+    const padded = pad ? base64 + '='.repeat(4 - pad) : base64;
+    return decodeURIComponent(atob(padded).split('').map(c => {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+  } catch (e) {
+    return null;
+  }
+}
+
 function decodeToken(token: string): DecodedToken | null {
   try {
     const parts = token.split('.');
     if (parts.length !== 3) return null;
 
-    const header = JSON.parse(atob(parts[0]));
-    const payload = JSON.parse(atob(parts[1]));
+    const headerStr = decodeBase64Url(parts[0]);
+    const payloadStr = decodeBase64Url(parts[1]);
+    
+    if (!headerStr || !payloadStr) return null;
+
+    const header = JSON.parse(headerStr);
+    const payload = JSON.parse(payloadStr);
     const signature = parts[2];
 
     let isExpired = false;

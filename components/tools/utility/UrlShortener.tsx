@@ -162,7 +162,7 @@ export default function UrlShortener() {
                     className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl border border-white/5 text-xs font-bold transition-all"
                   >
                     <Copy size={14} />
-                    Copy Code
+                    Copy Link
                   </button>
                   <a 
                     href={result.shortUrl}

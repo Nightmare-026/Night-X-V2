@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useCallback, useRef } from 'react';
-import { Upload, Copy, Download, RefreshCw, Image as ImageIcon, Code2 } from 'lucide-react';
+import { Upload, Copy, Download, RefreshCw, Image as ImageIcon, Code2, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ImageToBase64() {
@@ -44,9 +44,11 @@ export default function ImageToBase64() {
     if (!output) return;
     const blob = new Blob([output], { type: 'text/plain' });
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
+    const url = URL.createObjectURL(blob);
+    a.href = url;
     a.download = `${inputFile?.name || 'image'}_base64.txt`;
     a.click();
+    URL.revokeObjectURL(url);
   };
 
   const reset = () => { setInputFile(null); setBase64(null); setDataUrl(null); };

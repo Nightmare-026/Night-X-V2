@@ -9,37 +9,19 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronDown, LogOut, Menu, Search, User, X, Zap, Command, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import AnnouncementBanner from '@/components/ui/AnnouncementBanner';
-import SearchModal from '@/components/SearchModal';
+import { useSearch } from '@/components/providers/SearchProvider';
 import styles from './Header.module.css';
 
 export default function Header() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
   const router = useRouter();
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const { openSearch } = useSearch();
   const profileRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handler = window.setTimeout(() => {
-      window.dispatchEvent(new CustomEvent('tool-search', { detail: searchQuery }));
-    }, 300);
-
-    return () => window.clearTimeout(handler);
-  }, [searchQuery]);
-
-  useEffect(() => {
-    const handleSearchReset = (event: Event) => {
-      const customEvent = event as CustomEvent<string>;
-      setSearchQuery(customEvent.detail || '');
-    };
-
-    window.addEventListener('tool-search-sync', handleSearchReset as EventListener);
-    return () => window.removeEventListener('tool-search-sync', handleSearchReset as EventListener);
-  }, []);
+  // Search state is now handled globally via SearchProvider
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -52,17 +34,7 @@ export default function Header() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        setIsSearchModalOpen(true);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  // Cmd+K listener is now handled in SearchProvider
 
   useEffect(() => {
     setIsMobileMenuOpen(false);
@@ -71,7 +43,7 @@ export default function Header() {
 
   // Body scroll lock
   useEffect(() => {
-    if (isMobileMenuOpen || isSearchModalOpen) {
+    if (isMobileMenuOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
@@ -79,7 +51,7 @@ export default function Header() {
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [isMobileMenuOpen, isSearchModalOpen]);
+  }, [isMobileMenuOpen]);
 
   // Scroll height for header shimmer
   const [scrolled, setScrolled] = useState(false);
@@ -139,7 +111,7 @@ export default function Header() {
 
           <div className="relative mx-8 hidden max-w-[240px] flex-1 md:flex">
             <button
-              onClick={() => setIsSearchModalOpen(true)}
+              onClick={openSearch}
               className="flex w-full items-center justify-between rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/40 transition-all hover:bg-white/10 hover:border-white/20"
             >
               <div className="flex items-center gap-2">
@@ -365,10 +337,6 @@ export default function Header() {
             </motion.div>
           )}
         </AnimatePresence>
-    <SearchModal 
-      isOpen={isSearchModalOpen} 
-      onClose={() => setIsSearchModalOpen(false)} 
-    />
   </>
 );
 }

@@ -36,34 +36,56 @@ export async function POST(req: Request) {
       );
     }
 
-    // Check if user already exists
+    // Check if user already exists and create in a transaction for atomicity
     if (!adminDb) {
       return NextResponse.json({ message: "Service unavailable" }, { status: 503 });
     }
-    const userRef = adminDb.collection("users").where("email", "==", email).limit(1);
-    const snapshot = await userRef.get();
 
-    if (!snapshot.empty) {
+    const userDocRef = adminDb.collection("users").doc(email.toLowerCase());
+    
+    try {
+      const registrationResult = await adminDb.runTransaction(async (transaction) => {
+        const userDoc = await transaction.get(userDocRef);
+        
+        if (userDoc.exists) {
+          return { error: "User already exists with this email", status: 400 };
+        }
+
+        // Hash password inside transaction (or just before)
+        const hashedPassword = await hash(password, 12);
+
+        const userData = {
+          name,
+          email: email.toLowerCase(),
+          password_hash: hashedPassword,
+          terms_accepted_at: new Date().toISOString(),
+          createdAt: new Date().toISOString(),
+          uid: userDocRef.id // Store the ID for convenience
+        };
+
+        transaction.set(userDocRef, userData);
+        return { success: true, userData };
+      });
+
+      if (registrationResult.error) {
+        return NextResponse.json({ message: registrationResult.error }, { status: registrationResult.status });
+      }
+
       return NextResponse.json(
-        { message: "User already exists with this email" },
-        { status: 400 }
+        { 
+          message: "User registered successfully", 
+          user: { 
+            id: userDocRef.id, 
+            name: name, 
+            email: email.toLowerCase() 
+          } 
+        },
+        { status: 201 }
       );
+    } catch (transactionError: any) {
+      console.error("Registration transaction failed:", transactionError);
+      return NextResponse.json({ message: "Registration failed. Please try again." }, { status: 500 });
     }
-
-    // Hash password
-    const hashedPassword = await hash(password, 12);
-
-    // Create user in Firestore
-    const newUserRef = adminDb.collection("users").doc();
-    const userData = {
-      name,
-      email,
-      password_hash: hashedPassword,
-      terms_accepted_at: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
-    };
-
-    await newUserRef.set(userData);
 
     return NextResponse.json(
       { 

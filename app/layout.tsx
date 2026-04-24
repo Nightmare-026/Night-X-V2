@@ -68,16 +68,18 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen bg-background font-dm-sans antialiased">
         <SessionProvider>
-          <div className="relative flex min-h-screen flex-col">
-            <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:p-4 focus:bg-accent-purple focus:text-white top-0 left-0">
-              Skip to main content
-            </a>
-            <Header />
-            <main id="main-content" className="flex-1 relative">
-              {children}
-            </main>
-            <Footer />
-          </div>
+          <SearchProvider>
+            <div className="relative flex min-h-screen flex-col">
+              <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:p-4 focus:bg-accent-purple focus:text-white top-0 left-0">
+                Skip to main content
+              </a>
+              <Header />
+              <main id="main-content" className="flex-1 relative">
+                {children}
+              </main>
+              <Footer />
+            </div>
+          </SearchProvider>
         </SessionProvider>
       </body>
     </html>

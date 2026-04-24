@@ -84,13 +84,14 @@ export default async function getCroppedImg(
   // return canvas.toDataURL('image/jpeg');
 
   // As a blob
+  // IMPORTANT: The caller MUST call URL.revokeObjectURL() when the image is no longer needed to prevent memory leaks.
   return new Promise((resolve, reject) => {
     canvas.toBlob((file) => {
       if (file) {
         resolve(URL.createObjectURL(file));
       } else {
-        reject(new Error('Canvas is empty'));
+        reject(new Error('Failed to generate image blob from canvas'));
       }
-    }, 'image/jpeg');
+    }, 'image/jpeg', 0.95); // Added quality parameter
   });
 }

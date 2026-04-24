@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { adminDb, incrementAIUsage } from "@/lib/firebaseAdmin";
 import { NextResponse } from "next/server";
 import { generateAIResponse } from "@/lib/ai-service";
+import { extractJson } from "@/lib/utils";
 
 export const dynamic = 'force-dynamic';
 
@@ -63,17 +64,10 @@ export async function POST(req: Request) {
     );
 
     try {
-      // More robust JSON extraction
-      let jsonContent = aiResponseText.trim();
-      if (jsonContent.includes('```')) {
-        const match = jsonContent.match(/```(?:json)?([\s\S]*?)```/);
-        if (match) jsonContent = match[1].trim();
-      }
+      const parsedResponse = extractJson(aiResponseText);
       
-      const parsedResponse = JSON.parse(jsonContent);
-      
-      if (!parsedResponse.variations || !Array.isArray(parsedResponse.variations)) {
-        throw new Error("Invalid paraphrase format from AI");
+      if (!parsedResponse || !parsedResponse.variations || !Array.isArray(parsedResponse.variations)) {
+        throw new Error("Invalid paraphrase format from AI or extraction failed");
       }
 
       await incrementAIUsage(session.user.id, tool);

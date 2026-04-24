@@ -42,15 +42,34 @@ export default function RandomNumber() {
       const range = max - min + 1;
       const effectiveCount = !allowDuplicates && count > range ? range : count;
 
+      const getRandomInt = (minVal: number, maxVal: number) => {
+        const rangeVal = maxVal - minVal + 1;
+        const array = new Uint32Array(1);
+        crypto.getRandomValues(array);
+        return (array[0] % rangeVal) + minVal;
+      };
+
       if (!allowDuplicates) {
-        const pool = Array.from({ length: range }, (_, i) => min + i);
-        for (let i = 0; i < effectiveCount; i++) {
-          const randomIndex = Math.floor(Math.random() * pool.length);
-          newResults.push(pool.splice(randomIndex, 1)[0]);
+        // For small ranges, use the pool method for efficiency
+        // For large ranges, use a Set to track duplicates to avoid memory issues
+        if (range < 10000) {
+          const pool = Array.from({ length: range }, (_, i) => min + i);
+          for (let i = 0; i < effectiveCount; i++) {
+            const array = new Uint32Array(1);
+            crypto.getRandomValues(array);
+            const randomIndex = array[0] % pool.length;
+            newResults.push(pool.splice(randomIndex, 1)[0]);
+          }
+        } else {
+          const uniqueSet = new Set<number>();
+          while (uniqueSet.size < effectiveCount) {
+            uniqueSet.add(getRandomInt(min, max));
+          }
+          newResults = Array.from(uniqueSet);
         }
       } else {
         for (let i = 0; i < effectiveCount; i++) {
-          newResults.push(Math.floor(Math.random() * range) + min);
+          newResults.push(getRandomInt(min, max));
         }
       }
 

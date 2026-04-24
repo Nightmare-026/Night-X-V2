@@ -32,7 +32,7 @@ export default function WatermarkAdder() {
 
   // Watermark settings
   const [type, setType] = useState<WatermarkType>('text');
-  const [text, setText] = useState('© Night X');
+  const [text, setText] = useState('(c) Night X');
   const [watermarkImage, setWatermarkImage] = useState<File | null>(null);
   const [watermarkImagePreview, setWatermarkImagePreview] = useState<string | null>(null);
   const [fontSize, setFontSize] = useState(32);
@@ -188,9 +188,9 @@ export default function WatermarkAdder() {
   };
 
   const positions: { key: Position; label: string }[] = [
-    { key: 'top-left', label: '↖' }, { key: 'top-center', label: '↑' }, { key: 'top-right', label: '↗' },
-    { key: 'middle-left', label: '←' }, { key: 'center', label: '⊙' }, { key: 'middle-right', label: '→' },
-    { key: 'bottom-left', label: '↙' }, { key: 'bottom-center', label: '↓' }, { key: 'bottom-right', label: '↘' },
+    { key: 'top-left', label: 'TL' }, { key: 'top-center', label: 'TC' }, { key: 'top-right', label: 'TR' },
+    { key: 'middle-left', label: 'ML' }, { key: 'center', label: 'Center' }, { key: 'middle-right', label: 'MR' },
+    { key: 'bottom-left', label: 'BL' }, { key: 'bottom-center', label: 'BC' }, { key: 'bottom-right', label: 'BR' },
   ];
 
   return (

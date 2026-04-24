@@ -63,8 +63,7 @@ export default function UuidGenerator() {
     }
   };
 
-  return (
-    <div className="max-w-6xl mx-auto space-y-8">
+  return <div className="max-w-6xl mx-auto space-y-8">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
         {/* Settings Panel */}
@@ -249,5 +248,5 @@ export default function UuidGenerator() {
         </div>
       </div>
     </div>
-  );
+  ;
 }
