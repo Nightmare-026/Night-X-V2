@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     template: "%s | Night X",
   },
   metadataBase: new URL(siteUrl),
-  description: "Night X brings image, text, developer, security, utility, calculator, and AI-assisted tools into one polished workspace.",
+  description: "Boost your productivity with Night X. Free browser-first tools for developers including QR generation, password security, and text utilities.",
   keywords: ["utility tools", "developer tools", "image tools", "security tools", "text tools", "Night X"],
   authors: [{ name: "Nightmare-026", url: "https://github.com/Nightmare-026" }],
   creator: "Nightmare-026",
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Night X | Utility Tools for Everyday Work",
-    description: "A focused digital toolkit for creators, developers, and everyday workflows.",
+    description: "Free, high-performance browser tools for creators and developers. QR codes, password security, and text utilities in one place.",
     url: siteUrl,
     siteName: "Night X",
     images: [
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Night X | Utility Tools for Everyday Work",
-    description: "A focused digital toolkit for creators, developers, and everyday workflows.",
+    description: "Free, high-performance browser tools for creators and developers. QR codes, password security, and text utilities in one place.",
     images: ["/og-image.png"],
     creator: "@Nightmare_026",
   },

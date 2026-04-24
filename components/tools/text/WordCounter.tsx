@@ -15,8 +15,8 @@ export default function WordCounter() {
     const sentences = text === '' ? 0 : text.split(/[.!?]+/).filter(s => s.trim().length > 0).length;
     const paragraphs = text === '' ? 0 : text.split(/\n\s*\n/).filter(p => p.trim().length > 0).length;
     const lines = text === '' ? 0 : text.split('\n').length;
-    const readingTime = Math.max(1, Math.round(words / 200));
-    const speakingTime = Math.max(1, Math.round(words / 130));
+    const readingTime = words > 0 ? Math.max(1, Math.round(words / 200)) : 0;
+    const speakingTime = words > 0 ? Math.max(1, Math.round(words / 130)) : 0;
     return { chars, charsNoSpaces, words, sentences, paragraphs, lines, readingTime, speakingTime };
   }, [text]);
 

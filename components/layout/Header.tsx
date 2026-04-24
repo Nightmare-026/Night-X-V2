@@ -214,7 +214,7 @@ export default function Header() {
           <button
             aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={isMobileMenuOpen}
-            className="p-2 text-white/70 md:hidden"
+            className="p-4 text-white/70 md:hidden relative z-[210]"
             onClick={() => setIsMobileMenuOpen((value) => !value)}
           >
             {isMobileMenuOpen ? <X className="h-6 w-6" aria-hidden="true" /> : <Menu className="h-6 w-6" aria-hidden="true" />}
@@ -229,7 +229,7 @@ export default function Header() {
               exit={{ opacity: 0, x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
               className={cn(
-                "fixed inset-0 z-[100] flex flex-col bg-[#06080F] px-6 pt-24 pb-12 overflow-y-auto",
+                "fixed inset-0 z-[200] flex flex-col bg-[#06080F] px-6 pt-24 pb-12 overflow-y-auto",
                 styles['mobile-menu-container']
               )}
             >

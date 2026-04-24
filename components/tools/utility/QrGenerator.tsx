@@ -156,7 +156,7 @@ export default function QrGenerator() {
               <h3 className="text-sm font-bold">Customization</h3>
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-[10px] text-white/40 uppercase block ml-1">QR Color</label>
                 <div className="flex items-center gap-3 bg-black/40 p-2 rounded-xl border border-white/10">

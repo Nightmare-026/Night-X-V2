@@ -14,7 +14,9 @@ function generatePassword(length: number, opts: { upper: boolean; lower: boolean
   if (opts.lower) chars += lower;
   if (opts.numbers) chars += nums;
   if (opts.symbols) chars += syms;
-  if (!chars) chars = lower;
+  
+  if (!chars) return '';
+  
   const arr = new Uint32Array(length);
   crypto.getRandomValues(arr);
   return Array.from(arr, v => chars[v % chars.length]).join('');
@@ -45,9 +47,12 @@ export default function PasswordGenerator() {
   const [showPw, setShowPw] = useState(true);
   const [copied, setCopied] = useState(false);
 
+  const isValid = upper || lower || numbers || symbols;
+
   const generate = useCallback(() => {
+    if (!isValid) return;
     setPassword(generatePassword(length, { upper, lower, numbers, symbols }));
-  }, [length, upper, lower, numbers, symbols]);
+  }, [length, upper, lower, numbers, symbols, isValid]);
 
   const handleCopy = async () => {
     if (!password) return;
@@ -77,7 +82,7 @@ export default function PasswordGenerator() {
         <div className="flex items-center gap-2 bg-black/30 rounded-xl px-4 py-3 min-h-[52px]">
           <Shield size={16} className="text-violet-400 shrink-0" />
           <span className="flex-1 font-mono text-base text-white/90 tracking-widest break-all">
-            {showPw ? (password || <span className="text-white/25 text-sm not-italic">Click Generate…</span>) : '•'.repeat(password.length || 12)}
+            {showPw ? (password || <span className="text-white/25 text-sm not-italic">{!isValid ? 'Select an option...' : 'Click Generate…'}</span>) : '•'.repeat(password.length || 12)}
           </span>
           <button onClick={() => setShowPw(!showPw)} className="text-white/40 hover:text-white/70 transition-colors">
             {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
@@ -128,7 +133,8 @@ export default function PasswordGenerator() {
       <div className="grid grid-cols-2 gap-3">
         <button
           onClick={generate}
-          className="py-3 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-semibold flex items-center justify-center gap-2 transition-all"
+          disabled={!isValid}
+          className="py-3 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
         >
           <RefreshCw size={16} />
           Generate

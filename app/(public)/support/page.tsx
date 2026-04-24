@@ -90,7 +90,7 @@ export default function SupportPage() {
             <br />
             For sponsorship or business inquiries, contact <a href={`mailto:${process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@night-x.app"}`} className="text-accent-cyan hover:underline">{process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@night-x.app"}</a>.
             <br />
-            <span className="text-amber-400 font-medium">(Payment System Coming Soon)</span>
+            <span className="inline-block mt-4 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-sm font-medium animate-pulse">Payment System Coming Soon</span>
           </p>
         </motion.div>
 

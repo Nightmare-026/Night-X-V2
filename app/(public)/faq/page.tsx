@@ -94,8 +94,8 @@ export default function FaqPage() {
         <div className="mt-12 rounded-3xl border border-white/10 bg-gradient-to-br from-accent-purple/10 to-accent-cyan/10 p-8 text-center">
           <h3 className="mb-2 text-2xl font-bold">Still need help?</h3>
           <p className="mb-5 text-white/55">Use the contact page for account issues, bug reports, and feature requests.</p>
-          <Link href="/contact" className="inline-flex rounded-xl bg-accent-cyan px-5 py-3 font-semibold text-black transition-opacity hover:opacity-90">
-            Contact Night X
+          <Link href="/contact" className="inline-flex items-center gap-2 rounded-xl bg-accent-cyan px-6 py-3 font-semibold text-black transition-all hover:opacity-90 hover:scale-[1.02] active:scale-[0.98]">
+            Get in Touch
           </Link>
         </div>
       </div>
