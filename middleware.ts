@@ -8,7 +8,7 @@ export default auth((req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
 
-  const publicTools = ['word-counter', 'password-generator', 'age-calculator', 'qr-generator'];
+  const publicTools = ['word-counter', 'password-generator', 'age-calculator', 'qr-generator', 'text-obfuscator', 'markdown-live'];
   const isPublicTool = publicTools.some(slug => nextUrl.pathname === `/tools/${slug}`);
 
   const isPublicRoute = [
@@ -27,9 +27,9 @@ export default auth((req) => {
   const isAuthRoute = nextUrl.pathname.startsWith("/auth");
 
   const isProtectedRoute = 
-    nextUrl.pathname.startsWith("/dashboard") || 
-    nextUrl.pathname.startsWith("/settings") ||
-    nextUrl.pathname.startsWith("/tools");
+    (nextUrl.pathname.startsWith("/dashboard") || 
+     nextUrl.pathname.startsWith("/settings") ||
+     nextUrl.pathname.startsWith("/tools")) && !isPublicRoute;
 
   // Redirect authenticated users away from auth pages
   if (isAuthRoute) {

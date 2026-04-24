@@ -50,7 +50,7 @@ export default function ServicesPage() {
               <p className="mb-4 text-sm text-white/50">{category.description}</p>
               <ul className="space-y-3 font-dm-sans">
                 {category.tools.slice(0, 8).map((tool) => {
-                  const isPublic = ['word-counter', 'password-generator', 'age-calculator', 'qr-generator'].includes(tool.slug);
+                  const isPublic = ['word-counter', 'password-generator', 'age-calculator', 'qr-generator', 'text-obfuscator', 'markdown-live'].includes(tool.slug);
                   return (
                     <li key={tool.slug}>
                       <Link 

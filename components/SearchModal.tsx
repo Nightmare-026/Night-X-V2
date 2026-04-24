@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, Zap, ArrowRight, Command } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { tools } from '@/lib/tools-registry';
+import { TOOLS } from '@/lib/tools-registry';
 import { cn } from '@/lib/utils';
 
 interface SearchModalProps {
@@ -19,8 +19,8 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const filteredTools = query.trim() === '' 
-    ? tools.slice(0, 5) 
-    : tools.filter(tool => 
+    ? TOOLS.slice(0, 5) 
+    : TOOLS.filter(tool => 
         tool.name.toLowerCase().includes(query.toLowerCase()) || 
         tool.description.toLowerCase().includes(query.toLowerCase()) ||
         tool.category.toLowerCase().includes(query.toLowerCase())
@@ -46,7 +46,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
         setSelectedIndex(prev => (prev - 1 + filteredTools.length) % filteredTools.length);
       }
       if (e.key === 'Enter' && filteredTools[selectedIndex]) {
-        handleSelect(filteredTools[selectedIndex].href);
+        handleSelect(`/tools/${filteredTools[selectedIndex].slug}`);
       }
     };
 
@@ -109,8 +109,8 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                     </p>
                     {filteredTools.map((tool, index) => (
                       <button
-                        key={tool.id}
-                        onClick={() => handleSelect(tool.href)}
+                        key={tool.slug}
+                        onClick={() => handleSelect(`/tools/${tool.slug}`)}
                         onMouseEnter={() => setSelectedIndex(index)}
                         className={cn(
                           "w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all group",
