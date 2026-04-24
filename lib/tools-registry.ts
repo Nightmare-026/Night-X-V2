@@ -131,7 +131,7 @@ export const TOOLS: Tool[] = [
     tags: ['password', 'generate', 'secure', 'random'],
     isAI: false, isPro: false, isNew: false,
     processingType: 'client',
-    relatedTools: ['password-strength', 'text-encryptor']
+    relatedTools: ['password-strength', 'text-obfuscator']
   },
   {
     slug: 'password-strength',
@@ -145,12 +145,12 @@ export const TOOLS: Tool[] = [
     relatedTools: ['password-generator', 'hash-generator']
   },
   {
-    slug: 'text-encryptor',
-    name: 'Text Encryptor',
-    description: 'Encrypt and decrypt text using AES in the browser.',
+    slug: 'text-obfuscator',
+    name: 'Text Obfuscator',
+    description: 'Securely obfuscate and de-obfuscate text using AES-256 protocols.',
     category: 'security',
     icon: '🔒',
-    tags: ['encrypt', 'decrypt', 'aes', 'secure'],
+    tags: ['encrypt', 'decrypt', 'aes', 'secure', 'obfuscate'],
     isAI: false, isPro: false, isNew: false,
     processingType: 'client',
     relatedTools: ['password-generator', 'base64-codec']
@@ -164,7 +164,7 @@ export const TOOLS: Tool[] = [
     tags: ['base64', 'encode', 'decode'],
     isAI: false, isPro: false, isNew: false,
     processingType: 'client',
-    relatedTools: ['url-encoder', 'text-encryptor']
+    relatedTools: ['url-encoder', 'text-obfuscator']
   },
   {
     slug: 'hash-generator',
@@ -275,6 +275,17 @@ export const TOOLS: Tool[] = [
     isAI: false, isPro: false, isNew: false,
     processingType: 'client',
     relatedTools: ['word-counter', 'text-sorter']
+  },
+  {
+    slug: 'markdown-live',
+    name: 'Markdown Live',
+    description: 'Real-time markdown preview with integrated XSS sanitization.',
+    category: 'text',
+    icon: '📝',
+    tags: ['markdown', 'preview', 'editor', 'xss', 'sanitize'],
+    isAI: false, isPro: false, isNew: true,
+    processingType: 'client',
+    relatedTools: ['word-counter', 'text-diff']
   },
   {
     slug: 'lorem-ipsum',

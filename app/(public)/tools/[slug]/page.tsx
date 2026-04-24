@@ -16,7 +16,7 @@ const ScreenshotToPDF = dynamic(() => import('@/components/tools/image/Screensho
 // Security Tools
 const PasswordGenerator = dynamic(() => import('@/components/tools/security/PasswordGenerator'), { ssr: false });
 const PasswordStrength = dynamic(() => import('@/components/tools/security/PasswordStrength'), { ssr: false });
-const TextEncryptor = dynamic(() => import('@/components/tools/security/TextEncryptor'), { ssr: false });
+const TextObfuscator = dynamic(() => import('@/components/tools/security/TextObfuscator'), { ssr: false });
 const Base64Codec = dynamic(() => import('@/components/tools/security/Base64Codec'), { ssr: false });
 const HashGenerator = dynamic(() => import('@/components/tools/security/HashGenerator'), { ssr: false });
 const UrlEncoder = dynamic(() => import('@/components/tools/security/UrlEncoder'), { ssr: false });
@@ -31,6 +31,7 @@ const DuplicateRemover = dynamic(() => import('@/components/tools/text/Duplicate
 const TextDiff = dynamic(() => import('@/components/tools/text/TextDiff'), { ssr: false });
 const LoremIpsum = dynamic(() => import('@/components/tools/text/LoremIpsum'), { ssr: false });
 const CharacterCounter = dynamic(() => import('@/components/tools/text/CharacterCounter'), { ssr: false });
+const MarkdownLive = dynamic(() => import('@/components/tools/text/MarkdownLive'), { ssr: false });
 
 
 // Developer Tools
@@ -115,8 +116,8 @@ export default function ToolPage({ params }: ToolPageProps) {
         return <PasswordGenerator />;
       case 'password-strength':
         return <PasswordStrength />;
-      case 'text-encryptor':
-        return <TextEncryptor />;
+      case 'text-obfuscator':
+        return <TextObfuscator />;
       case 'base64-codec':
         return <Base64Codec />;
       case 'hash-generator':
@@ -142,6 +143,8 @@ export default function ToolPage({ params }: ToolPageProps) {
         return <TextDiff />;
       case 'lorem-ipsum':
         return <LoremIpsum />;
+      case 'markdown-live':
+        return <MarkdownLive />;
       case 'json-formatter':
         return <JsonFormatter />;
       case 'json-csv-converter':
@@ -253,10 +256,10 @@ export default function ToolPage({ params }: ToolPageProps) {
           'Check the strength meter and estimated crack time.',
           'Review suggestions to improve your password security.'
         ];
-      case 'text-encryptor':
+      case 'text-obfuscator':
         return [
-          'Select between Encrypt or Decrypt mode.',
-          'Enter your secret key (keep it safe!).',
+          'Select between Obfuscate or De-obfuscate mode.',
+          'Enter your security key (keep it safe!).',
           'Input the text and click the process button.'
         ];
       case 'base64-codec':
@@ -331,6 +334,12 @@ export default function ToolPage({ params }: ToolPageProps) {
           'Select the number of paragraphs or words you need.',
           'Toggle include HTML tags if needed.',
           'Click generate and copy your placeholder text.'
+        ];
+      case 'markdown-live':
+        return [
+          'Type or paste your Markdown code in the left panel.',
+          'View the live rendered preview in the right panel.',
+          'Copy the HTML or save your Markdown document.'
         ];
       case 'json-formatter':
         return [

@@ -24,6 +24,11 @@ export default function PrivacyPage() {
       title: "4. Security and retention",
       icon: <Lock className="w-6 h-6 text-amber-400" />,
       content: "We use HTTPS in transit and store passwords using secure hashing where password login is enabled. We keep operational data only for as long as needed to run the service, prevent abuse, and investigate errors. You should avoid submitting highly sensitive secrets to tools unless you fully trust the deployment."
+    },
+    {
+      title: "5. Sovereign Commitment: No Advertising",
+      icon: <EyeOff className="w-6 h-6 text-cyan-400" />,
+      content: "Night X is a sovereign utility hub. We do not use third-party advertising, nor do we sell your data to brokers. There are no marketing trackers or behavioral profiling scripts embedded in the core platform."
     }
   ];
 

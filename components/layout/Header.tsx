@@ -6,9 +6,10 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronDown, LogOut, Menu, Search, User, X, Zap } from 'lucide-react';
+import { ChevronDown, LogOut, Menu, Search, User, X, Zap, Command, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import AnnouncementBanner from '@/components/ui/AnnouncementBanner';
+import SearchModal from '@/components/SearchModal';
 import styles from './Header.module.css';
 
 export default function Header() {
@@ -19,6 +20,7 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -48,6 +50,18 @@ export default function Header() {
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsSearchModalOpen(true);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   useEffect(() => {
@@ -90,27 +104,20 @@ export default function Header() {
             ))}
           </nav>
 
-          <div className="relative mx-8 hidden max-w-md flex-1 group md:flex" role="search">
-            <div
-              className={cn(
-                'flex w-full items-center rounded-full border border-white/10 bg-white/5 px-4 py-2 transition-all duration-300',
-                isSearchFocused ? 'border-accent-purple bg-white/10 ring-2 ring-accent-purple/20' : 'hover:bg-white/10'
-              )}
+          <div className="relative mx-8 hidden max-w-[240px] flex-1 md:flex">
+            <button
+              onClick={() => setIsSearchModalOpen(true)}
+              className="flex w-full items-center justify-between rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/40 transition-all hover:bg-white/10 hover:border-white/20"
             >
-              <Search
-                className={cn('mr-3 h-4 w-4 transition-colors', isSearchFocused ? 'text-accent-purple' : 'text-white/40')}
-                aria-hidden="true"
-              />
-              <input
-                type="text"
-                placeholder="Search tools..."
-                className="w-full border-none bg-transparent text-sm text-white outline-none placeholder:text-white/30"
-                value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-                onFocus={() => setIsSearchFocused(true)}
-                onBlur={() => setIsSearchFocused(false)}
-              />
-            </div>
+              <div className="flex items-center gap-2">
+                <Search className="h-4 w-4" />
+                <span>Protocol Search...</span>
+              </div>
+              <div className="flex items-center gap-1 px-1.5 py-0.5 rounded border border-white/10 bg-white/5 text-[10px]">
+                <Command size={10} />
+                <span>K</span>
+              </div>
+            </button>
           </div>
 
           <div className="hidden items-center gap-4 md:flex">
@@ -154,6 +161,15 @@ export default function Header() {
                       <div className="border-t border-white/5 p-2">
                         <button
                           onClick={() => {
+                            router.push('/profile');
+                            setIsProfileOpen(false);
+                          }}
+                          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-white/70 transition-colors hover:bg-white/5 hover:text-white"
+                        >
+                          <User className="h-4 w-4" /> Profile
+                        </button>
+                        <button
+                          onClick={() => {
                             router.push('/dashboard');
                             setIsProfileOpen(false);
                           }}
@@ -168,7 +184,7 @@ export default function Header() {
                           }}
                           className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-white/70 transition-colors hover:bg-white/5 hover:text-white"
                         >
-                          <User className="h-4 w-4" /> Settings
+                          <Settings size={14} className="h-4 w-4" /> Settings
                         </button>
                       </div>
                       <div className="border-t border-white/5 p-2">
@@ -285,6 +301,10 @@ export default function Header() {
           )}
         </AnimatePresence>
       </header>
+      <SearchModal 
+        isOpen={isSearchModalOpen} 
+        onClose={() => setIsSearchModalOpen(false)} 
+      />
     </>
   );
 }

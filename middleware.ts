@@ -21,6 +21,7 @@ export default auth((req) => {
     "/feedback",
     "/services",
     "/faq",
+    "/security",
   ].some(route => nextUrl.pathname === route) || isPublicTool;
 
   const isAuthRoute = nextUrl.pathname.startsWith("/auth");
