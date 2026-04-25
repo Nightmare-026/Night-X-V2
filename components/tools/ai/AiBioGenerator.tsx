@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Send, Copy, Check, RotateCcw, Sparkles, Loader2, Info, UserCircle, Share2, Instagram, Linkedin, Twitter, Globe } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AIErrorMessage from '@/components/ui/AIErrorMessage';
+import { safeFetch } from '@/lib/fetch-utils';
 
 const AiBioGenerator = () => {
   const [keywords, setKeywords] = useState('');
@@ -17,8 +18,7 @@ const AiBioGenerator = () => {
 
   const fetchUsage = async () => {
     try {
-      const res = await fetch('/api/ai/usage?tool=ai-bio-generator');
-      const data = await res.json();
+      const data = await safeFetch('/api/ai/usage?tool=ai-bio-generator');
       setUsage({ count: data.count, limit: data.limit });
     } catch (err) {
       console.error('Error fetching usage:', err);
@@ -37,17 +37,11 @@ const AiBioGenerator = () => {
     setResults([]);
 
     try {
-      const res = await fetch('/api/ai/bio', {
+      const data = await safeFetch('/api/ai/bio', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ keywords, platform, tone }),
       });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to generate bios');
-      }
 
       setResults(data.bios || []);
       fetchUsage();

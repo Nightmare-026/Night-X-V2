@@ -14,7 +14,8 @@ import {
   Hash,
   Sparkles,
   Smartphone,
-  Check
+  Check,
+  Type
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn, copyToClipboard } from '@/lib/utils';

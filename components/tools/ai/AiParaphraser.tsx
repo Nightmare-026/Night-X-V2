@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Send, Copy, Check, RotateCcw, Sparkles, Loader2, Info, Languages, History } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AIErrorMessage from '@/components/ui/AIErrorMessage';
+import { safeFetch } from '@/lib/fetch-utils';
 
 const AiParaphraser = () => {
   const [text, setText] = useState('');
@@ -16,8 +17,7 @@ const AiParaphraser = () => {
 
   const fetchUsage = async () => {
     try {
-      const res = await fetch('/api/ai/usage?tool=ai-paraphraser');
-      const data = await res.json();
+      const data = await safeFetch('/api/ai/usage?tool=ai-paraphraser');
       setUsage({ count: data.count, limit: data.limit });
     } catch (err) {
       console.error('Error fetching usage:', err);
@@ -36,17 +36,11 @@ const AiParaphraser = () => {
     setResults([]);
 
     try {
-      const res = await fetch('/api/ai/paraphrase', {
+      const data = await safeFetch('/api/ai/paraphrase', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text, tone }),
       });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to paraphrase');
-      }
 
       setResults(data.variations || []);
       fetchUsage();
