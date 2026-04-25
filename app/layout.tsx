@@ -79,8 +79,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${outfit.variable} ${dmSans.variable}`}>
-      <body className="min-h-screen bg-background font-dm-sans antialiased selection:bg-accent-purple/30">
+    <html lang="en" suppressHydrationWarning className={`${outfit.variable} ${dmSans.variable} overflow-x-hidden`}>
+      <body className="min-h-screen bg-background font-dm-sans antialiased selection:bg-accent-purple/30 overflow-x-hidden">
         <SessionProvider>
           <SearchProvider>
             <div className="relative flex min-h-screen flex-col">

@@ -32,7 +32,7 @@ const CategoryFilter = React.memo(function CategoryFilter({
     <div className="w-full mb-8 relative">
       <div 
         ref={scrollRef}
-        className="flex items-center gap-3 overflow-x-auto pb-6 scrollbar-hide no-scrollbar select-none flex-nowrap"
+        className="flex items-center gap-3 overflow-x-auto pb-2 no-scrollbar select-none flex-nowrap"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
       >
         {CATEGORIES.map((category) => {
