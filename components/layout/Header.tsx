@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronDown, LogOut, Menu, Search, User, X, Zap, Command, Settings } from 'lucide-react';
+import { ChevronDown, LogOut, Menu, Search, User, X, Zap, Command, Settings, LayoutDashboard, Wrench, Sparkles, LifeBuoy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import AnnouncementBanner from '@/components/ui/AnnouncementBanner';
 import { useSearch } from '@/components/providers/SearchProvider';
@@ -63,11 +63,10 @@ export default function Header() {
 
   if (pathname?.startsWith('/auth')) return null;
 
-  const navLinks = [
-    { name: 'Dashboard', href: '/dashboard', protected: true },
-    { name: 'Tools', href: '/services' },
-    { name: 'AI Features', href: '/dashboard?category=ai' },
-    { name: 'Support', href: '/support' },
+    { name: 'Dashboard', href: '/dashboard', protected: true, icon: <LayoutDashboard size={20} /> },
+    { name: 'Tools', href: '/services', icon: <Wrench size={20} /> },
+    { name: 'AI Features', href: '/dashboard?category=ai', icon: <Sparkles size={20} /> },
+    { name: 'Support', href: '/support', icon: <LifeBuoy size={20} /> },
   ];
 
   return (
@@ -276,15 +275,20 @@ export default function Header() {
                       key={link.name}
                       href={link.href}
                       className={cn(
-                        "text-3xl font-bold transition-all duration-300",
-                        isActive ? "text-accent-cyan translate-x-2" : "text-white/60 hover:text-white"
+                        "text-xl font-medium transition-all duration-300 rounded-2xl px-4 py-3 flex items-center justify-between",
+                        isActive 
+                          ? "text-accent-cyan bg-accent-cyan/10 border border-accent-cyan/20 font-semibold" 
+                          : "text-white/40 hover:text-white hover:bg-white/5"
                       )}
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       <div className="flex items-center gap-4">
-                        {isActive && <div className="w-1.5 h-1.5 rounded-full bg-accent-cyan shadow-[0_0_10px_rgba(0,229,255,0.8)]" />}
+                        <span className={cn(isActive ? "text-accent-cyan" : "text-white/20")}>
+                          {link.icon}
+                        </span>
                         {link.name}
                       </div>
+                      {isActive && <div className="w-1.5 h-1.5 rounded-full bg-accent-cyan shadow-[0_0_10px_rgba(0,229,255,0.8)]" />}
                     </Link>
                   );
                 })}
