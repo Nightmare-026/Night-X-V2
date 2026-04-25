@@ -164,17 +164,13 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="flex flex-col items-center justify-between gap-4 border-t border-white/5 pt-8 md:flex-row">
-          <p className="text-xs text-white/20">
-            &copy; {new Date().getFullYear()} <span className="font-medium text-white/40">Night X</span>. All rights reserved.
-          </p>
-          <div className="flex items-center gap-6">
-            <p className="flex items-center gap-1.5 text-xs text-white/20">
-              Made with ❤️ in India
+        <div className="flex flex-col items-center justify-center gap-6 border-t border-white/5 pt-10 text-center">
+          <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
+            <p className="text-xs text-white/30">
+              &copy; {new Date().getFullYear()} <span className="font-medium text-white/50">Night X</span>. All rights reserved.
             </p>
-            <p className="flex items-center gap-2 text-xs text-white/20">
-              Built with <span className="font-medium text-white/40">Next.js</span>
-              <ExternalLink className="h-3 w-3" />
+            <p className="flex items-center gap-1.5 text-xs text-white/30">
+              Made with ❤️ in India
             </p>
           </div>
         </div>

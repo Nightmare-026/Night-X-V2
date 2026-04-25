@@ -92,7 +92,7 @@ export default function ToolGrid() {
     return (
       <div className="w-full">
         <div className="h-10 w-64 bg-white/5 animate-pulse rounded-full mb-8" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {[...Array(8)].map((_, i) => (
             <div key={i} className="glass-card h-64 w-full animate-pulse opacity-50" />
           ))}
@@ -137,10 +137,10 @@ export default function ToolGrid() {
             variants={containerVariants}
             initial="hidden"
             animate="show"
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch"
           >
             {filteredTools.map((tool) => (
-              <motion.div key={tool.slug} variants={itemVariants} layout>
+              <motion.div key={tool.slug} variants={itemVariants} layout className="h-full">
                 <ToolCard tool={tool} />
               </motion.div>
             ))}
