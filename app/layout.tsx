@@ -5,6 +5,19 @@ import SessionProvider from "@/components/providers/SessionProvider";
 import { SearchProvider } from "@/components/providers/SearchProvider";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import { Outfit, DM_Sans } from 'next/font/google';
+
+const outfit = Outfit({ 
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-outfit',
+});
+
+const dmSans = DM_Sans({ 
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-dm-sans',
+});
 
 export const viewport: Viewport = {
   themeColor: "#06080F",
@@ -66,8 +79,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className="min-h-screen bg-background font-dm-sans antialiased">
+    <html lang="en" suppressHydrationWarning className={`${outfit.variable} ${dmSans.variable}`}>
+      <body className="min-h-screen bg-background font-dm-sans antialiased selection:bg-accent-purple/30">
         <SessionProvider>
           <SearchProvider>
             <div className="relative flex min-h-screen flex-col">

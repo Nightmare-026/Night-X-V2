@@ -236,3 +236,16 @@ export function isValidEmail(email: string): { isValid: boolean; reason?: string
 
   return { isValid: true };
 }
+
+/**
+ * Returns initials from a name (e.g., "John Doe" -> "JD")
+ */
+export function getInitials(name: string): string {
+  if (!name) return "U";
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+}

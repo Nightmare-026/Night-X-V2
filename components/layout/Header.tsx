@@ -109,16 +109,17 @@ export default function Header() {
             ))}
           </nav>
 
-          <div className="relative mx-8 hidden max-w-[240px] flex-1 md:flex">
+          <div className="relative mx-4 hidden max-w-[300px] flex-1 md:flex">
             <button
               onClick={openSearch}
-              className="flex w-full items-center justify-between rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/40 transition-all hover:bg-white/10 hover:border-white/20"
+              className="group flex w-full items-center justify-between rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/40 transition-all hover:bg-white/10 hover:border-white/20"
             >
               <div className="flex items-center gap-2">
                 <Search className="h-4 w-4" />
-                <span>Search 40+ tools...</span>
+                <span className="hidden lg:inline">Search 40+ tools...</span>
+                <span className="lg:hidden">Search...</span>
               </div>
-              <div className="flex items-center gap-1 px-1.5 py-0.5 rounded border border-white/10 bg-white/5 text-[10px]">
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded-md border border-white/10 bg-white/10 text-[10px] font-bold text-white/60">
                 <Command size={10} />
                 <span>K</span>
               </div>
@@ -134,7 +135,7 @@ export default function Header() {
                   onClick={() => setIsProfileOpen((value) => !value)}
                   className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 p-1 pl-2 transition-colors hover:bg-white/10"
                 >
-                  <div className={styles['profile-avatar']}>
+                  <div className={cn(styles['profile-avatar'], "bg-accent-purple/20 flex items-center justify-center overflow-hidden")}>
                     {session.user?.image ? (
                       <Image
                         src={session.user.image}
@@ -143,10 +144,17 @@ export default function Header() {
                         height={32}
                         className="h-full w-full object-cover"
                         unoptimized
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                          target.parentElement?.classList.add('fallback-active');
+                        }}
                       />
-                    ) : (
-                      <User className="h-full w-full p-1 text-white" />
-                    )}
+                    ) : null}
+                    <span className="fallback-initials text-[10px] font-bold text-accent-purple hidden [.fallback-active_&]:block [div:not(:has(img))_&]:block">
+                      {import('@/lib/utils').then(u => u.getInitials(session.user?.name || '')) && session.user?.name ? 
+                        session.user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U'}
+                    </span>
                   </div>
                   <ChevronDown className={cn('h-4 w-4 text-white/40 transition-transform', isProfileOpen && 'rotate-180')} />
                 </button>

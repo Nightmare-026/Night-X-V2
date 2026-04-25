@@ -49,7 +49,7 @@ export default function LandingPage() {
             </span>
           </motion.div>
 
-          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mb-6 text-5xl font-bold tracking-tight text-white md:text-7xl lg:text-8xl font-syne">
+          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mb-6 text-5xl font-bold tracking-tight text-white md:text-7xl lg:text-8xl font-syne hero-title">
             One Hub.
             <br />
             <span className="bg-gradient-to-r from-accent-purple to-accent-cyan bg-clip-text text-transparent">
@@ -92,7 +92,9 @@ export default function LandingPage() {
               <div key={stat.label} className="flex flex-col items-center gap-1">
                 <div className="mb-2 text-accent-purple">{stat.icon}</div>
                 <span className="font-syne text-2xl font-bold text-white">{stat.label}</span>
-                <span className="text-xs font-bold uppercase tracking-widest text-white/20">{stat.value}</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-accent-cyan/80 bg-accent-cyan/5 px-2 py-1 rounded mt-1">
+                  {stat.value}
+                </span>
               </div>
             ))}
           </div>
@@ -108,7 +110,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 sm:gap-6 category-grid">
             {CATEGORIES.filter((category) => category.id !== 'all').map((category) => (
               <Link key={category.id} href={`/dashboard?category=${category.id}`}>
                 <motion.div whileHover={{ y: -5 }} className="group relative h-full cursor-pointer overflow-hidden rounded-3xl border border-white/5 bg-white/5 p-8 transition-all hover:border-accent-purple/50">

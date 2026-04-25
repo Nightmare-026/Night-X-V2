@@ -170,7 +170,7 @@ export default function Footer() {
           </p>
           <div className="flex items-center gap-6">
             <p className="flex items-center gap-1.5 text-xs text-white/20">
-              Made with <Heart className="h-3 w-3 fill-red-500 text-red-500" /> in India
+              Made with ❤️ in India
             </p>
             <p className="flex items-center gap-2 text-xs text-white/20">
               Built with <span className="font-medium text-white/40">Next.js</span>

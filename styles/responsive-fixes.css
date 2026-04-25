@@ -37,3 +37,24 @@
 .safe-pt {
   padding-top: env(safe-area-inset-top);
 }
+
+/* Category Card Alignment Fix */
+@media (max-width: 1024px) {
+  .category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .category-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .hero-title {
+    font-size: 2.5rem !important;
+    line-height: 1.1 !important;
+  }
+}
