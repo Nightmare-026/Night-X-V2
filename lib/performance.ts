@@ -7,13 +7,20 @@ export function lazyLoadIntersection(callback: () => void, element: Element) {
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
-        callback();
+        // Disconnect immediately to prevent loop
         observer.unobserve(entry.target);
+        observer.disconnect();
+        callback();
       }
     });
-  });
+  }, { threshold: 0.1 });
 
   observer.observe(element);
+  
+  // Safety timeout to prevent infinite hanging
+  setTimeout(() => {
+    observer.disconnect();
+  }, 10000);
 }
 
 export function measureWebVitals(metric: any) {

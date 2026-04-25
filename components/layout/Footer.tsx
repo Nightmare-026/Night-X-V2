@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ArrowRight, ExternalLink, Github, Heart, Instagram, Mail, MessageSquare, Send, Zap } from 'lucide-react';
+import { safeFetch } from '@/lib/fetch-utils';
 
 export default function Footer() {
   const [email, setEmail] = useState('');
@@ -19,31 +20,16 @@ export default function Footer() {
     setError('');
 
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
-
-      const response = await fetch('/api/newsletter', {
+      const data = await safeFetch('/api/newsletter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
-        signal: controller.signal,
       });
 
-      clearTimeout(timeoutId);
-      const data = await response.json();
-
-      if (response.ok) {
-        setSubscribed(true);
-        setEmail('');
-      } else {
-        setError(data.error || 'Something went wrong');
-      }
+      setSubscribed(true);
+      setEmail('');
     } catch (err: any) {
-      if (err.name === 'AbortError') {
-        setError('Request timed out. Please try again.');
-      } else {
-        setError('Failed to connect to the server');
-      }
+      setError(err.message || 'Failed to connect to the server');
     } finally {
       setLoading(false);
     }
