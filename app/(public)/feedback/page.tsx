@@ -50,7 +50,7 @@ export default function FeedbackPage() {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="inline-flex items-center justify-center p-4 bg-purple-500/10 text-purple-400 rounded-full mb-6"
+            className="inline-flex items-center justify-center p-4 bg-accent-purple/10 text-accent-purple rounded-full mb-6"
           >
             <MessageSquarePlus className="w-8 h-8" />
           </motion.div>
@@ -106,7 +106,7 @@ export default function FeedbackPage() {
                       onClick={() => setType(t.id)}
                       className={`flex items-center gap-3 p-4 rounded-xl border transition-all ${
                         type === t.id
-                          ? 'bg-purple-500/20 border-purple-500 text-purple-400'
+                          ? 'bg-accent-purple/20 border-accent-purple text-accent-purple'
                           : 'bg-black/50 border-white/10 hover:bg-white/5 text-gray-400'
                       }`}
                     >
@@ -147,7 +147,7 @@ export default function FeedbackPage() {
               <button 
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-semibold py-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-purple-500/25"
+                className="w-full bg-gradient-to-r from-accent-purple to-blue-600 hover:from-accent-purple/90 hover:to-blue-500 text-white font-semibold py-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-accent-purple/25"
               >
                 {isSubmitting ? (
                   <Loader2 className="w-6 h-6 animate-spin" />

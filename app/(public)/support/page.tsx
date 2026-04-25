@@ -144,7 +144,7 @@ export default function SupportPage() {
 
           <button
             onClick={handlePayment}
-            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold py-4 rounded-xl transition-all flex items-center justify-center gap-2 text-lg shadow-lg shadow-blue-500/25"
+            className="w-full bg-gradient-to-r from-blue-600 to-accent-purple hover:from-blue-500 hover:to-accent-purple/80 text-white font-semibold py-4 rounded-xl transition-all flex items-center justify-center gap-2 text-lg shadow-lg shadow-blue-500/25"
           >
             <Heart className="w-5 h-5 fill-current" />
             Support Night X

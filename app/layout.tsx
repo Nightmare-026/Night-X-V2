@@ -29,12 +29,12 @@ const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://nightx.app";
 
 export const metadata: Metadata = {
   title: {
-    default: "Night X | Utility Tools for Everyday Work",
+    default: "Night X | Elite Utility Tools Hub",
     template: "%s | Night X",
   },
   metadataBase: new URL(siteUrl),
-  description: "Boost your productivity with Night X. Free browser-first tools for developers including QR generation, password security, and text utilities.",
-  keywords: ["utility tools", "developer tools", "image tools", "security tools", "text tools", "Night X"],
+  description: "Experience the ultimate productivity hub. 40+ browser-first tools for developers, designers, and creators. Secure, fast, and privacy-focused.",
+  keywords: ["utility tools", "developer tools", "image tools", "security tools", "text tools", "Night X", "AI productivity", "privacy tools"],
   authors: [{ name: "Nightmare-026", url: "https://github.com/Nightmare-026" }],
   creator: "Nightmare-026",
   publisher: "Nightmare-026",
@@ -44,8 +44,8 @@ export const metadata: Metadata = {
     telephone: false,
   },
   openGraph: {
-    title: "Night X | Utility Tools for Everyday Work",
-    description: "Free, high-performance browser tools for creators and developers. QR codes, password security, and text utilities in one place.",
+    title: "Night X | Elite Utility Tools Hub",
+    description: "40+ elite browser-first tools for creators and developers. Secure, fast, and privacy-focused utility workspace.",
     url: siteUrl,
     siteName: "Night X",
     images: [
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Night X Preview",
+        alt: "Night X - Elite Utility Hub",
       },
     ],
     locale: "en_US",
@@ -61,8 +61,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Night X | Utility Tools for Everyday Work",
-    description: "Free, high-performance browser tools for creators and developers. QR codes, password security, and text utilities in one place.",
+    title: "Night X | Elite Utility Tools Hub",
+    description: "40+ elite browser-first tools for creators and developers. Secure, fast, and privacy-focused utility workspace.",
     images: ["/og-image.png"],
     creator: "@Nightmare_026",
   },

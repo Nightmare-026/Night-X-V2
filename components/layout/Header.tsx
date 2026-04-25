@@ -7,7 +7,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronDown, LogOut, Menu, Search, User, X, Zap, Command, Settings, LayoutDashboard, Wrench, Sparkles, LifeBuoy } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, getInitials } from '@/lib/utils';
 import AnnouncementBanner from '@/components/ui/AnnouncementBanner';
 import { useSearch } from '@/components/providers/SearchProvider';
 import styles from './Header.module.css';
@@ -112,7 +112,7 @@ export default function Header() {
           <div className="relative mx-4 hidden max-w-[300px] flex-1 md:flex">
             <button
               onClick={openSearch}
-              className="group flex w-full items-center justify-between rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/40 transition-all hover:bg-white/10 hover:border-white/20"
+              className="group flex w-full items-center justify-between rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/60 transition-all hover:bg-white/10 hover:border-white/20"
             >
               <div className="flex items-center gap-2">
                 <Search className="h-4 w-4" />
@@ -152,8 +152,7 @@ export default function Header() {
                       />
                     ) : null}
                     <span className="fallback-initials text-[10px] font-bold text-accent-purple hidden [.fallback-active_&]:block [div:not(:has(img))_&]:block">
-                      {import('@/lib/utils').then(u => u.getInitials(session.user?.name || '')) && session.user?.name ? 
-                        session.user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U'}
+                      {getInitials(session.user?.name || 'U')}
                     </span>
                   </div>
                   <ChevronDown className={cn('h-4 w-4 text-white/40 transition-transform', isProfileOpen && 'rotate-180')} />
@@ -316,8 +315,7 @@ export default function Header() {
                           />
                         ) : null}
                         <span className="fallback-initials text-xs font-bold text-accent-purple hidden [.fallback-active-mobile_&]:block [div:not(:has(img))_&]:block">
-                          {session.user?.name ? 
-                            session.user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U'}
+                          {getInitials(session.user?.name || 'U')}
                         </span>
                       </div>
                       <div className="overflow-hidden">

@@ -53,7 +53,7 @@ export const TOOLS: Tool[] = [
     category: 'image',
     icon: '↔️',
     tags: ['resize', 'dimensions', 'width', 'height'],
-    isAI: false, isPro: false, isNew: false, isPublic: false,
+    isAI: false, isPro: false, isNew: false, isPublic: true,
     processingType: 'client',
     relatedTools: ['image-compressor', 'image-cropper']
   },
@@ -64,7 +64,7 @@ export const TOOLS: Tool[] = [
     category: 'image',
     icon: '🔄',
     tags: ['convert', 'jpg', 'png', 'format'],
-    isAI: false, isPro: false, isNew: false, isPublic: false,
+    isAI: false, isPro: false, isNew: false, isPublic: true,
     processingType: 'client',
     relatedTools: ['image-compressor', 'image-to-base64']
   },
@@ -141,7 +141,7 @@ export const TOOLS: Tool[] = [
     category: 'security',
     icon: '💪',
     tags: ['password', 'strength', 'check', 'security'],
-    isAI: false, isPro: false, isNew: false, isPublic: false,
+    isAI: false, isPro: false, isNew: false, isPublic: true,
     processingType: 'client',
     relatedTools: ['password-generator', 'hash-generator']
   },
@@ -218,7 +218,7 @@ export const TOOLS: Tool[] = [
     category: 'text',
     icon: '🔢',
     tags: ['character', 'count', 'letters', 'length'],
-    isAI: false, isPro: false, isNew: false, isPublic: false,
+    isAI: false, isPro: false, isNew: false, isPublic: true,
     processingType: 'client',
     relatedTools: ['word-counter', 'remove-spaces']
   },
@@ -295,7 +295,7 @@ export const TOOLS: Tool[] = [
     category: 'text',
     icon: '📜',
     tags: ['lorem', 'ipsum', 'placeholder', 'dummy text'],
-    isAI: false, isPro: false, isNew: false, isPublic: false,
+    isAI: false, isPro: false, isNew: false, isPublic: true,
     processingType: 'client',
     relatedTools: ['word-counter', 'case-converter']
   },
@@ -449,7 +449,7 @@ export const TOOLS: Tool[] = [
     category: 'life',
     icon: '💰',
     tags: ['emi', 'loan', 'interest', 'calculator', 'india'],
-    isAI: false, isPro: false, isNew: false, isPublic: false,
+    isAI: false, isPro: false, isNew: false, isPublic: true,
     processingType: 'client',
     relatedTools: ['percentage-calculator', 'age-calculator']
   },
@@ -460,7 +460,7 @@ export const TOOLS: Tool[] = [
     category: 'life',
     icon: '%',
     tags: ['percentage', 'percent', 'calculate', 'math'],
-    isAI: false, isPro: false, isNew: false, isPublic: false,
+    isAI: false, isPro: false, isNew: false, isPublic: true,
     processingType: 'client',
     relatedTools: ['unit-converter', 'emi-calculator']
   },
@@ -471,7 +471,7 @@ export const TOOLS: Tool[] = [
     category: 'life',
     icon: '⚖️',
     tags: ['unit', 'convert', 'length', 'weight', 'temperature'],
-    isAI: false, isPro: false, isNew: false, isPublic: false,
+    isAI: false, isPro: false, isNew: false, isPublic: true,
     processingType: 'client',
     relatedTools: ['percentage-calculator', 'random-number']
   },

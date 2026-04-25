@@ -42,14 +42,14 @@ export default function LandingPage() {
         </div>
 
         <motion.div style={{ opacity, scale }} className="container relative z-10 mx-auto px-4 text-center">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur-md">
-            <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
-            <span className="text-xs font-bold uppercase tracking-widest text-white/80">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur-md max-w-full">
+            <Star className="h-4 w-4 shrink-0 fill-yellow-500 text-yellow-500" />
+            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-white/80 break-words text-center">
               Free tools • Account unlocks dashboard and AI features
             </span>
           </motion.div>
 
-          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mb-6 text-5xl font-bold tracking-tight text-white md:text-7xl lg:text-8xl font-syne hero-title">
+          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mb-6 text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-7xl lg:text-8xl font-syne hero-title">
             One Hub.
             <br />
             <span className="bg-gradient-to-r from-accent-purple to-accent-cyan bg-clip-text text-transparent">

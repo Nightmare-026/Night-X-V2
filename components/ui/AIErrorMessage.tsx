@@ -15,57 +15,62 @@ export default function AIErrorMessage({ error }: AIErrorMessageProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="rounded-2xl border border-red-500/20 bg-red-500/5 p-6 backdrop-blur-md"
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl shadow-2xl"
     >
-      <div className="flex items-start gap-4">
-        <div className="p-2 rounded-xl bg-red-500/10 text-red-400">
-          <AlertCircle size={24} />
+      {/* Decorative background glow */}
+      <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-red-500/10 blur-[50px]" />
+      
+      <div className="relative flex items-start gap-5">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-red-500/10 text-red-400 border border-red-500/20">
+          <AlertCircle size={28} />
         </div>
-        <div className="flex-1 space-y-2">
-          <h3 className="font-syne font-bold text-red-200">
-            {isKeyMissing 
-              ? "Service Configuration Error" 
-              : isLimitReached 
-                ? "Daily Limit Reached" 
-                : isUnauthorized 
-                  ? "Authentication Required" 
-                  : "AI Service Interruption"}
-          </h3>
-          <p className="text-sm text-red-300/70 leading-relaxed font-dm-sans">
-            {isKeyMissing 
-              ? "The AI provider keys are currently not configured on this environment. If you are the administrator, please check your Vercel secrets." 
-              : isUnauthorized
-                ? "You need to be logged in to use AI-powered tools. This helps us manage usage and provide a personalized experience."
-                : error}
-          </p>
+        <div className="flex-1 space-y-3">
+          <div>
+            <h3 className="font-syne text-lg font-bold tracking-tight text-white">
+              {isKeyMissing 
+                ? "Provider Configuration Needed" 
+                : isLimitReached 
+                  ? "Usage Limit Exceeded" 
+                  : isUnauthorized 
+                    ? "Authorization Required" 
+                    : "AI Service Connection Issue"}
+            </h3>
+            <p className="mt-1 text-sm leading-relaxed text-white/50">
+              {isKeyMissing 
+                ? "The AI processing engine is waiting for secure API credentials. Please contact the administrator to finalize setup." 
+                : isUnauthorized
+                  ? "You have reached an AI-protected tool. Sign in to unlock advanced paraphrasing and generation features."
+                  : error}
+            </p>
+          </div>
           
-          <div className="pt-4 flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-4 pt-2">
             {isUnauthorized ? (
               <a 
-                href="/login" 
-                className="flex items-center gap-2 px-4 py-2 bg-red-500/20 rounded-lg text-xs font-bold uppercase tracking-wider text-red-100 hover:bg-red-500/30 transition-all border border-red-500/30"
+                href="/auth/signin" 
+                className="group flex items-center gap-2 rounded-xl bg-accent-purple px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white transition-all hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(124,110,250,0.4)] active:scale-95"
               >
-                <UserCircle size={14} />
-                Sign In to Continue
+                <UserCircle size={16} />
+                Sign In Now
               </a>
             ) : (
               <>
-                <a 
-                  href="/feedback" 
-                  className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-red-300 hover:text-white transition-colors"
-                >
-                  <LifeBuoy size={14} />
-                  Report Issue
-                </a>
                 <button 
                   onClick={() => window.location.reload()}
-                  className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-red-300 hover:text-white transition-colors"
+                  className="flex items-center gap-2 rounded-lg bg-white/5 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white/60 border border-white/10 transition-all hover:bg-white/10 hover:text-white"
                 >
                   <Terminal size={14} />
-                  Retry Connection
+                  Retry Process
                 </button>
+                <a 
+                  href="/support" 
+                  className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white/30 hover:text-accent-cyan transition-colors"
+                >
+                  <LifeBuoy size={14} />
+                  Get Assistance
+                </a>
               </>
             )}
           </div>

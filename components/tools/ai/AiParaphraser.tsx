@@ -78,7 +78,7 @@ const AiParaphraser = () => {
             <motion.div 
               initial={{ width: 0 }}
               animate={{ width: `${(usage.count / usage.limit) * 100}%` }}
-              className="h-full bg-accent-purple"
+              className="h-full bg-gradient-to-r from-accent-purple to-accent-cyan"
             />
           </div>
         </div>

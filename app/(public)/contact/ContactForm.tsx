@@ -71,7 +71,7 @@ export default function ContactForm() {
             type="text"
             name="name"
             required
-            className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-cyan transition-all text-white placeholder:text-white/25"
+            className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-cyan transition-all text-white placeholder:text-white/50"
             placeholder="John Doe"
           />
         </div>
@@ -81,7 +81,7 @@ export default function ContactForm() {
             type="email"
             name="email"
             required
-            className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-cyan transition-all text-white placeholder:text-white/25"
+            className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-cyan transition-all text-white placeholder:text-white/50"
             placeholder="john@example.com"
           />
         </div>
@@ -93,7 +93,7 @@ export default function ContactForm() {
           type="text"
           name="subject"
           required
-          className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-cyan transition-all text-white placeholder:text-white/25"
+          className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-cyan transition-all text-white placeholder:text-white/50"
           placeholder="Bug report, feature request, partnership..."
         />
       </div>
@@ -104,7 +104,7 @@ export default function ContactForm() {
           name="message"
           required
           rows={5}
-          className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-cyan transition-all text-white placeholder:text-white/25 resize-none"
+          className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-cyan transition-all text-white placeholder:text-white/50 resize-none"
           placeholder="Tell us what happened, what page you were on, and how we can help."
         />
       </div>
