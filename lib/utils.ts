@@ -213,3 +213,26 @@ export async function firestoreRateLimit(
     return { success: true, remaining: 1 }; // Fail open for UX
   }
 }
+
+/**
+ * Validates email format and checks against disposable domains
+ */
+export function isValidEmail(email: string): { isValid: boolean; reason?: string } {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return { isValid: false, reason: "Invalid email format" };
+  }
+
+  const disposableDomains = [
+    "temp-mail.org", "guerrillamail.com", "10minutemail.com", 
+    "mailinator.com", "getnada.com", "dispostable.com",
+    "yopmail.com", "maildrop.cc", "sharklasers.com"
+  ];
+  
+  const domain = email.split("@")[1]?.toLowerCase();
+  if (disposableDomains.includes(domain)) {
+    return { isValid: false, reason: "Disposable email addresses are not allowed" };
+  }
+
+  return { isValid: true };
+}

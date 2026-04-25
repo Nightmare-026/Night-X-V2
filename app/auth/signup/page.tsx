@@ -33,7 +33,8 @@ export default function SignupPage() {
     email: '',
     password: '',
     confirmPassword: '',
-    terms_accepted: false
+    terms_accepted: false,
+    website_url: ''
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -218,6 +219,18 @@ export default function SignupPage() {
             animate={error ? "error" : ""}
             variants={shakeVariants}
           >
+            {/* Honeypot field - hidden from users */}
+            <div className="hidden" aria-hidden="true">
+              <input 
+                type="text" 
+                name="website_url" 
+                tabIndex={-1} 
+                autoComplete="off"
+                value={formData.website_url || ''}
+                onChange={(e) => setFormData({ ...formData, website_url: e.target.value })}
+              />
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-white/60 mb-1.5 ml-1">Full Name</label>
               <input 

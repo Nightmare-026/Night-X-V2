@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebaseAdmin';
 import { headers } from 'next/headers';
+import { isValidEmail } from '@/lib/utils';
 
 // Simple in-memory rate limiter
 const rateLimitMap = new Map<string, { count: number; lastReset: number }>();
@@ -33,10 +34,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
 
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return NextResponse.json({ error: 'Invalid email format' }, { status: 400 });
+    // Robust email validation
+    const emailValidation = isValidEmail(email);
+    if (!emailValidation.isValid) {
+      return NextResponse.json({ error: emailValidation.reason }, { status: 400 });
     }
 
     if (!adminDb) {

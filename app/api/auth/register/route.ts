@@ -1,12 +1,29 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { hash } from "bcrypt-ts";
 import { adminDb } from "@/lib/firebaseAdmin";
+import { firestoreRateLimit, isValidEmail } from "@/lib/utils";
 
 export const dynamic = 'force-dynamic';
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const { name, email, password, terms_accepted } = await req.json();
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || 'anonymous';
+    
+    // Persistent Rate limit signups: 3 per hour per IP
+    const { success } = await firestoreRateLimit(adminDb, ip, 'registration', 3, 3600000);
+    if (!success) {
+      return NextResponse.json(
+        { message: "Too many registration attempts. Please try again later." },
+        { status: 429 }
+      );
+    }
+
+    const { name, email, password, terms_accepted, website_url } = await req.json();
+
+    // Honeypot check
+    if (website_url) {
+      return NextResponse.json({ message: "User registered successfully" }, { status: 201 });
+    }
 
     if (!email || !password || !name) {
       return NextResponse.json(
@@ -15,10 +32,10 @@ export async function POST(req: Request) {
       );
     }
 
-    // Server-side validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return NextResponse.json({ message: "Invalid email format" }, { status: 400 });
+    // Robust email validation
+    const emailValidation = isValidEmail(email);
+    if (!emailValidation.isValid) {
+      return NextResponse.json({ message: emailValidation.reason }, { status: 400 });
     }
 
     if (password.length < 8) {
