@@ -32,8 +32,8 @@ const CategoryFilter = React.memo(function CategoryFilter({
     <div className="w-full mb-8 relative">
       <div 
         ref={scrollRef}
-        className="flex items-center gap-3 overflow-x-auto pb-4 scrollbar-hide no-scrollbar select-none"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        className="flex items-center gap-3 overflow-x-auto pb-6 scrollbar-hide no-scrollbar select-none flex-nowrap"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
       >
         {CATEGORIES.map((category) => {
           const isActive = activeCategory === category.id;
@@ -44,11 +44,11 @@ const CategoryFilter = React.memo(function CategoryFilter({
               key={category.id}
               onClick={() => handleCategoryClick(category.id)}
               className={cn(
-                "relative flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-300",
+                "relative flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold whitespace-nowrap transition-all duration-300 shrink-0",
                 "border border-white/10 glass-card",
                 isActive 
-                  ? "text-white border-transparent" 
-                  : "text-white/60 hover:text-white hover:border-white/20"
+                  ? "text-white border-transparent shadow-xl" 
+                  : "text-white/40 hover:text-white hover:border-white/20"
               )}
             >
               {isActive && (

@@ -35,10 +35,15 @@ const ToolCard = React.memo(function ToolCard({ tool }: ToolCardProps) {
     <motion.div
       layout
       whileHover={{ y: -5, scale: 1.02 }}
-      className="glass-card p-5 group cursor-pointer flex flex-col h-full border-white/10 hover:border-white/20"
+      className="glass-card p-6 md:p-8 group cursor-pointer flex flex-col h-full border-white/10 hover:border-white/20 relative overflow-hidden"
       onClick={() => router.push(`/tools/${tool.slug}`)}
       onMouseEnter={() => preloadTool(tool.slug)}
     >
+      {/* Icon Glow Effect */}
+      <div 
+        className="absolute -top-12 -left-12 w-24 h-24 blur-[60px] opacity-20 pointer-events-none transition-opacity group-hover:opacity-40"
+        style={{ backgroundColor: color }}
+      />
       <div className="flex justify-between items-start mb-4">
         <div 
           className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl glass-effect"
@@ -70,17 +75,19 @@ const ToolCard = React.memo(function ToolCard({ tool }: ToolCardProps) {
         {tool.description}
       </p>
 
-      <div className="flex items-center justify-between pt-4 border-t border-white/5">
+      <div className="flex items-center justify-between pt-6 border-t border-white/5 mt-auto">
         <span 
-          className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-white/5"
-          style={{ color }}
+          className="text-[10px] font-black uppercase tracking-[0.15em] px-2.5 py-1 rounded-md bg-white/5 border border-white/5"
+          style={{ color, backgroundColor: `${color}11` }}
         >
           {tool.category}
         </span>
         
-        <div className="flex items-center gap-1 text-white/40 group-hover:text-white transition-colors text-xs font-medium">
-          Open Tool
-          <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+        <div className="flex items-center gap-2 text-white/50 group-hover:text-white transition-all text-sm font-bold">
+          <span className="hidden sm:inline">Open Tool</span>
+          <div className="w-8 h-8 rounded-full bg-accent-cyan/10 border border-accent-cyan/20 flex items-center justify-center text-accent-cyan group-hover:bg-accent-cyan group-hover:text-white transition-all shadow-lg shadow-accent-cyan/10 group-hover:shadow-accent-cyan/40">
+            <ArrowUpRight size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+          </div>
         </div>
       </div>
     </motion.div>

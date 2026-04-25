@@ -37,18 +37,20 @@ export default async function DashboardPage() {
   return (
     <ToastProvider>
       <div className="flex flex-col min-h-screen">
-        <main className="flex-grow container mx-auto px-4 lg:px-8 py-12">
-          <div className="mb-12">
-            <h1 className="text-4xl md:text-5xl font-syne font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-white/40">
+        <main className="flex-grow container mx-auto px-6 lg:px-8 py-12">
+          <div className="mb-12 px-2 md:px-0">
+            <h1 className="text-4xl md:text-5xl font-syne font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-white/40 leading-tight">
               Welcome back, {session.user?.name?.split(' ')[0]}
             </h1>
-            <p className="text-white/60 text-lg max-w-2xl font-dm-sans">
+            <p className="text-white/60 text-lg max-w-2xl font-dm-sans leading-relaxed">
               Explore the Night X dashboard, search across tools, and open the features that fit your workflow.
             </p>
           </div>
 
           <Suspense fallback={null}>
-            <WelcomeBanner />
+            <div className="px-2 md:px-0">
+              <WelcomeBanner />
+            </div>
           </Suspense>
 
           <DashboardClient>
