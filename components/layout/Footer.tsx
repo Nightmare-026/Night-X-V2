@@ -19,12 +19,17 @@ export default function Footer() {
     setError('');
 
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
       const response = await fetch('/api/newsletter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
+        signal: controller.signal,
       });
 
+      clearTimeout(timeoutId);
       const data = await response.json();
 
       if (response.ok) {
@@ -33,8 +38,12 @@ export default function Footer() {
       } else {
         setError(data.error || 'Something went wrong');
       }
-    } catch {
-      setError('Failed to connect to the server');
+    } catch (err: any) {
+      if (err.name === 'AbortError') {
+        setError('Request timed out. Please try again.');
+      } else {
+        setError('Failed to connect to the server');
+      }
     } finally {
       setLoading(false);
     }
