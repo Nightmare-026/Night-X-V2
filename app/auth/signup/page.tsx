@@ -24,6 +24,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useToast } from '@/components/ui/Toast';
 import { AnimatePresence } from 'framer-motion';
+import { Turnstile } from '@marsidev/react-turnstile';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -40,6 +41,7 @@ export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [strength, setStrength] = useState(0); // 0-4
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const shakeVariants = {
     error: {
@@ -69,11 +71,17 @@ export default function SignupPage() {
       return;
     }
 
+    if (!turnstileToken) {
+      setError("Please complete the security check");
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, turnstileToken }),
       });
 
       const data = await res.json();
@@ -334,9 +342,19 @@ export default function SignupPage() {
               )}
             </AnimatePresence>
 
+            <div className="py-2 flex justify-center">
+              <Turnstile 
+                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'} // Test key by default
+                onSuccess={(token) => setTurnstileToken(token)}
+                onExpire={() => setTurnstileToken(null)}
+                onError={() => setError("Security check failed. Please refresh.")}
+                theme="dark"
+              />
+            </div>
+
             <button 
               type="submit"
-              disabled={isLoading || !formData.terms_accepted}
+              disabled={isLoading || !formData.terms_accepted || !turnstileToken}
               className={cn(
                 "w-full flex items-center justify-center gap-2 py-4 bg-accent-purple text-white font-bold rounded-xl transition-all shadow-xl shadow-accent-purple/20",
                 (isLoading || !formData.terms_accepted) ? "opacity-50 cursor-not-allowed grayscale" : "hover:scale-[1.02] active:scale-[0.98]"

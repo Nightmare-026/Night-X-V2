@@ -18,7 +18,24 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { name, email, password, terms_accepted, website_url } = await req.json();
+    const { name, email, password, terms_accepted, website_url, turnstileToken } = await req.json();
+
+    // Verify Turnstile Token
+    if (!turnstileToken) {
+      return NextResponse.json({ message: "Security check missing" }, { status: 400 });
+    }
+
+    const verifyUrl = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
+    const verifyRes = await fetch(verifyUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `secret=${process.env.TURNSTILE_SECRET_KEY || '1x0000000000000000000000000000000AA'}&response=${turnstileToken}`
+    });
+
+    const verifyData = await verifyRes.json();
+    if (!verifyData.success) {
+      return NextResponse.json({ message: "Security check failed. Please try again." }, { status: 400 });
+    }
 
     // Honeypot check
     if (website_url) {
