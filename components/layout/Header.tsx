@@ -243,10 +243,18 @@ export default function Header() {
               exit={{ opacity: 0, x: '100%' }}
               transition={{ type: 'spring', damping: 30, stiffness: 300, mass: 0.8 }}
               className={cn(
-                "fixed inset-0 z-[200] flex flex-col bg-[#06080F] px-6 pt-24 pb-12 overflow-y-auto",
+                "fixed inset-0 z-[200] flex flex-col bg-[#06080F] px-8 pt-24 pb-12 overflow-y-auto",
                 styles['mobile-menu-container']
               )}
             >
+              {/* Internal Close Button for Mobile Drawer */}
+              <button 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="absolute top-6 right-6 p-2 rounded-full bg-white/5 text-white/60 hover:text-white border border-white/10"
+                aria-label="Close menu"
+              >
+                <X className="h-6 w-6" />
+              </button>
               <div className="mb-10">
                 <button
                   onClick={() => {
@@ -261,39 +269,55 @@ export default function Header() {
               </div>
 
               <nav className="flex flex-col gap-6 mb-12">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.name}
-                    href={link.href}
-                    className="text-3xl font-bold text-white transition-colors hover:text-accent-purple"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    {link.name}
-                  </Link>
-                ))}
+                {navLinks.map((link) => {
+                  const isActive = pathname === link.href;
+                  return (
+                    <Link
+                      key={link.name}
+                      href={link.href}
+                      className={cn(
+                        "text-3xl font-bold transition-all duration-300",
+                        isActive ? "text-accent-cyan translate-x-2" : "text-white/60 hover:text-white"
+                      )}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <div className="flex items-center gap-4">
+                        {isActive && <div className="w-1.5 h-1.5 rounded-full bg-accent-cyan shadow-[0_0_10px_rgba(0,229,255,0.8)]" />}
+                        {link.name}
+                      </div>
+                    </Link>
+                  );
+                })}
               </nav>
 
               <div className="mt-auto flex flex-col gap-4 border-t border-white/10 pt-10">
                 {status === 'authenticated' ? (
                   <>
                     <div className="mb-6 flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/10">
-                      <div className={styles['profile-avatar']}>
+                      <div className={cn(styles['profile-avatar'], "w-12 h-12 bg-accent-purple/20 flex items-center justify-center overflow-hidden")}>
                         {session.user?.image ? (
                           <Image
                             src={session.user.image}
                             alt={session.user.name || 'User avatar'}
-                            width={40}
-                            height={40}
+                            width={48}
+                            height={48}
                             className="h-full w-full object-cover"
                             unoptimized
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              target.parentElement?.classList.add('fallback-active-mobile');
+                            }}
                           />
-                        ) : (
-                          <User className="h-full w-full p-1.5 text-white" />
-                        )}
+                        ) : null}
+                        <span className="fallback-initials text-xs font-bold text-accent-purple hidden [.fallback-active-mobile_&]:block [div:not(:has(img))_&]:block">
+                          {session.user?.name ? 
+                            session.user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U'}
+                        </span>
                       </div>
                       <div className="overflow-hidden">
-                        <p className="font-bold text-white truncate">{session.user?.name}</p>
-                        <p className="text-sm text-white/40 truncate">{session.user?.email}</p>
+                        <p className="font-bold text-white truncate text-base">{session.user?.name}</p>
+                        <p className="text-xs text-white/40 truncate">{session.user?.email}</p>
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4 mb-4">
