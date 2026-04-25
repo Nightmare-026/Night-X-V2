@@ -63,6 +63,7 @@ export default function Header() {
 
   if (pathname?.startsWith('/auth')) return null;
 
+  const navLinks = [
     { name: 'Dashboard', href: '/dashboard', protected: true, icon: <LayoutDashboard size={20} /> },
     { name: 'Tools', href: '/services', icon: <Wrench size={20} /> },
     { name: 'AI Features', href: '/dashboard?category=ai', icon: <Sparkles size={20} /> },
