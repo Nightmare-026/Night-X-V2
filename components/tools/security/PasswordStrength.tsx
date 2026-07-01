@@ -1,11 +1,12 @@
 'use client';
+import { cn } from '@/lib/utils';
 
 import React, { useState, useEffect } from 'react';
-import { Shield, ShieldCheck, ShieldAlert, Eye, EyeOff, Copy, Check, Info } from 'lucide-react';
+import { Shield, ShieldCheck, ShieldAlert, Eye, EyeOff, Copy, Check, Info , Lock, Clock, AlertCircle, Database} from 'lucide-react';
 import zxcvbn from 'zxcvbn';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const PasswordStrength = () => {
+export default function PasswordStrength() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -27,164 +28,197 @@ const PasswordStrength = () => {
 
   const getScoreColor = (score: number) => {
     switch (score) {
-      case 0: return 'bg-red-400';
-      case 1: return 'bg-orange-400';
-      case 2: return 'bg-yellow-400';
-      case 3: return 'bg-accent-cyan';
-      case 4: return 'bg-accent-purple';
-      default: return 'bg-gray-200';
+      case 0: return 'bg-red-500';
+      case 1: return 'bg-orange-500';
+      case 2: return 'bg-yellow-500';
+      case 3: return 'bg-emerald-400';
+      case 4: return 'bg-emerald-500';
+      default: return 'bg-white/5';
     }
   };
 
   const getScoreLabel = (score: number) => {
     switch (score) {
-      case 0: return 'Very Weak';
-      case 1: return 'Weak';
-      case 2: return 'Fair';
-      case 3: return 'Strong';
-      case 4: return 'Ultra Secure';
-      default: return 'Enter Password';
+      case 0: return 'Critical Weakness';
+      case 1: return 'Vulnerable';
+      case 2: return 'Suboptimal';
+      case 3: return 'Secure';
+      case 4: return 'Hardened';
+      default: return 'Awaiting Input';
     }
   };
 
   return (
-    <div className="space-y-6 max-w-2xl mx-auto">
-      <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
-        <div className="relative">
-          <input
-            type={showPassword ? 'text' : 'password'}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter password to check..."
-            className={`w-full bg-black/20 border border-white/10 rounded-xl px-4 py-4 pr-24 focus:outline-none focus:ring-2 transition-all text-lg font-mono ${
-              !result ? 'focus:ring-white/20' : 
-              result.score === 0 ? 'focus:ring-red-500/50' :
-              result.score === 1 ? 'focus:ring-orange-500/50' :
-              result.score === 2 ? 'focus:ring-yellow-500/50' :
-              result.score === 3 ? 'focus:ring-blue-500/50' :
-              'focus:ring-green-500/50'
-            }`}
-          />
-          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-            <button
-              onClick={() => setShowPassword(!showPassword)}
-              className="p-2 hover:bg-white/5 rounded-lg transition-colors text-white/60"
-              title={showPassword ? 'Hide password' : 'Show password'}
-            >
-              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-            </button>
-            <button
-              onClick={handleCopy}
-              disabled={!password}
-              className="p-2 hover:bg-white/5 rounded-lg transition-colors text-white/60 disabled:opacity-50"
-              title="Copy password"
-            >
-              {copied ? <Check size={20} className="text-green-500" /> : <Copy size={20} />}
-            </button>
-          </div>
-        </div>
-
-        {/* Strength Meter */}
-        <div className="mt-6 space-y-2">
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-white/60">Strength Score</span>
-            <span className={`font-semibold ${result ? 'text-white' : 'text-white/30'}`}>
-              {result ? getScoreLabel(result.score) : '---'}
-            </span>
-          </div>
-          <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${result ? (result.score + 1) * 20 : 0}%` }}
-              className={`h-full transition-colors duration-500 ${result ? getScoreColor(result.score) : 'bg-transparent'}`}
-            />
-          </div>
-        </div>
-      </div>
-
-      <AnimatePresence>
-        {result && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-4"
-          >
-            {/* Crack Times */}
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-              <h3 className="text-white/80 font-medium mb-4 flex items-center gap-2">
-                <Shield size={18} className="text-red-400" />
-                Estimated Crack Time
-              </h3>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-white/40">Online (No Throttling)</span>
-                  <span className="text-white font-mono">{result.crack_times_display.online_no_throttling_10_per_second}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-white/40">Online (Throttled)</span>
-                  <span className="text-white font-mono">{result.crack_times_display.online_throttling_100_per_hour}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-white/40">Offline (Fast Hashing)</span>
-                  <span className="text-white font-mono">{result.crack_times_display.offline_fast_hashing_1e10_per_second}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-white/40">Offline (Slow Hashing)</span>
-                  <span className="text-white font-mono">{result.crack_times_display.offline_slow_hashing_1e4_per_second}</span>
-                </div>
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        {/* Left Panel: Input & Settings */}
+        <div className="lg:col-span-5 space-y-6">
+          <div className="bg-white/[0.02] border border-white/[0.05] rounded-md p-8 space-y-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Shield className="text-emerald-400" size={16} />
+                <h3 className="text-xs font-outfit font-bold uppercase tracking-widest text-white/80">Entropy Input</h3>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="p-2 hover:bg-white/5 rounded-md transition-colors text-white/40 hover:text-white"
+                  title={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+                <button
+                  onClick={handleCopy}
+                  disabled={!password}
+                  className="p-2 hover:bg-white/5 rounded-md transition-colors text-white/40 hover:text-white disabled:opacity-20"
+                  title="Copy password"
+                >
+                  {copied ? <Check size={16} className="text-emerald-400" /> : <Copy size={16} />}
+                </button>
               </div>
             </div>
 
-            {/* Feedback & Suggestions */}
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-              <h3 className="text-white/80 font-medium mb-4 flex items-center gap-2">
-                <Info size={18} className="text-blue-400" />
-                Security Analysis
-              </h3>
+            <div className="space-y-2">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Analyze password strength..."
+                className="w-full bg-black/40 border border-white/[0.05] rounded-md px-6 py-5 text-lg font-mono focus:outline-none focus:border-emerald-400/50 transition-all"
+              />
+              <p className="text-[10px] text-white/20 uppercase font-bold tracking-widest px-1">
+                {password.length} Characters Detected
+              </p>
+            </div>
+
+            {/* Privacy Badge */}
+            <div className="p-4 bg-emerald-400/5 border border-emerald-400/10 rounded-md flex items-start gap-3">
+              <Lock size={14} className="text-emerald-400 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Privacy Protocol</p>
+                <p className="text-[10px] text-white/40 leading-relaxed font-inter mt-1">
+                  Local-only execution. Cryptographic entropy remains in browser memory.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Panel: Analysis */}
+        <div className="lg:col-span-7 space-y-6">
+          <div className="bg-white/[0.02] border border-white/[0.05] rounded-md p-8 relative overflow-hidden min-h-[500px]">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-400/5 blur-[100px] rounded-full" />
+            
+            <div className="relative z-10 space-y-12">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-[10px] font-bold tracking-[0.2em] text-emerald-400 uppercase mb-2">Security Evaluation</div>
+                  <h2 className="text-xl font-outfit font-bold text-white uppercase tracking-widest">Entropy Breakdown</h2>
+                </div>
+                <div className="text-right">
+                  <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest mb-1">Status</div>
+                  <div className={cn(
+                    "text-xs font-bold uppercase tracking-widest",
+                    result ? (result.score < 2 ? "text-red-400" : "text-emerald-400") : "text-white/20"
+                  )}>
+                    {getScoreLabel(result?.score ?? -1)}
+                  </div>
+                </div>
+              </div>
+
+              {/* Strength Meter (5-segment) */}
               <div className="space-y-4">
-                {result.feedback.warning && (
-                  <div className="flex gap-3 text-red-400 bg-red-400/10 p-3 rounded-xl text-sm border border-red-400/20">
-                    <ShieldAlert size={18} className="shrink-0" />
-                    <p>{result.feedback.warning}</p>
-                  </div>
-                )}
-                
-                {result.feedback.suggestions.length > 0 ? (
-                  <div className="space-y-2">
-                    <p className="text-xs text-white/40 uppercase tracking-wider font-bold">Suggestions</p>
-                    {result.feedback.suggestions.map((suggestion: string, idx: number) => (
-                      <div key={idx} className="flex gap-3 text-white/60 text-sm">
-                        <Check size={16} className="text-green-500 shrink-0" />
-                        <p>{suggestion}</p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="flex gap-3 text-green-400 bg-green-400/10 p-3 rounded-xl text-sm border border-green-400/20">
-                    <ShieldCheck size={18} className="shrink-0" />
-                    <p>Excellent! This password is very difficult to crack.</p>
-                  </div>
-                )}
+                <div className="grid grid-cols-5 gap-2">
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <div 
+                      key={i}
+                      className={cn(
+                        "h-1.5 rounded-full transition-all duration-500",
+                        result && i <= result.score ? getScoreColor(result.score) : "bg-white/5"
+                      )}
+                    />
+                  ))}
+                </div>
+                <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-white/20">
+                  <span>Weak</span>
+                  <span>Hardened</span>
+                </div>
               </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
-      <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-6">
-        <h3 className="text-blue-400 font-medium mb-2 flex items-center gap-2">
-          <Info size={18} />
-          Why check strength?
-        </h3>
-        <p className="text-sm text-white/60 leading-relaxed">
-          This tool uses the <strong>zxcvbn</strong> algorithm (developed by Dropbox) to estimate how long it would take for a computer to guess your password. It considers common patterns, dictionary words, and sequences, providing a much more realistic score than simple character counts.
-          <br /><br />
-          <span className="text-white/40 italic">Note: All processing is done locally in your browser. Your password is never sent to any server.</span>
-        </p>
+              <AnimatePresence mode="wait">
+                {result ? (
+                  <motion.div
+                    key="results"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="grid grid-cols-1 md:grid-cols-2 gap-8"
+                  >
+                    {/* Crack Times */}
+                    <div className="space-y-6">
+                      <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/40 flex items-center gap-2">
+                        <Clock size={12} />
+                        Crack Latency
+                      </h3>
+                      <div className="space-y-4">
+                        {[
+                          { label: 'Online Attack', value: result.crack_times_display.online_no_throttling_10_per_second },
+                          { label: 'Offline (Fast)', value: result.crack_times_display.offline_fast_hashing_1e10_per_second },
+                          { label: 'Offline (Slow)', value: result.crack_times_display.offline_slow_hashing_1e4_per_second },
+                        ].map((item, idx) => (
+                          <div key={idx} className="flex justify-between items-end border-b border-white/[0.03] pb-2">
+                            <span className="text-[10px] text-white/40 font-bold uppercase tracking-widest">{item.label}</span>
+                            <span className="text-xs font-mono text-white/80">{item.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Suggestions */}
+                    <div className="space-y-6">
+                      <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/40 flex items-center gap-2">
+                        <Info size={12} />
+                        Protocol Suggestions
+                      </h3>
+                      <div className="space-y-4">
+                        {result.feedback.warning && (
+                          <div className="flex gap-3 text-red-400 bg-red-400/5 p-4 rounded-md border border-red-400/10 text-[10px] font-bold uppercase tracking-widest">
+                            <AlertCircle size={14} className="shrink-0" />
+                            <p className="leading-relaxed">{result.feedback.warning}</p>
+                          </div>
+                        )}
+                        
+                        {result.feedback.suggestions.length > 0 ? (
+                          <div className="space-y-3">
+                            {result.feedback.suggestions.map((suggestion: string, idx: number) => (
+                              <div key={idx} className="flex gap-3 text-white/60 text-[10px] font-inter uppercase tracking-widest">
+                                <Check size={12} className="text-emerald-400 shrink-0 mt-0.5" />
+                                <p className="leading-relaxed">{suggestion}</p>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="flex gap-3 text-emerald-400 bg-emerald-400/5 p-4 rounded-md border border-emerald-400/10 text-[10px] font-bold uppercase tracking-widest">
+                            <ShieldCheck size={14} className="shrink-0" />
+                            <p className="leading-relaxed">Optimal entropy detected. No modifications required.</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-20 opacity-10 space-y-4">
+                    <Database size={48} strokeWidth={1} />
+                    <p className="text-[10px] font-bold uppercase tracking-widest">Awaiting Entropy Feed</p>
+                  </div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
-};
+}
 
-export default PasswordStrength;

@@ -43,8 +43,6 @@ export default function HashGenerator() {
     try {
       const msgUint8 = new TextEncoder().encode(text);
       const hashBuffer = await crypto.subtle.digest(algorithm, msgUint8);
-      
-      // Efficient hex conversion
       return Array.from(new Uint8Array(hashBuffer))
         .map(b => b.toString(16).padStart(2, '0'))
         .join('');
@@ -64,7 +62,6 @@ export default function HashGenerator() {
     const results: Record<string, string> = {};
     
     try {
-      // Parallelize hash generation for all algorithms
       const hashPromises = ALGORITHMS.map(async (algo) => {
         results[algo.id] = await generateHash(val, algo.id);
       });
@@ -78,7 +75,6 @@ export default function HashGenerator() {
     }
   }, []);
 
-  // Use an effect for debounced computation
   React.useEffect(() => {
     const timer = setTimeout(() => {
       compute(input);
@@ -98,87 +94,76 @@ export default function HashGenerator() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
+    <div className="space-y-8">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
         {/* Input Panel */}
         <div className="lg:col-span-5 space-y-6">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="bg-white/5 border border-white/10 rounded-[32px] overflow-hidden"
-          >
-            <div className="p-8 space-y-8">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-accent-purple/10 text-accent-purple">
-                    <Terminal size={18} />
-                  </div>
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-white/70">Raw Input</h3>
-                </div>
-                {input && (
-                  <button 
-                    onClick={() => { setInput(''); setHashes({}); }}
-                    className="text-[10px] font-black text-white/20 hover:text-red-400 uppercase tracking-widest transition-colors"
-                  >
-                    Clear All
-                  </button>
-                )}
+          <div className="bg-white/[0.02] border border-white/[0.05] rounded-md p-8 space-y-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Terminal className="text-emerald-400" size={16} />
+                <h3 className="text-xs font-outfit font-bold uppercase tracking-widest text-white/80">Source Payload</h3>
               </div>
+              {input && (
+                <button 
+                  onClick={() => { setInput(''); setHashes({}); }}
+                  className="text-[10px] font-bold text-white/20 hover:text-red-400 uppercase tracking-widest transition-colors"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
 
-              <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-accent-purple/20 to-accent-cyan/20 rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition-opacity" />
-                <textarea
-                  value={input}
-                  onChange={handleInputChange}
-                  placeholder="Enter text to hash..."
-                  className="relative w-full h-64 bg-black/40 border border-white/10 rounded-2xl p-6 text-white font-mono text-sm focus:outline-none focus:border-accent-purple transition-all resize-none"
-                />
+            <div className="relative group">
+              <textarea
+                value={input}
+                onChange={handleInputChange}
+                placeholder="Paste payload here..."
+                className="w-full h-64 bg-black/40 border border-white/[0.05] rounded-md p-6 text-white font-mono text-sm focus:outline-none focus:border-emerald-400/50 transition-all resize-none"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-white/[0.02] rounded-md border border-white/[0.05] space-y-1">
+                <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Payload Size</p>
+                <p className="text-lg font-outfit font-bold text-white/80 tracking-widest">{input.length} B</p>
               </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-white/5 rounded-2xl border border-white/5 space-y-1">
-                  <p className="text-[10px] font-black text-white/20 uppercase tracking-widest">Character Count</p>
-                  <p className="text-lg font-bold text-white/80 font-syne">{input.length}</p>
+              <div className="p-4 bg-white/[0.02] rounded-md border border-white/[0.05] space-y-1">
+                <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Compiler</p>
+                <div className="flex items-center gap-2">
+                  <div className={cn("w-2 h-2 rounded-full", isProcessing ? "bg-emerald-400 animate-pulse" : (input ? "bg-emerald-400" : "bg-white/10"))} />
+                  <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{isProcessing ? 'Active' : (input ? 'Stable' : 'Idle')}</p>
                 </div>
-                <div className="p-4 bg-white/5 rounded-2xl border border-white/5 space-y-1">
-                  <p className="text-[10px] font-black text-white/20 uppercase tracking-widest">Status</p>
-                  <div className="flex items-center gap-2">
-                    <div className={cn("w-2 h-2 rounded-full", isProcessing ? "bg-accent-purple animate-pulse" : (input ? "bg-accent-cyan" : "bg-white/10"))} />
-                    <p className="text-xs font-bold text-white/60">{isProcessing ? 'Processing' : (input ? 'Computed' : 'Idle')}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-br from-accent-purple/10 to-transparent p-6 rounded-2xl border border-white/5 space-y-3">
-                <h4 className="text-[10px] font-black uppercase tracking-widest text-accent-purple">Security Note</h4>
-                <p className="text-[11px] text-white/40 leading-relaxed">
-                  Hashing is performed locally using the <span className="text-white/60">SubtleCrypto API</span>. Your sensitive data never touches our servers.
-                </p>
               </div>
             </div>
-          </motion.div>
+
+            <div className="p-6 bg-emerald-400/5 border border-emerald-400/10 rounded-md">
+              <div className="flex items-center gap-3 mb-3 text-emerald-400">
+                <ShieldCheck size={14} />
+                <span className="text-[10px] font-bold uppercase tracking-widest">Encryption Shield</span>
+              </div>
+              <p className="text-[10px] text-white/40 uppercase tracking-widest font-inter leading-relaxed">
+                All hashing operations are executed in-situ via SubtleCrypto. No data transmission occurs.
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Results Panel */}
         <div className="lg:col-span-7 space-y-6">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white/5 border border-white/10 rounded-[40px] p-8 md:p-10 relative overflow-hidden group min-h-[600px]"
-          >
-            {/* Decoration */}
-            <div className="absolute top-0 right-0 w-96 h-96 bg-accent-cyan/5 blur-[120px] rounded-full group-hover:bg-accent-cyan/10 transition-all duration-1000" />
+          <div className="bg-white/[0.02] border border-white/[0.05] rounded-md p-8 relative overflow-hidden min-h-[600px] flex flex-col">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-400/5 blur-[100px] rounded-full" />
             
-            <div className="relative z-10 flex flex-col h-full w-full">
-              <div className="mb-8 flex items-center justify-between">
+            <div className="relative z-10 flex flex-col h-full flex-1">
+              <div className="flex items-center justify-between mb-12">
                 <div>
-                  <div className="text-[10px] font-black tracking-[0.2em] text-accent-cyan uppercase mb-2">Message Digests</div>
-                  <h2 className="text-2xl font-bold font-syne">Generated Hashes</h2>
+                  <div className="text-[10px] font-bold tracking-[0.2em] text-emerald-400 uppercase mb-2">Digest Registry</div>
+                  <h2 className="text-xl font-outfit font-bold text-white uppercase tracking-widest">Cryptographic Hashes</h2>
                 </div>
-                <div className="flex items-center gap-2 bg-black/40 px-4 py-2 rounded-xl border border-white/5">
-                  <Binary size={14} className="text-accent-cyan" />
-                  <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">HEX OUTPUT</span>
+                <div className="flex items-center gap-2 bg-black/40 px-4 py-2 rounded-md border border-white/[0.05]">
+                  <Binary size={14} className="text-emerald-400" />
+                  <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Hex Stream</span>
                 </div>
               </div>
 
@@ -192,42 +177,38 @@ export default function HashGenerator() {
                       transition={{ delay: index * 0.05 }}
                       className="group/card relative"
                     >
-                      <div className="absolute -inset-0.5 bg-gradient-to-r from-accent-purple/10 to-accent-cyan/10 rounded-2xl blur opacity-0 group-hover/card:opacity-100 transition-opacity" />
-                      <div className="relative p-6 bg-black/40 border border-white/5 rounded-2xl flex flex-col gap-4 shadow-xl">
+                      <div className="relative p-6 bg-black/40 border border-white/[0.05] rounded-md flex flex-col gap-4 transition-all group-hover/card:border-emerald-400/20">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <div className={cn("p-1.5 rounded-lg bg-white/5", algo.color)}>
+                            <div className={cn("p-1.5 rounded-md bg-white/5", algo.color)}>
                               <Hash size={14} />
                             </div>
-                            <span className="text-xs font-black uppercase tracking-widest text-white/60">{algo.label}</span>
-                            {algo.premium && <Sparkles size={12} className="text-yellow-400" />}
-                            {algo.legacy && <span className="text-[8px] font-black bg-red-500/10 text-red-400 px-2 py-0.5 rounded-full border border-red-500/20">UNSAFE</span>}
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-white/60">{algo.label}</span>
+                            {algo.premium && <Sparkles size={12} className="text-yellow-400/50" />}
+                            {algo.legacy && <span className="text-[8px] font-bold bg-red-500/10 text-red-400 px-2 py-0.5 rounded-sm border border-red-500/20 uppercase">Deprecated</span>}
                           </div>
                           <button 
                             onClick={() => hashes[algo.id] && handleCopy(hashes[algo.id], algo.id)}
                             disabled={!hashes[algo.id]}
-                            className="p-2 hover:bg-white/5 text-white/20 hover:text-accent-cyan rounded-lg transition-all disabled:opacity-0"
+                            className="p-2 hover:bg-white/5 text-white/20 hover:text-emerald-400 rounded-md transition-all disabled:opacity-0"
                           >
                             <Copy size={16} />
                           </button>
                         </div>
                         <div className="relative">
-                          <div className="w-full bg-[#0D0F18] border border-white/5 rounded-xl p-4 font-mono text-xs break-all text-white/80 min-h-[60px] flex items-center">
+                          <div className="w-full bg-[#080808] border border-white/[0.05] rounded-md p-5 font-mono text-xs break-all text-white/80 min-h-[70px] flex items-center leading-relaxed tracking-wider">
                             {hashes[algo.id] ? (
-                              <motion.span
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                              >
+                              <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                                 {hashes[algo.id]}
                               </motion.span>
                             ) : (
-                              <span className="text-white/5 italic">Awaiting computation...</span>
+                              <span className="text-white/5 lowercase tracking-normal">awaiting payload...</span>
                             )}
                           </div>
                           {hashes[algo.id] && (
-                            <div className="absolute bottom-2 right-2 flex items-center gap-1.5 px-2 py-1 bg-black/60 rounded-md border border-white/5">
+                            <div className="absolute bottom-2 right-2 flex items-center gap-1.5 px-2 py-1 bg-black/60 rounded-md border border-white/[0.05]">
                               <ShieldCheck size={10} className="text-emerald-400" />
-                              <span className="text-[8px] font-black text-white/40 uppercase">Verified</span>
+                              <span className="text-[8px] font-bold text-white/40 uppercase tracking-widest">Verified Integrity</span>
                             </div>
                           )}
                         </div>
@@ -238,39 +219,34 @@ export default function HashGenerator() {
               </div>
 
               {!input && (
-                <div className="flex flex-col items-center justify-center gap-6 opacity-20 py-20">
-                  <div className="p-10 rounded-full bg-white/5 border border-white/5">
-                    <Search size={48} strokeWidth={1} />
-                  </div>
-                  <div className="text-center space-y-1">
-                    <p className="text-sm font-bold uppercase tracking-widest">No Input Detected</p>
-                    <p className="text-[10px] font-medium max-w-[200px]">Type something in the panel on the left to generate cryptographic hashes</p>
-                  </div>
+                <div className="flex-1 flex flex-col items-center justify-center opacity-10 space-y-4 py-20">
+                  <Search size={48} strokeWidth={1} />
+                  <p className="text-[10px] font-bold uppercase tracking-widest">Registry Awaiting Feed</p>
                 </div>
               )}
             </div>
-          </motion.div>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-white/5 border border-white/10 p-6 rounded-[32px] flex items-center gap-4">
-              <div className="p-3 bg-accent-cyan/10 text-accent-cyan rounded-2xl">
-                <Zap size={24} />
+            <div className="bg-white/[0.02] border border-white/[0.05] p-6 rounded-md flex items-center gap-4">
+              <div className="p-3 bg-emerald-400/10 text-emerald-400 rounded-md">
+                <Zap size={20} />
               </div>
               <div>
-                <h4 className="text-xs font-bold text-white/80">Real-time Diff</h4>
-                <p className="text-[10px] text-white/40 leading-relaxed">
-                  Hash changes instantly as you type. Useful for verifying integrity of small snippets.
+                <h4 className="text-[10px] font-bold text-white/80 uppercase tracking-widest">Instant Sync</h4>
+                <p className="text-[10px] text-white/30 uppercase tracking-widest font-inter leading-relaxed mt-1">
+                  Hashes re-calculate in real-time as input stream changes.
                 </p>
               </div>
             </div>
-            <div className="bg-white/5 border border-white/10 p-6 rounded-[32px] flex items-center gap-4">
-              <div className="p-3 bg-accent-purple/10 text-accent-purple rounded-2xl">
-                <ShieldCheck size={24} />
+            <div className="bg-white/[0.02] border border-white/[0.05] p-6 rounded-md flex items-center gap-4">
+              <div className="p-3 bg-emerald-400/10 text-emerald-400 rounded-md">
+                <ShieldCheck size={20} />
               </div>
               <div>
-                <h4 className="text-xs font-bold text-white/80">Collision Proof</h4>
-                <p className="text-[10px] text-white/40 leading-relaxed">
-                  We use modern standards (SHA-256+) to ensure maximum resistance against collisions.
+                <h4 className="text-[10px] font-bold text-white/80 uppercase tracking-widest">Standard Compliance</h4>
+                <p className="text-[10px] text-white/30 uppercase tracking-widest font-inter leading-relaxed mt-1">
+                  Supports SHA-1 through SHA-512 cryptographic standards.
                 </p>
               </div>
             </div>

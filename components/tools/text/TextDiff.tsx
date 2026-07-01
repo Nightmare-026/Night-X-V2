@@ -1,4 +1,5 @@
 'use client';
+import { cn } from '@/lib/utils';
 
 import React, { useState, useEffect } from 'react';
 import { Columns, List, Copy, Check, RotateCcw, ArrowRight, Shield, AlertCircle } from 'lucide-react';
@@ -31,114 +32,129 @@ const TextDiff = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
-      {/* Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-white/5 border border-white/10 p-4 rounded-2xl backdrop-blur-sm">
-        <div className="flex bg-black/20 p-1 rounded-xl border border-white/5">
+    <div className="space-y-8 max-w-6xl mx-auto">
+      {/* Premium Toolbar */}
+      <div className="flex flex-wrap items-center justify-between gap-6 bg-white/[0.02] border border-white/[0.05] p-4 rounded-md">
+        <div className="flex bg-white/[0.02] p-1 rounded-md border border-white/[0.05]">
           <button
             onClick={() => setViewMode('split')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-              viewMode === 'split' ? 'bg-red-500 text-white' : 'text-white/40 hover:text-white'
-            }`}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all",
+              viewMode === 'split' ? "bg-accent-blue text-white shadow-lg" : "text-white/20 hover:text-white"
+            )}
           >
-            <Columns size={16} />
+            <Columns size={14} />
             Split
           </button>
           <button
             onClick={() => setViewMode('inline')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-              viewMode === 'inline' ? 'bg-red-500 text-white' : 'text-white/40 hover:text-white'
-            }`}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all",
+              viewMode === 'inline' ? "bg-accent-blue text-white shadow-lg" : "text-white/20 hover:text-white"
+            )}
           >
-            <List size={16} />
+            <List size={14} />
             Inline
           </button>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-widest">
-            <span className="flex items-center gap-1.5 text-green-400">
-              <span className="w-2 h-2 rounded-full bg-green-500" />
-              {stats.added} Additions
-            </span>
-            <span className="flex items-center gap-1.5 text-red-400">
-              <span className="w-2 h-2 rounded-full bg-red-500" />
-              {stats.removed} Deletions
-            </span>
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
+            <div className="flex flex-col items-end">
+              <span className="text-[10px] text-white/20 uppercase tracking-widest font-bold">Additions</span>
+              <span className="text-sm font-outfit font-bold text-green-400">{stats.added}</span>
+            </div>
+            <div className="w-px h-8 bg-white/[0.05]" />
+            <div className="flex flex-col items-end">
+              <span className="text-[10px] text-white/20 uppercase tracking-widest font-bold">Deletions</span>
+              <span className="text-sm font-outfit font-bold text-red-400">{stats.removed}</span>
+            </div>
           </div>
           <button
             onClick={handleReset}
-            className="p-2 text-white/40 hover:text-white transition-colors"
+            className="p-3 bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.05] rounded-md text-white/20 hover:text-white transition-all"
             title="Reset"
           >
-            <RotateCcw size={18} />
+            <RotateCcw size={16} />
           </button>
         </div>
       </div>
 
-      {/* Input Panes */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <label className="text-[10px] text-white/40 uppercase tracking-widest font-bold px-2">Original Text</label>
+      {/* Input Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 px-1">
+            <div className="w-1.5 h-1.5 rounded-full bg-white/10" />
+            <label className="text-[10px] text-white/20 uppercase tracking-widest font-bold font-inter">Original Document</label>
+          </div>
           <textarea
             value={original}
             onChange={(e) => setOriginal(e.target.value)}
-            placeholder="Paste original version..."
-            className="w-full h-48 bg-black/30 border border-white/10 rounded-2xl p-4 focus:outline-none focus:ring-2 focus:ring-red-500/50 transition-all resize-none font-mono text-xs text-white/60 custom-scrollbar"
+            placeholder="Paste source text..."
+            className="w-full h-48 bg-black/40 border border-white/[0.05] rounded-md p-6 focus:outline-none focus:border-accent-blue/50 transition-all resize-none font-mono text-sm text-white/60 custom-scrollbar leading-relaxed"
           />
         </div>
-        <div className="space-y-2">
-          <label className="text-[10px] text-white/40 uppercase tracking-widest font-bold px-2">Modified Text</label>
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 px-1">
+            <div className="w-1.5 h-1.5 rounded-full bg-accent-blue/40" />
+            <label className="text-[10px] text-white/20 uppercase tracking-widest font-bold font-inter">Modified Document</label>
+          </div>
           <textarea
             value={modified}
             onChange={(e) => setModified(e.target.value)}
-            placeholder="Paste modified version..."
-            className="w-full h-48 bg-black/30 border border-white/10 rounded-2xl p-4 focus:outline-none focus:ring-2 focus:ring-red-500/50 transition-all resize-none font-mono text-xs text-white/60 custom-scrollbar"
+            placeholder="Paste updated text..."
+            className="w-full h-48 bg-black/40 border border-white/[0.05] rounded-md p-6 focus:outline-none focus:border-accent-blue/50 transition-all resize-none font-mono text-sm text-white/60 custom-scrollbar leading-relaxed"
           />
         </div>
       </div>
 
-      {/* Diff Result */}
-      <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-sm">
-        <div className="bg-white/5 px-6 py-3 border-b border-white/10 flex items-center gap-2">
-          <ArrowRight size={16} className="text-red-400" />
-          <span className="text-sm font-medium text-white/80">Comparison View</span>
+      {/* Comparison View */}
+      <div className="bg-white/[0.02] border border-white/[0.05] rounded-md overflow-hidden">
+        <div className="bg-white/[0.02] px-6 py-3 border-b border-white/[0.05] flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <ArrowRight size={14} className="text-accent-blue" />
+            <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest font-inter">Line-by-Line Comparison</span>
+          </div>
         </div>
         
-        <div className="p-6 overflow-x-auto custom-scrollbar">
+        <div className="p-8 overflow-x-auto custom-scrollbar bg-black/40 min-h-[300px]">
           {diffResult.length > 0 && (original || modified) ? (
-            <div className="font-mono text-sm leading-relaxed min-w-full">
+            <div className="font-mono text-sm leading-relaxed space-y-1">
               {diffResult.map((change, i) => (
                 <div
                   key={i}
-                  className={`px-3 py-0.5 rounded ${
-                    change.added ? 'bg-green-500/10 text-green-400 border-l-4 border-green-500' :
-                    change.removed ? 'bg-red-500/10 text-red-400 border-l-4 border-red-500' :
-                    'text-white/40'
-                  }`}
+                  className={cn(
+                    "px-4 py-1.5 rounded-sm border-l-2 transition-colors",
+                    change.added ? "bg-green-500/5 text-green-400 border-green-500/50" :
+                    change.removed ? "bg-red-500/5 text-red-400 border-red-500/50" :
+                    "text-white/20 border-transparent"
+                  )}
                 >
-                  <pre className="whitespace-pre-wrap break-all">
-                    {change.added ? '+ ' : change.removed ? '- ' : '  '}
+                  <pre className="whitespace-pre-wrap break-all font-mono">
+                    <span className="inline-block w-4 opacity-30 select-none">
+                      {change.added ? '+' : change.removed ? '-' : ' '}
+                    </span>
                     {change.value}
                   </pre>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="h-40 flex flex-col items-center justify-center text-white/10 italic">
-              <Shield size={32} className="mb-2 opacity-10" />
-              Compare two text blocks to see differences
+            <div className="h-40 flex flex-col items-center justify-center space-y-4">
+              <Shield size={32} className="text-white/5" />
+              <p className="text-[10px] text-white/10 uppercase tracking-widest font-bold">Awaiting Input Data</p>
             </div>
           )}
         </div>
       </div>
 
-      <div className="flex items-start gap-4 bg-red-500/5 border border-red-500/10 rounded-2xl p-6">
-        <AlertCircle size={20} className="text-red-400 shrink-0 mt-1" />
-        <div className="text-sm text-white/60 leading-relaxed">
-          <h4 className="text-white font-medium mb-1">How Diffing Works</h4>
-          <p>
-            This tool uses a line-by-line comparison algorithm to identify exactly what has changed between two versions of text. Green highlights represent new lines added to the modified version, while red highlights show lines that were removed from the original.
+      {/* Information Footer */}
+      <div className="bg-white/[0.02] border border-white/[0.05] p-6 rounded-md flex items-start gap-4">
+        <AlertCircle size={20} className="text-accent-blue shrink-0 mt-0.5" />
+        <div className="space-y-1">
+          <h4 className="text-[10px] font-bold text-white uppercase tracking-widest font-outfit">Differential Analysis</h4>
+          <p className="text-[10px] text-white/30 font-inter uppercase tracking-wide leading-relaxed">
+            Comparing assets line-by-line using standard Myers diff algorithm. Additions are marked in emerald, removals in crimson.
           </p>
         </div>
       </div>

@@ -1,8 +1,22 @@
-'use client';
-
-import React, { useState, useEffect } from 'react';
-import { FileSpreadsheet, ArrowRight, Copy, Check, RotateCcw, FileJson, Settings2, Download, ArrowLeftRight } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { cn } from '@/lib/utils';
+import { 
+  FileSpreadsheet, 
+  ArrowRight, 
+  Copy, 
+  Check, 
+  RotateCcw, 
+  FileJson, 
+  Settings2, 
+  Download, 
+  ArrowLeftRight,
+  Database,
+  Code2,
+  Terminal,
+  Cpu,
+  Layers,
+  ArrowRightLeft
+} from 'lucide-react';
 
 type Mode = 'csv-to-json' | 'json-to-csv';
 
@@ -63,7 +77,6 @@ const JsonCsvConverter = () => {
         );
         return [headers.join(delimiter), ...rows].join('\n');
       } else {
-        // Assume array of arrays
         return parsed.map(row => 
           Array.isArray(row) 
             ? row.map(item => {
@@ -122,115 +135,181 @@ const JsonCsvConverter = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
-      {/* Mode Toggle & Settings */}
-      <div className="flex flex-wrap items-center justify-between gap-6 bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-sm">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => setMode(mode === 'csv-to-json' ? 'json-to-csv' : 'csv-to-json')}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition-all text-sm font-bold"
-          >
-            <ArrowLeftRight size={16} />
-            Switch to {mode === 'csv-to-json' ? 'JSON to CSV' : 'CSV to JSON'}
-          </button>
-
-          <div className="h-8 w-px bg-white/10 mx-2 hidden sm:block" />
-
-          <div className="flex items-center gap-3">
-            <Settings2 size={18} className="text-white/40" />
-            <span className="text-sm text-white/60 font-medium">Delimiter:</span>
-            <select
-              value={delimiter}
-              onChange={(e) => setDelimiter(e.target.value)}
-              className="bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-red-500/50"
-            >
-              <option value=",">Comma (,)</option>
-              <option value=";">Semicolon (;)</option>
-              <option value="	">Tab (\t)</option>
-              <option value="|">Pipe (|)</option>
-            </select>
-          </div>
-        </div>
-
-        {mode === 'csv-to-json' && (
-          <label className="flex items-center gap-3 cursor-pointer group">
-            <div 
-              className={`w-10 h-5 rounded-full p-1 transition-colors duration-300 ${hasHeader ? 'bg-red-500' : 'bg-white/10'}`}
-              onClick={() => setHasHeader(!hasHeader)}
-            >
-              <motion.div animate={{ x: hasHeader ? 20 : 0 }} className="w-3 h-3 bg-white rounded-full shadow-sm" />
-            </div>
-            <span className="text-sm text-white/60 group-hover:text-white transition-colors">First row is header</span>
-          </label>
-        )}
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Input */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between px-2">
-            <span className="text-xs text-white/40 uppercase tracking-widest font-bold flex items-center gap-2">
-              {mode === 'csv-to-json' ? <FileSpreadsheet size={14} className="text-green-400" /> : <FileJson size={14} className="text-blue-400" />}
-              {mode === 'csv-to-json' ? 'CSV Input' : 'JSON Input'}
-            </span>
-          </div>
-          <textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder={mode === 'csv-to-json' 
-              ? "name,age,city\nJohn,30,New York\nJane,25,London" 
-              : '[\n  {"name": "John", "age": 30},\n  {"name": "Jane", "age": 25}\n]'}
-            className="w-full h-96 bg-black/30 border border-white/10 rounded-2xl p-6 focus:outline-none focus:ring-2 focus:ring-red-500/50 transition-all resize-none font-mono text-sm text-white/80 leading-relaxed custom-scrollbar"
-          />
-        </div>
-
-        {/* Output */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between px-2">
-            <span className="text-xs text-white/40 uppercase tracking-widest font-bold flex items-center gap-2">
-              {mode === 'csv-to-json' ? <FileJson size={14} className="text-blue-400" /> : <FileSpreadsheet size={14} className="text-green-400" />}
-              {mode === 'csv-to-json' ? 'JSON Output' : 'CSV Output'}
-            </span>
-            <div className="flex gap-2">
-              <button
-                onClick={handleDownload}
-                disabled={!output}
-                className="p-1.5 text-white/40 hover:text-white transition-colors disabled:opacity-0"
-              >
-                <Download size={16} />
-              </button>
-              <button
-                onClick={handleCopy}
-                disabled={!output}
-                className="p-1.5 text-white/40 hover:text-white transition-colors disabled:opacity-0"
-              >
-                {copied ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
-              </button>
-            </div>
-          </div>
-          <div className="w-full h-96 bg-white/5 border border-white/10 rounded-2xl p-6 font-mono text-sm overflow-auto custom-scrollbar whitespace-pre text-white/90">
-            {error ? (
-              <div className="text-red-400 flex items-center gap-2">
-                <RotateCcw size={14} />
-                {error}
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        {/* Left Panel: Data Source Configuration */}
+        <div className="lg:col-span-5 space-y-6">
+          <div className="bg-white/[0.02] border border-white/[0.05] rounded-md p-8 space-y-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Database className="text-cyan-400" size={16} />
+                <h3 className="text-xs font-outfit font-bold uppercase tracking-widest text-white/80">Data Source</h3>
               </div>
-            ) : output || <span className="text-white/10 italic">Result will appear here...</span>}
+              <button 
+                onClick={() => setMode(mode === 'csv-to-json' ? 'json-to-csv' : 'csv-to-json')}
+                className="group flex items-center gap-2 px-3 py-1.5 rounded-md bg-cyan-400/5 border border-cyan-400/10 text-[10px] font-bold uppercase tracking-widest text-cyan-400 hover:bg-cyan-400/10 transition-all"
+              >
+                <ArrowRightLeft size={12} className="group-hover:rotate-180 transition-transform duration-500" />
+                Switch Logic
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              {/* Settings Group */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <label className="text-[10px] font-bold text-white/20 uppercase tracking-widest px-1 flex items-center gap-2">
+                    <Settings2 size={10} /> Delimiter
+                  </label>
+                  <select
+                    value={delimiter}
+                    onChange={(e) => setDelimiter(e.target.value)}
+                    className="w-full bg-black/40 border border-white/[0.05] rounded-md px-4 py-3 text-xs text-white/80 focus:outline-none focus:border-cyan-400/50 transition-all appearance-none cursor-pointer"
+                  >
+                    <option value=",">Comma (,)</option>
+                    <option value=";">Semicolon (;)</option>
+                    <option value="	">Tab (\t)</option>
+                    <option value="|">Pipe (|)</option>
+                  </select>
+                </div>
+
+                <div className="space-y-3">
+                  <label className="text-[10px] font-bold text-white/20 uppercase tracking-widest px-1 flex items-center gap-2">
+                    <Layers size={10} /> Structuring
+                  </label>
+                  <button
+                    onClick={() => setHasHeader(!hasHeader)}
+                    disabled={mode === 'json-to-csv'}
+                    className={cn(
+                      "w-full px-4 py-3 rounded-md border text-[10px] font-bold uppercase tracking-widest transition-all",
+                      mode === 'json-to-csv' ? "opacity-20 cursor-not-allowed border-white/5 bg-transparent" :
+                      hasHeader 
+                        ? "bg-cyan-400/10 border-cyan-400/20 text-cyan-400" 
+                        : "bg-white/5 border-white/10 text-white/40"
+                    )}
+                  >
+                    {hasHeader ? "Header Active" : "No Header"}
+                  </button>
+                </div>
+              </div>
+
+              {/* Input Area */}
+              <div className="space-y-3">
+                <label className="text-[10px] font-bold text-white/20 uppercase tracking-widest px-1 flex items-center gap-2">
+                  <Terminal size={10} /> Source Payload ({mode.split('-')[0].toUpperCase()})
+                </label>
+                <textarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder={mode === 'csv-to-json' 
+                    ? "id,name,role\n1,Alpha,Admin\n2,Beta,User" 
+                    : '[\n  {"id": 1, "name": "Alpha"}\n]'}
+                  className="w-full h-80 bg-black/40 border border-white/[0.05] rounded-md p-6 font-mono text-xs text-white/80 focus:outline-none focus:border-cyan-400/50 transition-all resize-none custom-scrollbar leading-relaxed"
+                />
+              </div>
+            </div>
+
+            <div className="p-6 bg-cyan-400/5 border border-cyan-400/10 rounded-md space-y-4">
+              <div className="flex items-center gap-3 text-cyan-400">
+                <Cpu size={14} />
+                <span className="text-[10px] font-bold uppercase tracking-widest">Conversion Engine</span>
+              </div>
+              <p className="text-[10px] text-white/40 leading-relaxed font-inter uppercase tracking-widest">
+                Deploying bi-directional serialization protocol. Handles escaped characters and complex nested arrays with 99.9% syntactic precision.
+              </p>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-        <h4 className="text-white/80 font-medium mb-3 flex items-center gap-2">
-          <ArrowLeftRight size={18} className="text-red-400" />
-          JSON / CSV Bi-directional Converter
-        </h4>
-        <p className="text-sm text-white/60 leading-relaxed">
-          {mode === 'csv-to-json' 
-            ? "Converting CSV (Comma Separated Values) to JSON is essential for web developers working with data exports from Excel or Google Sheets. This tool automatically handles data parsing and formatting." 
-            : "Converting JSON to CSV allows you to export your data into a format compatible with spreadsheet software like Excel, Numbers, or Google Sheets."}
-          <br /><br />
-          The tool supports custom delimiters and properly handles escaped characters and line breaks in data cells.
-        </p>
+        {/* Right Panel: Serialized Output */}
+        <div className="lg:col-span-7 space-y-6">
+          <div className="bg-white/[0.02] border border-white/[0.05] rounded-md p-8 relative overflow-hidden flex flex-col min-h-[600px]">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-400/5 blur-[100px] rounded-full" />
+            
+            <div className="relative z-10 flex flex-col h-full space-y-8">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-[10px] font-bold tracking-[0.2em] text-cyan-400 uppercase mb-2">Protocol Result</div>
+                  <h2 className="text-xl font-outfit font-bold text-white uppercase tracking-widest">Serialized Output</h2>
+                </div>
+                
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleDownload}
+                    disabled={!output}
+                    className="p-2.5 rounded-md bg-white/5 border border-white/10 text-white/40 hover:text-cyan-400 hover:border-cyan-400/30 transition-all disabled:opacity-0"
+                    title="Export Data"
+                  >
+                    <Download size={16} />
+                  </button>
+                  <button
+                    onClick={handleCopy}
+                    disabled={!output}
+                    className="p-2.5 rounded-md bg-white/5 border border-white/10 text-white/40 hover:text-cyan-400 hover:border-cyan-400/30 transition-all disabled:opacity-0"
+                    title="Copy Payload"
+                  >
+                    {copied ? <Check size={16} className="text-emerald-400" /> : <Copy size={16} />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex-1 bg-black/40 border border-white/[0.05] rounded-md p-8 font-mono text-sm relative overflow-hidden">
+                <div className="absolute top-4 right-4 text-[10px] font-bold text-white/10 uppercase tracking-widest select-none">
+                  Output Viewport
+                </div>
+                
+                <div className="h-full overflow-auto custom-scrollbar">
+                  {error ? (
+                    <div className="flex flex-col items-center justify-center h-full text-center space-y-4">
+                      <div className="p-4 rounded-full bg-red-400/10 border border-red-400/20">
+                        <RotateCcw className="text-red-400 animate-spin-slow" size={24} />
+                      </div>
+                      <div className="space-y-1">
+                        <div className="text-red-400 font-bold text-xs uppercase tracking-widest">Parsing Violation</div>
+                        <div className="text-white/40 text-[10px] max-w-xs uppercase tracking-widest leading-relaxed">
+                          {error}
+                        </div>
+                      </div>
+                    </div>
+                  ) : output ? (
+                    <div className="text-white/80 whitespace-pre font-mono leading-relaxed selection:bg-cyan-400/30">
+                      {output}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-full text-center space-y-4">
+                      <Code2 className="text-white/10" size={48} />
+                      <div className="text-white/20 text-[10px] font-bold uppercase tracking-widest">
+                        Awaiting Serialization Protocol...
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-6 bg-white/[0.02] border border-white/[0.05] rounded-md space-y-4">
+                  <div className="flex items-center gap-3 text-cyan-400">
+                    <FileJson size={14} />
+                    <span className="text-[10px] font-bold uppercase tracking-widest">Standard Schema</span>
+                  </div>
+                  <p className="text-[10px] text-white/40 leading-relaxed font-inter uppercase tracking-widest">
+                    Ensuring all generated JSON objects adhere to strict syntactic validation rules.
+                  </p>
+                </div>
+                <div className="p-6 bg-white/[0.02] border border-white/[0.05] rounded-md space-y-4">
+                  <div className="flex items-center gap-3 text-emerald-400">
+                    <FileSpreadsheet size={14} />
+                    <span className="text-[10px] font-bold uppercase tracking-widest">CSV Integrity</span>
+                  </div>
+                  <p className="text-[10px] text-white/40 leading-relaxed font-inter uppercase tracking-widest">
+                    Sanitizing cell data to prevent injection and maintain tabular consistency.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

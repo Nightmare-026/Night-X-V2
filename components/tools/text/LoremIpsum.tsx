@@ -1,7 +1,8 @@
 'use client';
+import { cn } from '@/lib/utils';
 
 import React, { useState } from 'react';
-import { Copy, RefreshCw } from 'lucide-react';
+import { Copy, RefreshCw , Type, Check} from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const LOREM_WORDS = `lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum sed perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium totam rem aperiam eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo`.split(' ');
@@ -47,83 +48,112 @@ export default function LoremIpsum() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Controls */}
-      <div className="glass-card rounded-2xl border border-white/10 p-6 space-y-5">
-        {/* Type selector */}
-        <div className="space-y-2">
-          <label className="text-sm text-white/60 font-medium">Generate by</label>
-          <div className="flex gap-2 flex-wrap">
-            {(['paragraphs', 'sentences', 'words'] as const).map(t => (
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      {/* Result Display */}
+      <div className="lg:col-span-8 space-y-4">
+        <div className="rounded-md border border-white/[0.05] bg-white/[0.02] overflow-hidden">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.05]">
+            <div className="flex items-center gap-2">
+              <Type className="text-accent-blue" size={16} />
+              <h2 className="text-xs font-outfit font-bold uppercase tracking-widest text-white/80">Generated Output</h2>
+            </div>
+            {result && (
               <button
-                key={t}
-                onClick={() => setType(t)}
-                className={`px-4 py-2 rounded-xl text-sm font-medium capitalize transition-all ${
-                  type === t
-                    ? 'bg-violet-600 text-white'
-                    : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'
-                }`}
+                onClick={handleCopy}
+                className="flex items-center gap-2 text-white/40 hover:text-white transition-colors"
               >
-                {t}
+                {copied ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
+                <span className="text-[10px] font-bold uppercase tracking-widest font-inter">{copied ? 'Copied' : 'Copy'}</span>
               </button>
-            ))}
+            )}
+          </div>
+          <div className="p-8 min-h-[400px]">
+            {result ? (
+              <pre className="text-white/90 text-base leading-relaxed whitespace-pre-wrap font-inter">{result}</pre>
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center text-center space-y-4 opacity-20 py-20">
+                <RefreshCw size={48} className="animate-spin-slow" />
+                <p className="text-sm font-outfit uppercase tracking-widest font-bold">Press generate to start</p>
+              </div>
+            )}
           </div>
         </div>
-
-        {/* Count */}
-        <div className="space-y-2">
-          <label className="text-sm text-white/60 font-medium">Count: <span className="text-violet-400 font-bold">{count}</span></label>
-          <input
-            type="range"
-            min={1}
-            max={type === 'words' ? 500 : 20}
-            value={count}
-            onChange={e => setCount(Number(e.target.value))}
-            className="w-full accent-violet-500"
-          />
-          <div className="flex justify-between text-xs text-white/30">
-            <span>1</span><span>{type === 'words' ? 500 : 20}</span>
-          </div>
-        </div>
-
-        {/* HTML toggle */}
-        {type === 'paragraphs' && (
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setIncludeHtml(!includeHtml)}
-              className={`w-11 h-6 rounded-full relative transition-all ${includeHtml ? 'bg-violet-600' : 'bg-white/10'}`}
-            >
-              <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${includeHtml ? 'left-6' : 'left-1'}`} />
-            </button>
-            <span className="text-sm text-white/60">Wrap in <code className="text-violet-400">&lt;p&gt;</code> tags</span>
-          </div>
-        )}
-
-        <button
-          onClick={generate}
-          className="w-full py-3 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-semibold transition-all flex items-center justify-center gap-2"
-        >
-          <RefreshCw size={16} />
-          Generate Lorem Ipsum
-        </button>
       </div>
 
-      {/* Result */}
-      {result && (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-card rounded-2xl border border-white/10 overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
-            <span className="text-sm font-medium text-white/70">Generated Text</span>
+      {/* Configuration Sidebar */}
+      <div className="lg:col-span-4 space-y-6">
+        <div className="rounded-md border border-white/[0.05] bg-white/[0.02] p-6 space-y-6">
+          <div className="flex items-center gap-2">
+            <RefreshCw className="text-accent-blue" size={16} />
+            <h2 className="text-xs font-outfit font-bold uppercase tracking-widest text-white/80">Generator</h2>
+          </div>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-white/20 uppercase tracking-widest font-inter">Format</label>
+              <div className="grid grid-cols-1 gap-2">
+                {(['paragraphs', 'sentences', 'words'] as const).map(t => (
+                  <button
+                    key={t}
+                    onClick={() => setType(t)}
+                    className={cn(
+                      "px-4 py-3 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all text-left font-inter border",
+                      type === t
+                        ? "bg-accent-blue/10 border-accent-blue/30 text-white"
+                        : "bg-white/[0.02] border-white/[0.05] text-white/40 hover:border-white/10"
+                    )}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-4 pt-4">
+              <div className="flex justify-between items-end">
+                <label className="text-[10px] font-bold text-white/20 uppercase tracking-widest font-inter">Quantity</label>
+                <span className="text-xl font-bold text-accent-blue font-inter">{count}</span>
+              </div>
+              <input
+                type="range"
+                min={1}
+                max={type === 'words' ? 500 : 20}
+                value={count}
+                onChange={e => setCount(Number(e.target.value))}
+                className="w-full accent-accent-blue bg-white/5 h-1 rounded-full appearance-none cursor-pointer"
+              />
+            </div>
+
+            {type === 'paragraphs' && (
+              <button
+                onClick={() => setIncludeHtml(!includeHtml)}
+                className={cn(
+                  "flex items-center justify-between p-3 rounded-md border transition-all w-full mt-4",
+                  includeHtml ? "bg-accent-blue/5 border-accent-blue/30 text-white" : "bg-white/[0.01] border-white/[0.05] text-white/20 hover:border-white/10"
+                )}
+              >
+                <span className="text-[10px] font-bold uppercase tracking-widest font-inter">Include &lt;p&gt; tags</span>
+                <div className={cn(
+                  "w-6 h-3 rounded-full relative transition-colors",
+                  includeHtml ? "bg-accent-blue" : "bg-white/10"
+                )}>
+                  <div className={cn(
+                    "absolute top-0.5 w-2 h-2 rounded-full bg-white transition-all",
+                    includeHtml ? "left-3.5" : "left-0.5"
+                  )} />
+                </div>
+              </button>
+            )}
+
             <button
-              onClick={handleCopy}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/70 hover:text-white text-xs transition-all"
+              onClick={generate}
+              className="w-full py-4 bg-accent-blue text-white rounded-md font-bold text-xs uppercase tracking-widest hover:bg-accent-blue/90 transition-all font-inter mt-6 shadow-lg shadow-accent-blue/20"
             >
-              <Copy size={13} />
-              {copied ? 'Copied!' : 'Copy All'}
+              Generate Content
             </button>
           </div>
-          <pre className="p-4 text-white/80 text-sm leading-relaxed whitespace-pre-wrap font-sans">{result}</pre>
-        </motion.div>
-      )}
+        </div>
+      </div>
     </div>
   );
 }

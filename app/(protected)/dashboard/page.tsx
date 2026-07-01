@@ -6,7 +6,7 @@ import ToolGrid from '@/components/dashboard/ToolGrid';
 import AIChat from '@/components/dashboard/AIChat';
 import DashboardClient from '@/components/dashboard/DashboardClient';
 import WelcomeBanner from '@/components/dashboard/WelcomeBanner';
-import { ToastProvider } from '@/components/ui/Toast';
+
 
 export const metadata: Metadata = {
   title: 'Dashboard | Night X',
@@ -35,35 +35,40 @@ export default async function DashboardPage() {
   }
 
   return (
-    <ToastProvider>
-      <div className="flex flex-col min-h-screen">
-        <main className="flex-grow container mx-auto px-6 lg:px-8 py-12">
-          <div className="mb-12 px-2 md:px-0">
-            <h1 className="text-4xl md:text-5xl font-syne font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-white/40 leading-tight">
-              Welcome back, {session.user?.name?.split(' ')[0]}
-            </h1>
-            <p className="text-white/60 text-lg max-w-2xl font-dm-sans leading-relaxed">
-              Explore the Night X dashboard, search across tools, and open the features that fit your workflow.
-            </p>
+    <main className="flex-grow p-6 lg:p-10">
+      <header className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <h1 className="text-3xl md:text-4xl font-outfit font-bold text-white tracking-tight mb-2">
+            Welcome back, {session.user?.name?.split(' ')[0]}
+          </h1>
+          <p className="text-white/40 text-sm font-inter">
+            Explore your tools and AI assisted workflows.
+          </p>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          <div className="hidden md:flex h-10 items-center gap-2 rounded-md border border-white/[0.05] bg-white/[0.02] px-3 text-xs text-white/30">
+            <span className="flex h-2 w-2 rounded-full bg-green-500" />
+            System Online
           </div>
+        </div>
+      </header>
 
-          <Suspense fallback={null}>
-            <div className="px-2 md:px-0">
-              <WelcomeBanner />
-            </div>
-          </Suspense>
+      <Suspense fallback={null}>
+        <div className="mb-8">
+          <WelcomeBanner />
+        </div>
+      </Suspense>
 
-          <DashboardClient>
-            <Suspense fallback={<ToolGridSkeleton />}>
-              <ToolGrid />
-            </Suspense>
-          </DashboardClient>
-        </main>
-
-        <Suspense fallback={null}>
-          <AIChat />
+      <DashboardClient>
+        <Suspense fallback={<ToolGridSkeleton />}>
+          <ToolGrid />
         </Suspense>
-      </div>
-    </ToastProvider>
+      </DashboardClient>
+
+      <Suspense fallback={null}>
+        <AIChat />
+      </Suspense>
+    </main>
   );
 }

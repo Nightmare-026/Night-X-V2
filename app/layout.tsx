@@ -5,22 +5,18 @@ import SessionProvider from "@/components/providers/SessionProvider";
 import { SearchProvider } from "@/components/providers/SearchProvider";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import { Outfit, DM_Sans } from 'next/font/google';
+import ScrollObserver from "@/components/layout/ScrollObserver";
+import { Inter } from 'next/font/google';
+import { ToastProvider } from "@/components/ui/Toast";
 
-const outfit = Outfit({ 
+const inter = Inter({ 
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-outfit',
-});
-
-const dmSans = DM_Sans({ 
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-dm-sans',
+  variable: '--font-inter',
 });
 
 export const viewport: Viewport = {
-  themeColor: "#06080F",
+  themeColor: "#0A0A0F",
   width: "device-width",
   initialScale: 1,
 };
@@ -29,7 +25,7 @@ const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://nightx.app";
 
 export const metadata: Metadata = {
   title: {
-    default: "Night X | Elite Utility Tools Hub",
+    default: "Night X | One Hub. Every Tool You Need.",
     template: "%s | Night X",
   },
   metadataBase: new URL(siteUrl),
@@ -44,7 +40,7 @@ export const metadata: Metadata = {
     telephone: false,
   },
   openGraph: {
-    title: "Night X | Elite Utility Tools Hub",
+    title: "Night X | One Hub. Every Tool You Need.",
     description: "40+ elite browser-first tools for creators and developers. Secure, fast, and privacy-focused utility workspace.",
     url: siteUrl,
     siteName: "Night X",
@@ -61,7 +57,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Night X | Elite Utility Tools Hub",
+    title: "Night X | One Hub. Every Tool You Need.",
     description: "40+ elite browser-first tools for creators and developers. Secure, fast, and privacy-focused utility workspace.",
     images: ["/og-image.png"],
     creator: "@Nightmare_026",
@@ -79,23 +75,36 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${outfit.variable} ${dmSans.variable} overflow-x-hidden`}>
-      <body className="min-h-screen bg-background font-dm-sans antialiased selection:bg-accent-purple/30 overflow-x-hidden">
+    <html lang="en" suppressHydrationWarning className={`${inter.variable} overflow-x-hidden`}>
+      <body className="min-h-screen bg-background font-inter antialiased selection:bg-primary/40 overflow-x-hidden">
         <SessionProvider>
           <SearchProvider>
-            <div className="relative flex min-h-screen flex-col">
-              <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:p-4 focus:bg-accent-purple focus:text-white top-0 left-0">
-                Skip to main content
-              </a>
-              <Header />
-              <main id="main-content" className="flex-1 relative">
-                {children}
-              </main>
-              <Footer />
-            </div>
+            <ToastProvider>
+              <ScrollObserver />
+              
+              {/* Global Background Effects */}
+              <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+                <div className="absolute top-[-200px] left-[-200px] w-[600px] h-[600px] bg-primary/15 rounded-full blur-[60px] animate-blob-float-1" />
+                <div className="absolute top-[40%] right-[-200px] w-[500px] h-[500px] bg-accent-cyan/10 rounded-full blur-[60px] animate-blob-float-2" />
+                <div className="absolute bottom-[-200px] left-[30%] w-[400px] h-[400px] bg-accent-pink/8 rounded-full blur-[60px] animate-blob-float-3" />
+                <div className="noise-overlay" />
+              </div>
+
+              <div className="relative flex min-h-screen flex-col z-10">
+                <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:p-4 focus:bg-primary focus:text-white top-0 left-0">
+                  Skip to main content
+                </a>
+                <Header />
+                <main id="main-content" className="flex-1 relative">
+                  {children}
+                </main>
+                <Footer />
+              </div>
+            </ToastProvider>
           </SearchProvider>
         </SessionProvider>
       </body>
     </html>
   );
 }
+

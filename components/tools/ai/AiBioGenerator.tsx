@@ -1,10 +1,29 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Send, Copy, Check, RotateCcw, Sparkles, Loader2, Info, UserCircle, Share2, Instagram, Linkedin, Twitter, Globe } from 'lucide-react';
+import { 
+  Send, 
+  Copy, 
+  Check, 
+  RotateCcw, 
+  Sparkles, 
+  Loader2, 
+  Info, 
+  UserCircle, 
+  Share2, 
+  Instagram, 
+  Linkedin, 
+  Twitter, 
+  Globe,
+  Zap,
+  ChevronRight,
+  Fingerprint,
+  Cpu
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AIErrorMessage from '@/components/ui/AIErrorMessage';
 import { safeFetch } from '@/lib/fetch-utils';
+import { cn } from '@/lib/utils';
 
 const AiBioGenerator = () => {
   const [keywords, setKeywords] = useState('');
@@ -69,165 +88,200 @@ const AiBioGenerator = () => {
   const tones = ['Catchy', 'Professional', 'Minimalist', 'Funny', 'Mysterious'];
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
-      {/* Usage Header */}
-      <div className="flex justify-between items-center bg-white/5 border border-white/10 rounded-2xl p-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-accent-cyan/20 flex items-center justify-center text-accent-cyan">
-            <UserCircle size={20} />
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      {/* Left Panel: Identity Configuration (5 Columns) */}
+      <div className="lg:col-span-5 space-y-6">
+        <section className="glass-card border-white/[0.05] bg-black/40 p-6 rounded-md relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-4 opacity-5">
+            <Fingerprint size={120} />
           </div>
-          <div>
-            <h3 className="text-sm font-bold">AI Usage</h3>
-            <p className="text-[10px] text-white/40 uppercase tracking-widest">Free Daily Credits</p>
+
+          <div className="relative z-10 space-y-6">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="h-2 w-2 rounded-full bg-violet-400 shadow-[0_0_8px_rgba(167,139,250,0.6)]" />
+              <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-white/50 font-outfit">
+                Identity Configuration
+              </h2>
+            </div>
+
+            {/* Input Section */}
+            <div className="space-y-4">
+              <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest flex items-center gap-2">
+                <Sparkles size={12} className="text-violet-400" />
+                Profile Intelligence
+              </label>
+              <textarea
+                value={keywords}
+                onChange={(e) => setKeywords(e.target.value)}
+                placeholder="e.g. Software engineer, coffee lover, world traveler based in NYC..."
+                className="w-full h-40 bg-white/[0.02] border border-white/[0.05] rounded-md px-4 py-3 focus:outline-none focus:border-violet-400/50 transition-all resize-none text-sm text-white/80 leading-relaxed font-inter custom-scrollbar"
+              />
+            </div>
+
+            {/* Platform Selector */}
+            <div className="space-y-4">
+              <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest block">
+                Target Protocol (Platform)
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {platforms.map((p) => (
+                  <button
+                    key={p.name}
+                    onClick={() => setPlatform(p.name)}
+                    className={cn(
+                      "flex items-center justify-center gap-2 px-3 py-2 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all border",
+                      platform === p.name 
+                        ? "bg-violet-400/10 border-violet-400/30 text-violet-400 shadow-[0_0_15px_rgba(167,139,250,0.1)]" 
+                        : "bg-white/[0.02] border-white/[0.05] text-white/40 hover:bg-white/[0.05] hover:text-white"
+                    )}
+                  >
+                    {p.icon}
+                    {p.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Tone Selector */}
+            <div className="space-y-4">
+              <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest block">
+                Persona Aesthetic (Tone)
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {tones.map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setTone(t)}
+                    className={cn(
+                      "px-3 py-1.5 rounded-md text-[9px] font-bold uppercase tracking-widest transition-all border",
+                      tone === t 
+                        ? "border-violet-400/50 text-violet-400 bg-violet-400/5" 
+                        : "bg-white/[0.02] border-white/[0.05] text-white/40 hover:bg-white/10 hover:text-white"
+                    )}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Action Trigger */}
+            <button
+              onClick={handleGenerate}
+              disabled={!keywords.trim() || isLoading || usage.count >= usage.limit}
+              className="w-full py-4 rounded-md bg-violet-400 text-black font-bold text-xs uppercase tracking-[0.2em] shadow-lg shadow-violet-400/20 flex items-center justify-center gap-3 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-violet-300 transition-all group"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="animate-spin" size={16} />
+                  Synthesizing...
+                </>
+              ) : (
+                <>
+                  <Zap size={16} fill="currentColor" />
+                  Generate Identity
+                  <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
+            </button>
+            
+            {error && <AIErrorMessage error={error} />}
           </div>
-        </div>
-        <div className="text-right">
-          <p className="text-lg font-mono font-bold text-white">{usage.count}/{usage.limit}</p>
-          <div className="w-24 h-1.5 bg-white/10 rounded-full mt-1 overflow-hidden">
-            <motion.div 
-              initial={{ width: 0 }}
-              animate={{ width: `${(usage.count / usage.limit) * 100}%` }}
-              className="h-full bg-accent-cyan"
-            />
+
+          {/* Footer Trace */}
+          <div className="mt-8 pt-6 border-t border-white/[0.05] flex items-center justify-between opacity-50">
+            <div className="flex items-center gap-2">
+              <Cpu size={12} className="text-violet-400" />
+              <span className="text-[10px] font-mono text-white/40 tracking-tighter">BIO_ENGINE: VER_2.4</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <span className="text-[10px] font-mono text-white/40 block">CREDITS</span>
+                <span className="text-xs font-mono font-bold text-white">{usage.count}/{usage.limit}</span>
+              </div>
+            </div>
           </div>
-        </div>
+        </section>
+
+        {/* Info Module */}
+        <section className="glass-card border-white/[0.05] bg-black/40 p-6 rounded-md">
+          <div className="flex items-center gap-2 mb-4">
+            <Info size={14} className="text-violet-400" />
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/50">Identity Optimization</h3>
+          </div>
+          <div className="space-y-3 text-[11px] text-white/40 leading-relaxed font-inter">
+            <p><strong className="text-violet-400/80">Platform Integrity:</strong> Each platform has specific character limits and stylistic conventions. AI automatically adapts the output.</p>
+            <p><strong className="text-violet-400/80">Tone Mapping:</strong> Select &quot;Catchy&quot; for high engagement, or &quot;Professional&quot; for credibility-first environments like LinkedIn.</p>
+          </div>
+        </section>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Input Panel */}
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm space-y-6">
-          <div className="space-y-2">
-            <label className="text-xs text-white/40 uppercase tracking-widest font-bold flex items-center gap-2">
-              <Sparkles size={14} className="text-accent-cyan" />
-              TELL AI ABOUT YOURSELF
-            </label>
-            <textarea
-              value={keywords}
-              onChange={(e) => setKeywords(e.target.value)}
-              placeholder="e.g. Software engineer, coffee lover, world traveler based in NYC..."
-              className="w-full h-40 bg-black/30 border border-white/10 rounded-xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-accent-cyan/50 transition-all resize-none text-white/90 leading-relaxed font-light custom-scrollbar"
-            />
-          </div>
-
-          <div className="space-y-3">
-            <label className="text-[10px] text-white/40 uppercase tracking-widest font-bold">Target Platform</label>
-            <div className="grid grid-cols-3 gap-2">
-              {platforms.map((p) => (
-                <button
-                  key={p.name}
-                  onClick={() => setPlatform(p.name)}
-                  className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-medium transition-all ${
-                    platform === p.name 
-                    ? 'bg-accent-cyan text-black font-bold' 
-                    : 'bg-white/5 text-white/40 hover:bg-white/10 hover:text-white'
-                  }`}
-                >
-                  {p.icon}
-                  {p.name}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <label className="text-[10px] text-white/40 uppercase tracking-widest font-bold">Vibe / Tone</label>
-            <div className="flex flex-wrap gap-2">
-              {tones.map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setTone(t)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                    tone === t 
-                    ? 'border-accent-cyan text-accent-cyan border' 
-                    : 'bg-white/5 text-white/40 hover:bg-white/10 hover:text-white border border-transparent'
-                  }`}
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <button
-            onClick={handleGenerate}
-            disabled={!keywords.trim() || isLoading || usage.count >= usage.limit}
-            className="w-full py-4 rounded-xl bg-accent-cyan text-black font-bold text-sm shadow-lg shadow-accent-cyan/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-accent-cyan/90 transition-all"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="animate-spin" size={18} />
-                Generating...
-              </>
-            ) : (
-              <>
-                <Send size={18} />
-                GENERATE BIOS
-              </>
-            )}
-          </button>
+      {/* Right Panel: Generated Profiles (7 Columns) */}
+      <div className="lg:col-span-7 h-full">
+        <div className="glass-card border-white/[0.05] bg-black/40 p-8 rounded-md min-h-[600px] flex flex-col relative overflow-hidden h-full">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-violet-400/20 to-transparent" />
           
-          {error && (
-            <AIErrorMessage error={error} />
-          )}
-        </div>
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded bg-violet-400/10 flex items-center justify-center border border-violet-400/20">
+                <UserCircle size={16} className="text-violet-400" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-white font-outfit uppercase tracking-wider">Generated Profiles</h2>
+                <p className="text-[10px] text-white/30 uppercase tracking-widest font-mono">Neural Outputs // Identity Stack</p>
+              </div>
+            </div>
+          </div>
 
-        {/* Results Panel */}
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm flex flex-col">
-          <label className="text-xs text-white/40 uppercase tracking-widest font-bold mb-4">
-            GENERATED BIOS
-          </label>
-
-          <div className="flex-1 space-y-4 overflow-y-auto max-h-[600px] no-scrollbar pr-2">
+          <div className="flex-1 space-y-6 overflow-y-auto no-scrollbar pr-2">
             <AnimatePresence mode="popLayout">
               {results.length > 0 ? (
                 results.map((result, idx) => (
                   <motion.div
                     key={idx}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
+                    initial={{ opacity: 0, scale: 0.98, y: 10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
                     transition={{ delay: idx * 0.1 }}
-                    className="group relative bg-white/5 border border-white/5 rounded-2xl p-5 hover:bg-white/[0.07] transition-all"
+                    className="group relative bg-white/[0.03] border border-white/[0.05] rounded-md p-6 hover:bg-white/[0.05] hover:border-violet-400/30 transition-all shadow-inner"
                   >
-                    <div className="flex justify-between items-center mb-3">
-                      <span className="text-[10px] font-bold text-accent-cyan uppercase tracking-tighter">
-                        {result.type}
-                      </span>
+                    <div className="flex justify-between items-center mb-4">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[9px] font-bold text-violet-400 uppercase tracking-widest px-2 py-0.5 bg-violet-400/10 rounded-full border border-violet-400/20">
+                          {result.type}
+                        </span>
+                        <span className="text-[9px] text-white/20 font-mono">PROFILE_{idx + 1}.EXE</span>
+                      </div>
                       <button
                         onClick={() => handleCopy(result.text, idx)}
-                        className="p-2 bg-black/40 rounded-lg text-white/40 hover:text-white transition-all border border-white/5"
-                        title="Copy Bio"
+                        className="p-2 rounded-md bg-black/40 border border-white/[0.05] text-white/40 hover:text-violet-400 hover:border-violet-400/30 transition-all opacity-0 group-hover:opacity-100"
+                        title="Copy to Clipboard"
                       >
                         {copiedIndex === idx ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
                       </button>
                     </div>
-                    <p className="text-base text-white/90 leading-relaxed font-light italic">
+                    <p className="text-base text-white/90 leading-relaxed font-inter italic border-l-2 border-violet-400/20 pl-4">
                       &quot;{result.text}&quot;
                     </p>
                   </motion.div>
                 ))
               ) : (
-                <div className="h-full flex flex-col items-center justify-center text-center py-20 opacity-20">
-                  <UserCircle size={64} className="mb-4" />
-                  <p className="text-sm font-medium italic">
-                    {isLoading ? "Brewing your personality..." : "Your future bios will appear here"}
+                <div className="h-full flex flex-col items-center justify-center text-center py-20">
+                  <div className="w-20 h-20 rounded-md bg-white/[0.02] border border-white/[0.05] flex items-center justify-center text-white/5 mb-6 relative">
+                    <UserCircle size={40} className="relative z-10" />
+                    <div className="absolute inset-0 bg-violet-400/5 blur-xl rounded-full" />
+                  </div>
+                  <h3 className="text-sm font-bold text-white/40 uppercase tracking-[0.2em] mb-2 font-outfit">
+                    {isLoading ? "Synthesizing Identity..." : "Awaiting Parameters"}
+                  </h3>
+                  <p className="text-[11px] text-white/20 max-w-xs mx-auto leading-relaxed uppercase tracking-widest font-mono">
+                    {isLoading 
+                      ? "The identity engine is processing your keywords. Estimated completion: < 3s" 
+                      : "Configure your profile intelligence in the left module to generate identity variations."}
                   </p>
                 </div>
               )}
             </AnimatePresence>
           </div>
-        </div>
-      </div>
-
-      <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-        <h4 className="text-white/80 font-medium mb-3 flex items-center gap-2">
-          <Info size={18} className="text-accent-cyan" />
-          Optimizing your Bio
-        </h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-white/60 leading-relaxed">
-          <p>• <b>Instagram:</b> Keep it visual and use line breaks. Emojis help define your personality quickly.</p>
-          <p>• <b>LinkedIn:</b> Focus on achievements and value proposition. Professional but approachable works best.</p>
-          <p>• <b>Twitter:</b> Short, punchy, and include your current project or obsession.</p>
-          <p>• <b>TikTok:</b> Use trending keywords and a strong call to action (CTA).</p>
         </div>
       </div>
     </div>

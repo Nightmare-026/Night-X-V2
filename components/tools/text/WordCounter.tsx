@@ -10,14 +10,12 @@ export default function WordCounter() {
 
   const stats = useMemo(() => {
     const chars = text.length;
-    const charsNoSpaces = text.replace(/\s/g, '').length;
     const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
     const sentences = text === '' ? 0 : text.split(/[.!?]+/).filter(s => s.trim().length > 0).length;
     const paragraphs = text === '' ? 0 : text.split(/\n\s*\n/).filter(p => p.trim().length > 0).length;
     const lines = text === '' ? 0 : text.split('\n').length;
     const readingTime = words > 0 ? Math.max(1, Math.round(words / 200)) : 0;
-    const speakingTime = words > 0 ? Math.max(1, Math.round(words / 130)) : 0;
-    return { chars, charsNoSpaces, words, sentences, paragraphs, lines, readingTime, speakingTime };
+    return { chars, words, sentences, paragraphs, lines, readingTime };
   }, [text]);
 
   const handleCopy = async () => {
@@ -27,68 +25,71 @@ export default function WordCounter() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const statCards = [
-    { label: 'Words', value: stats.words, icon: <Type size={18} />, color: 'from-violet-500 to-purple-600' },
-    { label: 'Characters', value: stats.chars, icon: <FileText size={18} />, color: 'from-blue-500 to-cyan-500' },
-    { label: 'Chars (no spaces)', value: stats.charsNoSpaces, icon: <FileText size={18} />, color: 'from-emerald-500 to-teal-500' },
-    { label: 'Sentences', value: stats.sentences, icon: <FileText size={18} />, color: 'from-amber-500 to-orange-500' },
-    { label: 'Paragraphs', value: stats.paragraphs, icon: <FileText size={18} />, color: 'from-rose-500 to-pink-500' },
-    { label: 'Lines', value: stats.lines, icon: <FileText size={18} />, color: 'from-indigo-500 to-blue-500' },
-    { label: 'Reading Time', value: `~${stats.readingTime} min`, icon: <Clock size={18} />, color: 'from-teal-500 to-emerald-600' },
-    { label: 'Speaking Time', value: `~${stats.speakingTime} min`, icon: <Eye size={18} />, color: 'from-pink-500 to-rose-600' },
+  const statItems = [
+    { label: 'Words', value: stats.words },
+    { label: 'Characters', value: stats.chars },
+    { label: 'Sentences', value: stats.sentences },
+    { label: 'Paragraphs', value: stats.paragraphs },
+    { label: 'Lines', value: stats.lines },
+    { label: 'Read Time', value: `${stats.readingTime}m` },
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {statCards.map((card, i) => (
-          <motion.div
-            key={card.label}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.04 }}
-            className="glass-card p-4 rounded-xl border border-white/10 flex flex-col gap-2"
-          >
-            <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${card.color} flex items-center justify-center text-white`}>
-              {card.icon}
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      {/* Left Column: Input */}
+      <div className="lg:col-span-8 space-y-4">
+        <div className="rounded-md border border-white/[0.05] bg-white/[0.02] overflow-hidden focus-within:border-accent-blue/30 transition-colors">
+          <div className="flex items-center justify-between px-4 py-2 border-b border-white/[0.05] bg-white/[0.01]">
+            <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Input Text</span>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setText('')}
+                className="p-1.5 text-white/20 hover:text-red-400 transition-colors"
+                title="Clear"
+              >
+                <Trash2 size={14} />
+              </button>
+              <button
+                onClick={handleCopy}
+                className="p-1.5 text-white/20 hover:text-accent-blue transition-colors"
+                title="Copy"
+              >
+                <Copy size={14} />
+              </button>
             </div>
-            <p className="text-2xl font-syne font-bold text-white">{card.value}</p>
-            <p className="text-xs text-white/50">{card.label}</p>
-          </motion.div>
-        ))}
+          </div>
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Paste your text here..."
+            className="w-full h-[400px] bg-transparent p-6 text-sm text-white/80 outline-none resize-none font-inter leading-relaxed placeholder:text-white/10"
+          />
+        </div>
       </div>
 
-      {/* Text Input */}
-      <div className="glass-card rounded-2xl border border-white/10 overflow-hidden">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
-          <span className="text-sm font-medium text-white/70">Your Text</span>
-          <div className="flex gap-2">
-            <button
-              onClick={handleCopy}
-              disabled={!text}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/70 hover:text-white text-xs transition-all disabled:opacity-40"
-            >
-              <Copy size={13} />
-              {copied ? 'Copied!' : 'Copy'}
-            </button>
-            <button
-              onClick={() => setText('')}
-              disabled={!text}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-red-500/20 text-white/70 hover:text-red-400 text-xs transition-all disabled:opacity-40"
-            >
-              <Trash2 size={13} />
-              Clear
-            </button>
+      {/* Right Column: Results/Stats */}
+      <div className="lg:col-span-4 space-y-6">
+        <div className="rounded-md border border-white/[0.05] bg-white/[0.02] p-6">
+          <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/20 mb-6">Real-time Analysis</h3>
+          <div className="grid grid-cols-2 gap-4">
+            {statItems.map((item) => (
+              <div key={item.label} className="space-y-1">
+                <p className="text-[10px] font-bold text-white/20 uppercase tracking-tight">{item.label}</p>
+                <p className="text-xl font-outfit font-bold text-white">{item.value}</p>
+              </div>
+            ))}
           </div>
         </div>
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Start typing or paste your text here to get real-time statistics…"
-          rows={14}
-          className="w-full bg-transparent text-white/90 p-4 resize-none outline-none placeholder:text-white/25 text-sm leading-relaxed font-mono"
-        />
+
+        <div className="rounded-md border border-white/[0.05] bg-accent-blue/5 p-6">
+          <div className="flex items-center gap-3 mb-2 text-accent-blue">
+            <Clock size={16} />
+            <span className="text-xs font-bold uppercase tracking-widest">Efficiency</span>
+          </div>
+          <p className="text-xs text-white/40 leading-relaxed font-inter">
+            Processing large volumes of text? Use our PRO tools for bulk analysis and API access.
+          </p>
+        </div>
       </div>
     </div>
   );

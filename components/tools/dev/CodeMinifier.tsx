@@ -1,7 +1,7 @@
 'use client';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 import { 
   Zap, 
   Copy, 
@@ -10,7 +10,9 @@ import {
   FileCode,
   Shrink,
   Layout,
-  Code
+  Code as CodeIcon,
+  ShieldCheck,
+  TrendingDown
 } from 'lucide-react';
 
 type Language = 'html' | 'css' | 'javascript';
@@ -91,132 +93,138 @@ export default function CodeMinifier() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  const handleClear = () => {
+    setInput('');
+    setOutput('');
+    setStats(null);
+  };
+
   return (
-    <div className="space-y-6">
-      {/* Header / Language Selection */}
-      <div className="flex flex-wrap gap-4 items-center justify-between bg-white/5 p-4 rounded-2xl border border-white/10">
-        <div className="flex gap-2">
-          {(['javascript', 'css', 'html'] as Language[]).map((lang) => (
-            <button
-              key={lang}
-              onClick={() => setLanguage(lang)}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                language === lang 
-                  ? 'bg-accent-cyan text-black font-bold shadow-lg shadow-cyan-500/20' 
-                  : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'
-              }`}
-            >
-              {lang.toUpperCase()}
-            </button>
-          ))}
-        </div>
-
-        {stats && (
-          <div className="flex gap-6 text-sm">
-            <div className="flex flex-col items-end">
-              <span className="text-white/40 text-[10px] uppercase">Reduction</span>
-              <span className="text-green-400 font-bold">{stats.savings.toFixed(1)}%</span>
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        {/* Left Panel: Compression Logic */}
+        <div className="lg:col-span-5 space-y-6">
+          <div className="bg-white/[0.02] border border-white/[0.05] rounded-md p-8 space-y-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Shrink className="text-cyan-400" size={16} />
+                <h3 className="text-xs font-outfit font-bold uppercase tracking-widest text-white/80">Compression Logic</h3>
+              </div>
+              <button 
+                onClick={handleClear}
+                className="text-white/20 hover:text-red-400 transition-colors"
+                title="Flush Buffer"
+              >
+                <Trash2 size={14} />
+              </button>
             </div>
-            <div className="flex flex-col items-end border-l border-white/10 pl-6">
-              <span className="text-white/40 text-[10px] uppercase">Final Size</span>
-              <span className="text-white font-mono">{formatSize(stats.minified)}</span>
+
+            {/* Language Selector */}
+            <div className="grid grid-cols-3 gap-2 p-1 bg-black/40 rounded-md border border-white/[0.05]">
+              {(['javascript', 'css', 'html'] as Language[]).map((lang) => (
+                <button
+                  key={lang}
+                  onClick={() => setLanguage(lang)}
+                  className={cn(
+                    "py-2.5 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all",
+                    language === lang ? "bg-cyan-400 text-black" : "text-white/40 hover:text-white"
+                  )}
+                >
+                  {lang}
+                </button>
+              ))}
+            </div>
+
+            {/* Stats Module */}
+            {stats && (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-white/[0.02] border border-white/[0.05] rounded-md space-y-1">
+                  <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Reduction</div>
+                  <div className="text-lg font-outfit font-bold text-emerald-400 tracking-wider">-{stats.savings.toFixed(1)}%</div>
+                </div>
+                <div className="p-4 bg-white/[0.02] border border-white/[0.05] rounded-md space-y-1">
+                  <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Final Size</div>
+                  <div className="text-lg font-outfit font-bold text-white tracking-wider">{formatSize(stats.minified)}</div>
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-3">
+              <label className="text-[10px] font-bold text-white/20 uppercase tracking-widest px-1">Source Payload</label>
+              <textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder={`Paste ${language.toUpperCase()} protocol...`}
+                className="w-full h-64 bg-black/40 border border-white/[0.05] rounded-md px-6 py-5 text-sm font-mono focus:outline-none focus:border-cyan-400/50 transition-all resize-none scrollbar-hide"
+              />
+            </div>
+
+            <button
+              onClick={handleMinify}
+              disabled={!input.trim()}
+              className="w-full py-4 bg-cyan-400 hover:bg-cyan-300 disabled:bg-white/5 disabled:text-white/20 text-black rounded-md font-outfit font-bold text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 shadow-lg shadow-cyan-400/10"
+            >
+              <Zap size={14} className="fill-current" />
+              Compress Protocol
+            </button>
+          </div>
+        </div>
+
+        {/* Right Panel: Compressed Output */}
+        <div className="lg:col-span-7 space-y-6">
+          <div className="bg-white/[0.02] border border-white/[0.05] rounded-md p-8 relative overflow-hidden min-h-[600px] flex flex-col">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-400/5 blur-[100px] rounded-full" />
+            
+            <div className="relative z-10 flex flex-col h-full flex-1">
+              <div className="flex items-center justify-between mb-12">
+                <div>
+                  <div className="text-[10px] font-bold tracking-[0.2em] text-cyan-400 uppercase mb-2">Compressed Stream</div>
+                  <h2 className="text-xl font-outfit font-bold text-white uppercase tracking-widest">Optimized Payload</h2>
+                </div>
+                {output && (
+                  <button
+                    onClick={handleCopy}
+                    className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-md border border-white/[0.05] transition-all"
+                  >
+                    {copied ? <Check size={14} className="text-cyan-400" /> : <Copy size={14} className="text-white/40" />}
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-white/60">{copied ? 'Copied' : 'Export'}</span>
+                  </button>
+                )}
+              </div>
+
+              <div className="flex-1 space-y-8">
+                <div className="w-full flex-1 min-h-[300px] bg-black/60 border border-white/[0.05] rounded-md p-6 font-mono text-sm overflow-y-auto text-white/80 scrollbar-hide">
+                  {output ? (
+                    <div className="break-all">{output}</div>
+                  ) : (
+                    <span className="text-white/10 italic">Awaiting Compression Feed...</span>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-8 border-t border-white/[0.05]">
+                  <div className="p-6 bg-white/[0.02] border border-white/[0.05] rounded-md space-y-4">
+                    <div className="flex items-center gap-3 text-cyan-400">
+                      <TrendingDown size={14} />
+                      <span className="text-[10px] font-bold uppercase tracking-widest">LCP Optimization</span>
+                    </div>
+                    <p className="text-[10px] text-white/40 leading-relaxed font-inter uppercase tracking-widest">
+                      Reduces Largest Contentful Paint by stripping non-functional characters and comments.
+                    </p>
+                  </div>
+                  <div className="p-6 bg-white/[0.02] border border-white/[0.05] rounded-md space-y-4">
+                    <div className="flex items-center gap-3 text-emerald-400">
+                      <ShieldCheck size={14} />
+                      <span className="text-[10px] font-bold uppercase tracking-widest">Privacy Protocol</span>
+                    </div>
+                    <p className="text-[10px] text-white/40 leading-relaxed font-inter uppercase tracking-widest">
+                      All minification logic is executed within the local browser sandbox environment.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        )}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Input */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between px-2">
-            <label className="text-sm font-medium text-white/60 flex items-center gap-2">
-              <FileCode className="w-4 h-4 text-accent-cyan" />
-              Source Code
-            </label>
-            <button 
-              onClick={() => { setInput(''); setOutput(''); setStats(null); }}
-              className="text-white/40 hover:text-red-400 transition-colors"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
-          </div>
-          <textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder={`Paste your ${language.toUpperCase()} code here...`}
-            className="w-full h-[350px] bg-black/40 border border-white/10 rounded-2xl p-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all resize-none"
-          />
-        </div>
-
-        {/* Output */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between px-2">
-            <label className="text-sm font-medium text-white/60 flex items-center gap-2">
-              <Shrink className="w-4 h-4 text-green-400" />
-              Minified Output
-            </label>
-            <button
-              onClick={handleCopy}
-              disabled={!output}
-              className={`flex items-center gap-2 px-3 py-1 rounded-lg text-xs font-medium transition-all ${
-                copied 
-                  ? 'bg-green-500/20 text-green-400 border border-green-500/50' 
-                  : 'bg-white/5 text-white/60 hover:bg-white/10 border border-white/10 disabled:opacity-50'
-              }`}
-            >
-              {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-              {copied ? 'Copied' : 'Copy'}
-            </button>
-          </div>
-          <textarea
-            value={output}
-            readOnly
-            placeholder="Minified code will appear here..."
-            className="w-full h-[350px] bg-black/40 border border-white/10 rounded-2xl p-4 font-mono text-sm focus:outline-none transition-all resize-none text-white/80"
-          />
-        </div>
-      </div>
-
-      <div className="flex justify-center">
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={handleMinify}
-          disabled={!input.trim()}
-          className="px-8 py-4 bg-gradient-to-r from-cyan-600 to-blue-600 rounded-2xl font-syne font-bold text-lg shadow-xl shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all disabled:opacity-50"
-        >
-          Minify Now <Zap className="inline-block ml-2 w-5 h-5 fill-current" />
-        </motion.button>
-      </div>
-
-      {/* Info Sections */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6">
-        <div className="bg-white/5 p-5 rounded-2xl border border-white/10 hover:bg-white/10 transition-all">
-          <div className="w-10 h-10 bg-cyan-500/10 rounded-xl flex items-center justify-center mb-4 text-cyan-400">
-            <Code className="w-6 h-6" />
-          </div>
-          <h3 className="text-sm font-bold mb-2">JS Compression</h3>
-          <p className="text-xs text-white/40 leading-relaxed">
-            Removes comments, extra whitespace, and collapses multi-line statements to reduce file size.
-          </p>
-        </div>
-        <div className="bg-white/5 p-5 rounded-2xl border border-white/10 hover:bg-white/10 transition-all">
-          <div className="w-10 h-10 bg-purple-500/10 rounded-xl flex items-center justify-center mb-4 text-purple-400">
-            <Layout className="w-6 h-6" />
-          </div>
-          <h3 className="text-sm font-bold mb-2">CSS Optimization</h3>
-          <p className="text-xs text-white/40 leading-relaxed">
-            Strips comments and redundant spacing around selectors and rules for faster style loading.
-          </p>
-        </div>
-        <div className="bg-white/5 p-5 rounded-2xl border border-white/10 hover:bg-white/10 transition-all">
-          <div className="w-10 h-10 bg-orange-500/10 rounded-xl flex items-center justify-center mb-4 text-orange-400">
-            <Zap className="w-6 h-6" />
-          </div>
-          <h3 className="text-sm font-bold mb-2">HTML Cleaning</h3>
-          <p className="text-xs text-white/40 leading-relaxed">
-            Eliminates unnecessary line breaks and attribute spacing to improve LCP scores.
-          </p>
         </div>
       </div>
     </div>

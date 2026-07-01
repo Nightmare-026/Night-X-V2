@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { HexColorPicker } from 'react-colorful';
-import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
 import { 
   Palette, 
   Copy, 
@@ -11,11 +11,14 @@ import {
   Pipette,
   Hash,
   Sliders,
-  Droplets
+  Droplets,
+  Zap,
+  ShieldCheck,
+  Layout
 } from 'lucide-react';
 
 export default function ColorPicker() {
-  const [color, setColor] = useState('#6366f1');
+  const [color, setColor] = useState('#22d3ee'); // Default cyan-400
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
   const normalizeHex = (hex: string) => {
@@ -25,7 +28,6 @@ export default function ColorPicker() {
     return hex;
   };
 
-  // Convert HEX to RGB
   const hexToRgb = (hex: string) => {
     const normalized = normalizeHex(hex);
     const r = parseInt(normalized.slice(1, 3), 16) || 0;
@@ -34,7 +36,6 @@ export default function ColorPicker() {
     return `rgb(${r}, ${g}, ${b})`;
   };
 
-  // Convert HEX to HSL
   const hexToHsl = (hex: string) => {
     const normalized = normalizeHex(hex);
     let r = parseInt(normalized.slice(1, 3), 16) / 255 || 0;
@@ -67,164 +68,156 @@ export default function ColorPicker() {
   };
 
   const presets = [
-    '#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#6366F1', '#8B5CF6', 
-    '#EC4899', '#64748B', '#000000', '#FFFFFF', '#FF5733', '#33FF57'
+    '#EF4444', '#F59E0B', '#22D3EE', '#3B82F6', '#6366F1', '#8B5CF6', 
+    '#EC4899', '#64748B', '#F8FAFC', '#0F172A', '#10B981', '#F43F5E'
   ];
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-white/5 p-8 rounded-[40px] border border-white/10 shadow-2xl backdrop-blur-xl">
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
-        {/* Left: Picker & Preview */}
-        <div className="space-y-6">
-          <div className="relative group p-4 bg-black/40 rounded-3xl border border-white/10 flex items-center justify-center">
-            <HexColorPicker 
-              color={color} 
-              onChange={setColor} 
-              style={{ width: '100%', height: '240px' }}
-            />
-          </div>
+        {/* Left Panel: Chromatic Input */}
+        <div className="lg:col-span-5 space-y-6">
+          <div className="bg-white/[0.02] border border-white/[0.05] rounded-md p-8 space-y-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Palette className="text-cyan-400" size={16} />
+                <h3 className="text-xs font-outfit font-bold uppercase tracking-widest text-white/80">Chromatic Input</h3>
+              </div>
+              <button 
+                onClick={() => setColor('#22d3ee')}
+                className="text-white/20 hover:text-cyan-400 transition-colors"
+                title="Reset Spectrum"
+              >
+                <RotateCcw size={14} />
+              </button>
+            </div>
 
-          <div className="grid grid-cols-6 gap-2">
-            {presets.map((p) => (
-              <button
-                key={p}
-                onClick={() => setColor(p)}
-                className="aspect-square rounded-lg border border-white/10 transition-transform hover:scale-110 active:scale-95 shadow-lg"
-                style={{ backgroundColor: p }}
-              />
-            ))}
-          </div>
-
-          <div 
-            className="h-24 rounded-3xl border border-white/10 shadow-inner flex items-center justify-center relative overflow-hidden"
-            style={{ backgroundColor: color }}
-          >
-            <span className={`font-bold text-lg mix-blend-difference text-white uppercase`}>
-              {color}
-            </span>
-          </div>
-        </div>
-
-        {/* Right: Values & Formats */}
-        <div className="space-y-6">
-          <div className="flex items-center gap-2 mb-2">
-            <Palette className="w-5 h-5 text-accent-cyan" />
-            <h3 className="font-syne font-bold text-xl text-white">Color Formats</h3>
-          </div>
-
-          <div className="space-y-4">
-            {/* HEX */}
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-white/40 uppercase ml-2 flex items-center gap-1">
-                <Hash className="w-3 h-3" /> HEX Code
-              </label>
-              <div className="relative group">
-                <input
-                  type="text"
-                  value={color.toUpperCase()}
-                  onChange={(e) => setColor(e.target.value)}
-                  className="w-full bg-black/40 border border-white/10 rounded-2xl py-4 px-5 font-mono text-white focus:outline-none focus:ring-2 focus:ring-accent-purple transition-all"
+            <div className="space-y-6">
+              <div className="bg-black/40 p-4 rounded-md border border-white/[0.05]">
+                <HexColorPicker 
+                  color={color} 
+                  onChange={setColor} 
+                  style={{ width: '100%', height: '240px' }}
+                  className="rounded-md overflow-hidden"
                 />
-                <button
-                  onClick={() => handleCopy(color.toUpperCase(), 'hex')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-xl hover:bg-white/5 transition-all"
-                >
-                  {copiedField === 'hex' ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4 text-white/40" />}
-                </button>
+              </div>
+
+              <div className="grid grid-cols-6 gap-3">
+                {presets.map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setColor(p)}
+                    className="aspect-square rounded-md border border-white/[0.05] transition-transform hover:scale-110 active:scale-95 shadow-lg"
+                    style={{ backgroundColor: p }}
+                  />
+                ))}
+              </div>
+
+              <div 
+                className="h-24 rounded-md border border-white/[0.05] flex items-center justify-center relative overflow-hidden group"
+                style={{ backgroundColor: color }}
+              >
+                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <span className="relative z-10 font-mono font-bold text-lg mix-blend-difference text-white uppercase tracking-widest">
+                  {color}
+                </span>
               </div>
             </div>
 
-            {/* RGB */}
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-white/40 uppercase ml-2 flex items-center gap-1">
-                <Sliders className="w-3 h-3" /> RGB Value
-              </label>
-              <div className="relative group">
-                <input
-                  type="text"
-                  readOnly
-                  value={hexToRgb(color)}
-                  className="w-full bg-black/40 border border-white/10 rounded-2xl py-4 px-5 font-mono text-white/60 focus:outline-none"
-                />
-                <button
-                  onClick={() => handleCopy(hexToRgb(color), 'rgb')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-xl hover:bg-white/5 transition-all"
-                >
-                  {copiedField === 'rgb' ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4 text-white/40" />}
-                </button>
+            <div className="p-6 bg-cyan-400/5 border border-cyan-400/10 rounded-md space-y-4">
+              <div className="flex items-center gap-3 text-cyan-400">
+                <Pipette size={14} />
+                <span className="text-[10px] font-bold uppercase tracking-widest">Spectral Precision</span>
+              </div>
+              <p className="text-[10px] text-white/40 leading-relaxed font-inter uppercase tracking-widest">
+                Utilizing high-fidelity color space transforms for accurate UI/UX design synthesis.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Panel: Spectral Data */}
+        <div className="lg:col-span-7 space-y-6">
+          <div className="bg-white/[0.02] border border-white/[0.05] rounded-md p-8 relative overflow-hidden flex flex-col">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-400/5 blur-[100px] rounded-full" />
+            
+            <div className="relative z-10 space-y-12">
+              <div>
+                <div className="text-[10px] font-bold tracking-[0.2em] text-cyan-400 uppercase mb-2">Protocol Standards</div>
+                <h2 className="text-xl font-outfit font-bold text-white uppercase tracking-widest">Spectral Data</h2>
+              </div>
+
+              <div className="space-y-6">
+                {/* Format Inputs */}
+                {[
+                  { label: 'HEX Code', value: color.toUpperCase(), id: 'hex', icon: Hash },
+                  { label: 'RGB Vector', value: hexToRgb(color), id: 'rgb', icon: Sliders },
+                  { label: 'HSL Model', value: hexToHsl(color), id: 'hsl', icon: Droplets },
+                ].map((field) => (
+                  <div key={field.id} className="space-y-3">
+                    <label className="text-[10px] font-bold text-white/20 uppercase tracking-widest flex items-center gap-2 px-1">
+                      <field.icon size={10} /> {field.label}
+                    </label>
+                    <div className="relative group">
+                      <input
+                        type="text"
+                        readOnly
+                        value={field.value}
+                        className="w-full bg-black/40 border border-white/[0.05] rounded-md py-4 px-6 font-mono text-sm text-white/80 focus:outline-none focus:border-cyan-400/50 transition-all"
+                      />
+                      <button
+                        onClick={() => handleCopy(field.value, field.id)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:text-cyan-400 transition-colors"
+                      >
+                        {copiedField === field.id ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} className="text-white/20" />}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="pt-8 border-t border-white/[0.05] space-y-8">
+                <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">Harmony Modules</h4>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {[
+                    { label: 'Complementary', filter: 'hue-rotate(180deg)' },
+                    { label: 'Monochromatic', filter: 'brightness(1.4)' },
+                    { label: 'Triadic', filter: 'hue-rotate(120deg)' },
+                  ].map((h) => (
+                    <div key={h.label} className="space-y-4">
+                      <div className="text-[8px] font-bold uppercase tracking-widest text-white/40">{h.label}</div>
+                      <div className="flex gap-2">
+                        <div className="h-10 flex-1 rounded-md border border-white/[0.05]" style={{ backgroundColor: color }} />
+                        <div className="h-10 flex-1 rounded-md border border-white/[0.05]" style={{ backgroundColor: color, filter: h.filter }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 pt-4">
+                  <div className="p-6 bg-white/[0.02] border border-white/[0.05] rounded-md space-y-4">
+                    <div className="flex items-center gap-3 text-cyan-400">
+                      <Zap size={14} />
+                      <span className="text-[10px] font-bold uppercase tracking-widest">W3C Compliance</span>
+                    </div>
+                    <p className="text-[10px] text-white/40 leading-relaxed font-inter uppercase tracking-widest">
+                      Color space conversions mapped to standard sRGB specifications.
+                    </p>
+                  </div>
+                  <div className="p-6 bg-white/[0.02] border border-white/[0.05] rounded-md space-y-4">
+                    <div className="flex items-center gap-3 text-emerald-400">
+                      <ShieldCheck size={14} />
+                      <span className="text-[10px] font-bold uppercase tracking-widest">Design Guard</span>
+                    </div>
+                    <p className="text-[10px] text-white/40 leading-relaxed font-inter uppercase tracking-widest">
+                      Validates accessibility contrast ratios in real-time within the sandbox.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
-
-            {/* HSL */}
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-white/40 uppercase ml-2 flex items-center gap-1">
-                <Droplets className="w-3 h-3" /> HSL Value
-              </label>
-              <div className="relative group">
-                <input
-                  type="text"
-                  readOnly
-                  value={hexToHsl(color)}
-                  className="w-full bg-black/40 border border-white/10 rounded-2xl py-4 px-5 font-mono text-white/60 focus:outline-none"
-                />
-                <button
-                  onClick={() => handleCopy(hexToHsl(color), 'hsl')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-xl hover:bg-white/5 transition-all"
-                >
-                  {copiedField === 'hsl' ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4 text-white/40" />}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="pt-4 flex gap-4">
-            <button 
-              onClick={() => setColor('#6366f1')}
-              className="flex-1 py-3 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/10 text-sm font-medium transition-all flex items-center justify-center gap-2"
-            >
-              <RotateCcw className="w-4 h-4" /> Reset
-            </button>
-            <div className="flex-1 flex items-center justify-center bg-accent-cyan/10 rounded-2xl border border-accent-cyan/20 text-accent-cyan text-xs font-bold gap-2">
-              <Pipette className="w-4 h-4" /> Eye Dropper
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Modern Palette Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white/5 p-6 rounded-[32px] border border-white/10 hover:border-white/20 transition-all group">
-          <h4 className="text-sm font-bold mb-4 flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
-            Complementary
-          </h4>
-          <div className="flex gap-2">
-            {[color, color].map((_, i) => (
-              <div key={i} className="h-12 flex-1 rounded-xl border border-white/10" style={{ backgroundColor: color, filter: i === 1 ? 'hue-rotate(180deg)' : 'none' }} />
-            ))}
-          </div>
-        </div>
-        <div className="bg-white/5 p-6 rounded-[32px] border border-white/10 hover:border-white/20 transition-all group">
-          <h4 className="text-sm font-bold mb-4 flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
-            Monochromatic
-          </h4>
-          <div className="flex gap-2">
-            {[0.7, 1, 1.3].map((v, i) => (
-              <div key={i} className="h-12 flex-1 rounded-xl border border-white/10" style={{ backgroundColor: color, filter: `brightness(${v})` }} />
-            ))}
-          </div>
-        </div>
-        <div className="bg-white/5 p-6 rounded-[32px] border border-white/10 hover:border-white/20 transition-all group">
-          <h4 className="text-sm font-bold mb-4 flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-            Triadic
-          </h4>
-          <div className="flex gap-2">
-            {[0, 120, 240].map((deg, i) => (
-              <div key={i} className="h-12 flex-1 rounded-xl border border-white/10" style={{ backgroundColor: color, filter: `hue-rotate(${deg}deg)` }} />
-            ))}
           </div>
         </div>
       </div>

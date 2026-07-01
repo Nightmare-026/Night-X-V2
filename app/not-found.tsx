@@ -29,7 +29,7 @@ export default function NotFound() {
           </h2>
           
           <p className="text-white/50 mb-12 max-w-md mx-auto font-dm-sans text-lg">
-            The tool or page you are looking for has been moved or doesn't exist in this sector.
+            The tool or page you are looking for has been moved or doesn&apos;t exist in this sector.
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

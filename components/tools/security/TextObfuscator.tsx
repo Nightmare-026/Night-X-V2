@@ -1,11 +1,12 @@
 'use client';
+import { cn } from '@/lib/utils';
 
 import React, { useState } from 'react';
 import { Lock, Unlock, Key, Copy, Check, RotateCcw, ShieldCheck, AlertCircle, EyeOff, Eye } from 'lucide-react';
 import CryptoJS from 'crypto-js';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const TextObfuscator = () => {
+export default function TextObfuscator() {
   const [mode, setMode] = useState<'obfuscate' | 'deobfuscate'>('obfuscate');
   const [inputText, setInputText] = useState('');
   const [secretKey, setSecretKey] = useState('');
@@ -15,7 +16,7 @@ const TextObfuscator = () => {
 
   const handleProcess = () => {
     if (!inputText || !secretKey) {
-      setError('Please provide both text and a secret key.');
+      setError('Key and Input required for protocol.');
       return;
     }
 
@@ -31,7 +32,7 @@ const TextObfuscator = () => {
         setResult(decrypted);
       }
     } catch (err) {
-      setError('Processing failed. Please check your secret key and input data.');
+      setError('Cryptographic mismatch. Verify key integrity.');
       setResult('');
     }
   };
@@ -50,144 +51,165 @@ const TextObfuscator = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-3xl mx-auto">
-      {/* Mode Selector */}
-      <div className="flex bg-white/5 p-1 rounded-2xl border border-white/10 w-full max-w-sm mx-auto">
-        <button
-          onClick={() => setMode('obfuscate')}
-          className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all ${
-            mode === 'obfuscate' ? 'bg-accent-purple text-white shadow-lg' : 'text-white/60 hover:text-white'
-          }`}
-        >
-          <EyeOff size={18} />
-          Obfuscate
-        </button>
-        <button
-          onClick={() => setMode('deobfuscate')}
-          className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all ${
-            mode === 'deobfuscate' ? 'bg-accent-cyan text-white shadow-lg' : 'text-white/60 hover:text-white'
-          }`}
-        >
-          <Eye size={18} />
-          De-obfuscate
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 gap-6">
-        {/* Input Controls */}
-        <div className="glass-card border border-white/10 rounded-2xl p-6 backdrop-blur-sm space-y-4">
-          <div>
-            <label className="block text-sm text-white/40 mb-2 font-medium uppercase tracking-wider font-syne">Security Key</label>
-            <div className="relative">
-              <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={18} />
-              <input
-                type="password"
-                value={secretKey}
-                onChange={(e) => setSecretKey(e.target.value)}
-                placeholder="Enter your security protocol key..."
-                className="w-full bg-black/20 border border-white/10 rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:border-accent-purple/50 transition-all font-mono"
-              />
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        {/* Left Panel: Protocol Parameters */}
+        <div className="lg:col-span-5 space-y-6">
+          <div className="bg-white/[0.02] border border-white/[0.05] rounded-md p-8 space-y-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Lock className="text-emerald-400" size={16} />
+                <h3 className="text-xs font-outfit font-bold uppercase tracking-widest text-white/80">Protocol Parameters</h3>
+              </div>
+              <button
+                onClick={handleReset}
+                className="text-[10px] font-bold text-white/20 hover:text-red-400 uppercase tracking-widest transition-colors"
+              >
+                Reset
+              </button>
             </div>
-          </div>
 
-          <div>
-            <label className="block text-sm text-white/40 mb-2 font-medium uppercase tracking-wider font-syne">
-              {mode === 'obfuscate' ? 'Plaintext to Secure' : 'Obfuscated Protocol Data'}
-            </label>
-            <textarea
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              placeholder={mode === 'obfuscate' ? 'Enter text to be secured...' : 'Paste the obfuscated string here...'}
-              className="w-full h-32 bg-black/20 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-accent-purple/50 transition-all resize-none font-mono text-sm"
-            />
-          </div>
+            {/* Mode Switch */}
+            <div className="flex bg-black/40 p-1 rounded-md border border-white/[0.05]">
+              <button
+                onClick={() => setMode('obfuscate')}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-2 py-3 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all",
+                  mode === 'obfuscate' ? "bg-emerald-400 text-black" : "text-white/40 hover:text-white"
+                )}
+              >
+                Obfuscate
+              </button>
+              <button
+                onClick={() => setMode('deobfuscate')}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-2 py-3 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all",
+                  mode === 'deobfuscate' ? "bg-emerald-400 text-black" : "text-white/40 hover:text-white"
+                )}
+              >
+                De-obfuscate
+              </button>
+            </div>
 
-          <div className="flex gap-3 pt-2">
-            <button
-              onClick={handleProcess}
-              className={`flex-1 py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] ${
-                mode === 'obfuscate' 
-                  ? 'bg-gradient-to-r from-accent-purple to-purple-600 text-white shadow-lg shadow-accent-purple/20 hover:shadow-accent-purple/40' 
-                  : 'bg-gradient-to-r from-accent-cyan to-cyan-600 text-white shadow-lg shadow-accent-cyan/20 hover:shadow-accent-cyan/40'
-              }`}
-            >
-              {mode === 'obfuscate' ? <Lock size={20} /> : <Unlock size={20} />}
-              {mode === 'obfuscate' ? 'Secure Protocol' : 'Reveal Protocol'}
-            </button>
-            <button
-              onClick={handleReset}
-              className="p-4 bg-white/5 border border-white/10 rounded-xl text-white/60 hover:bg-white/10 hover:text-white transition-all"
-              title="Reset"
-            >
-              <RotateCcw size={20} />
-            </button>
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <label className="text-[10px] font-bold text-white/20 uppercase tracking-widest px-1">Security Key</label>
+                <div className="relative">
+                  <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={14} />
+                  <input
+                    type="password"
+                    value={secretKey}
+                    onChange={(e) => setSecretKey(e.target.value)}
+                    placeholder="Enter cryptographic key..."
+                    className="w-full bg-black/40 border border-white/[0.05] rounded-md pl-11 pr-4 py-4 text-sm font-mono focus:outline-none focus:border-emerald-400/50 transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-[10px] font-bold text-white/20 uppercase tracking-widest px-1">
+                  {mode === 'obfuscate' ? 'Plaintext Input' : 'Cyphertext Input'}
+                </label>
+                <textarea
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  placeholder={mode === 'obfuscate' ? 'Enter string to secure...' : 'Paste obfuscated data...'}
+                  className="w-full h-40 bg-black/40 border border-white/[0.05] rounded-md px-6 py-5 text-sm font-mono focus:outline-none focus:border-emerald-400/50 transition-all resize-none"
+                />
+              </div>
+
+              <button
+                onClick={handleProcess}
+                className="w-full py-5 bg-emerald-400 hover:bg-emerald-500 text-black rounded-md font-bold text-[10px] uppercase tracking-[0.2em] transition-all active:scale-[0.98]"
+              >
+                Execute Protocol
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Result Area */}
-        <AnimatePresence mode="wait">
-          {error ? (
-            <motion.div
-              key="error"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 flex items-center gap-3 text-red-400"
-            >
-              <AlertCircle size={20} />
-              <p className="text-sm font-medium">{error}</p>
-            </motion.div>
-          ) : result ? (
-            <motion.div
-              key="result"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="glass-card border border-white/10 rounded-2xl p-6 backdrop-blur-sm"
-            >
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-sm text-white/40 uppercase tracking-wider font-bold font-syne">Processed Output</span>
-                <button
-                  onClick={handleCopy}
-                  className="flex items-center gap-2 text-xs text-white/60 hover:text-white transition-colors bg-white/5 px-3 py-2 rounded-lg border border-white/10"
-                >
-                  {copied ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
-                  {copied ? 'Copied!' : 'Copy Result'}
-                </button>
+        {/* Right Panel: Output & Architecture */}
+        <div className="lg:col-span-7 space-y-6">
+          <div className="bg-white/[0.02] border border-white/[0.05] rounded-md p-8 relative overflow-hidden min-h-[500px] flex flex-col">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-400/5 blur-[100px] rounded-full" />
+            
+            <div className="relative z-10 flex flex-col h-full flex-1">
+              <div className="flex items-center justify-between mb-12">
+                <div>
+                  <div className="text-[10px] font-bold tracking-[0.2em] text-emerald-400 uppercase mb-2">Cryptographic Stream</div>
+                  <h2 className="text-xl font-outfit font-bold text-white uppercase tracking-widest">Protocol Output</h2>
+                </div>
+                {result && (
+                  <button
+                    onClick={handleCopy}
+                    className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-md border border-white/[0.05] transition-all"
+                  >
+                    {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} className="text-white/40" />}
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-white/60">{copied ? 'Copied' : 'Export'}</span>
+                  </button>
+                )}
               </div>
-              <div className="bg-black/40 rounded-xl p-4 border border-white/5 font-mono text-sm break-all text-white/90 leading-relaxed max-h-60 overflow-y-auto custom-scrollbar">
-                {result}
-              </div>
-              <div className="mt-4 flex items-center gap-2 text-xs text-accent-purple/60 bg-accent-purple/5 p-2 rounded-lg border border-accent-purple/10">
-                <ShieldCheck size={14} />
-                Local browser processing secured by Night X Protocol.
-              </div>
-            </motion.div>
-          ) : null}
-        </AnimatePresence>
-      </div>
 
-      <div className="glass-card border border-white/10 rounded-2xl p-6">
-        <h4 className="text-white/80 font-medium mb-3 flex items-center gap-2 font-syne">
-          <ShieldCheck size={18} className="text-accent-purple" />
-          Security Architecture
-        </h4>
-        <div className="space-y-4 text-sm text-white/60 leading-relaxed font-dm-sans">
-          <p>
-            This tool implements <strong>AES-256 Protocol</strong> to obfuscate data locally within your environment.
-          </p>
-          <ul className="list-disc list-inside space-y-1 marker:text-accent-purple">
-            <li>Sovereign Processing: No data is transmitted to external servers.</li>
-            <li>Zero-Knowledge: Your security keys are never cached or logged.</li>
-            <li>Ephemeral State: Data exists only in local memory during the session.</li>
-          </ul>
-          <p className="text-xs text-white/30 italic bg-white/5 p-3 rounded-xl border border-white/10">
-            Disclaimer: Night X does not store recovery keys. If the protocol key is lost, data recovery is mathematically impossible.
-          </p>
+              <div className="flex-1 space-y-8">
+                <AnimatePresence mode="wait">
+                  {error ? (
+                    <motion.div
+                      key="error"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="p-6 bg-red-500/5 border border-red-500/10 rounded-md flex items-center gap-4 text-red-400"
+                    >
+                      <AlertCircle size={20} />
+                      <p className="text-[10px] font-bold uppercase tracking-widest">{error}</p>
+                    </motion.div>
+                  ) : result ? (
+                    <motion.div
+                      key="result"
+                      initial={{ opacity: 0, scale: 0.98 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="space-y-6"
+                    >
+                      <div className="bg-black/60 rounded-md p-8 border border-white/[0.05] font-mono text-sm break-all text-white/80 leading-relaxed min-h-[200px]">
+                        {result}
+                      </div>
+                      <div className="p-4 bg-emerald-400/5 border border-emerald-400/10 rounded-md flex items-center gap-3">
+                        <ShieldCheck size={16} className="text-emerald-400" />
+                        <span className="text-[10px] font-bold text-emerald-400/60 uppercase tracking-widest">AES-256 Symmetric Seal Applied</span>
+                      </div>
+                    </motion.div>
+                  ) : (
+                    <div className="flex-1 flex flex-col items-center justify-center py-20 opacity-10 space-y-4">
+                      <Unlock size={48} strokeWidth={1} />
+                      <p className="text-[10px] font-bold uppercase tracking-widest">Registry Awaiting Feed</p>
+                    </div>
+                  )}
+                </AnimatePresence>
+
+                <div className="pt-8 border-t border-white/[0.05] space-y-6">
+                  <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">Security Architecture</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <p className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Sovereign Encryption</p>
+                      <p className="text-[10px] text-white/30 leading-relaxed font-inter uppercase">
+                        All operations are isolated within the browser instance. No plaintext ever leaves local memory.
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Protocol Disclaimer</p>
+                      <p className="text-[10px] text-white/30 leading-relaxed font-inter uppercase italic">
+                        Lost keys render data mathematically unrecoverable. Night X does not store protocol credentials.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
-};
+}
 
-export default TextObfuscator;

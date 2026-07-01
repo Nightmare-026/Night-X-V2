@@ -121,13 +121,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Registration failed. Please try again." }, { status: 500 });
     }
 
-    return NextResponse.json(
-      { 
-        message: "User registered successfully", 
-        user: { id: newUserRef.id, name: userData.name, email: userData.email } 
-      },
-      { status: 201 }
-    );
+    
   } catch (error) {
     console.error("Registration error:", error);
     return NextResponse.json(

@@ -12,9 +12,12 @@ import {
   LayoutGrid, 
   Trash2,
   RefreshCw,
-  Sparkles,
   Zap,
-  MousePointer2
+  MousePointer2,
+  ChevronRight,
+  Settings,
+  Layers,
+  Info
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn, downloadFile } from '@/lib/utils';
@@ -22,6 +25,12 @@ import { useToast } from '@/components/ui/Toast';
 
 type WatermarkType = 'text' | 'image';
 type Position = 'top-left' | 'top-center' | 'top-right' | 'middle-left' | 'center' | 'middle-right' | 'bottom-left' | 'bottom-center' | 'bottom-right' | 'tile';
+
+const POSITIONS: { key: Position; label: string }[] = [
+  { key: 'top-left', label: 'TL' }, { key: 'top-center', label: 'TC' }, { key: 'top-right', label: 'TR' },
+  { key: 'middle-left', label: 'ML' }, { key: 'center', label: 'CTR' }, { key: 'middle-right', label: 'MR' },
+  { key: 'bottom-left', label: 'BL' }, { key: 'bottom-center', label: 'BC' }, { key: 'bottom-right', label: 'BR' },
+];
 
 export default function WatermarkAdder() {
   const { toast } = useToast();
@@ -35,43 +44,30 @@ export default function WatermarkAdder() {
   const [text, setText] = useState('(c) Night X');
   const [watermarkImage, setWatermarkImage] = useState<File | null>(null);
   const [watermarkImagePreview, setWatermarkImagePreview] = useState<string | null>(null);
-  const [fontSize, setFontSize] = useState(32);
+  const [fontSize, setFontSize] = useState(48);
   const [opacity, setOpacity] = useState(0.5);
   const [position, setPosition] = useState<Position>('bottom-right');
   const [color, setColor] = useState('#ffffff');
-  const [imageSize, setImageSize] = useState(20); // 10-50% of main image
+  const [imageSize, setImageSize] = useState(20);
 
   const mainInputRef = useRef<HTMLInputElement>(null);
   const watermarkInputRef = useRef<HTMLInputElement>(null);
 
   const processMainFile = (file: File) => {
-    if (!file.type.startsWith('image/')) {
-      toast("Please upload an image file", "error");
-      return;
-    }
-    // Cleanup old preview if it exists
+    if (!file.type.startsWith('image/')) return;
     if (inputPreview) URL.revokeObjectURL(inputPreview);
-    
     setInputFile(file);
     setInputPreview(URL.createObjectURL(file));
     setOutputUrl(null);
-    toast("Image uploaded", "success");
   };
 
   const processWatermarkFile = (file: File) => {
-    if (!file.type.startsWith('image/')) {
-      toast("Please upload an image file for watermark", "error");
-      return;
-    }
-    // Cleanup old preview if it exists
+    if (!file.type.startsWith('image/')) return;
     if (watermarkImagePreview) URL.revokeObjectURL(watermarkImagePreview);
-
     setWatermarkImage(file);
     setWatermarkImagePreview(URL.createObjectURL(file));
-    toast("Watermark logo ready", "success");
   };
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (inputPreview) URL.revokeObjectURL(inputPreview);
@@ -101,11 +97,11 @@ export default function WatermarkAdder() {
 
       if (type === 'text') {
         ctx.fillStyle = color;
-        ctx.font = `bold ${fontSize}px Syne, Inter, sans-serif`;
+        ctx.font = `bold ${fontSize}px font-outfit, sans-serif`;
         const metrics = ctx.measureText(text);
         const tw = metrics.width;
         const th = fontSize;
-        const pad = canvas.width * 0.03; // 3% padding
+        const pad = canvas.width * 0.03;
 
         if (position === 'tile') {
           const stepX = tw * 2;
@@ -144,13 +140,13 @@ export default function WatermarkAdder() {
         if (blob) {
           if (outputUrl) URL.revokeObjectURL(outputUrl);
           setOutputUrl(URL.createObjectURL(blob));
-          toast("Watermark applied successfully!", "success");
+          toast("Composite rendered", "success");
         }
         setIsProcessing(false);
       }, 'image/png');
     } catch (err) {
       console.error(err);
-      toast("Failed to process image", "error");
+      toast("Process failure", "error");
       setIsProcessing(false);
     }
   };
@@ -183,283 +179,213 @@ export default function WatermarkAdder() {
 
   const handleDownload = () => {
     if (!outputUrl) return;
-    downloadFile(outputUrl, `watermarked_${inputFile?.name || 'image.png'}`);
-    toast("Image downloaded", "success");
+    downloadFile(outputUrl, `marked_${inputFile?.name || 'image.png'}`);
   };
 
-  const positions: { key: Position; label: string }[] = [
-    { key: 'top-left', label: 'TL' }, { key: 'top-center', label: 'TC' }, { key: 'top-right', label: 'TR' },
-    { key: 'middle-left', label: 'ML' }, { key: 'center', label: 'Center' }, { key: 'middle-right', label: 'MR' },
-    { key: 'bottom-left', label: 'BL' }, { key: 'bottom-center', label: 'BC' }, { key: 'bottom-right', label: 'BR' },
-  ];
-
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        
-        {/* Settings Panel (7 Columns) */}
-        <div className="lg:col-span-7 space-y-6">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="bg-white/5 border border-white/10 rounded-[32px] overflow-hidden"
-          >
-            <div className="p-8 space-y-8">
-              {!inputFile ? (
-                <div
-                  onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) processMainFile(f); }}
-                  onDragOver={e => e.preventDefault()}
-                  onClick={() => mainInputRef.current?.click()}
-                  className="border-2 border-dashed border-white/10 rounded-[32px] p-16 flex flex-col items-center justify-center gap-6 cursor-pointer hover:border-accent-purple/50 hover:bg-accent-purple/5 transition-all group"
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start relative">
+      
+      {/* Left Panel: Branding Manifest (5 Columns) */}
+      <div className="lg:col-span-5 space-y-6">
+        <section className="glass-card border-white/[0.05] bg-black/40 p-6 rounded-md relative overflow-hidden h-full flex flex-col min-h-[600px]">
+          <div className="relative z-10 flex-1 flex flex-col space-y-6">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.6)]" />
+                <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-white/50 font-outfit">
+                  Branding Manifest
+                </h2>
+              </div>
+              {inputFile && (
+                <button 
+                  onClick={() => { setInputFile(null); setInputPreview(null); setOutputUrl(null); }}
+                  className="text-[9px] font-bold uppercase tracking-widest text-white/20 hover:text-red-400 transition-colors"
                 >
-                  <div className="w-20 h-20 rounded-[24px] bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
-                    <Upload size={32} className="text-white/20 group-hover:text-accent-purple transition-colors" />
-                  </div>
-                  <div className="text-center">
-                    <h4 className="text-lg font-bold text-white/80">Drop background image</h4>
-                    <p className="text-white/30 text-sm mt-1">High resolution PNG, JPG supported</p>
-                  </div>
-                  <input ref={mainInputRef} type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) processMainFile(f); }} />
+                  Purge Stream
+                </button>
+              )}
+            </div>
+
+            {!inputFile ? (
+              <div 
+                className="group relative flex-1 flex flex-col items-center justify-center border border-dashed border-white/10 hover:border-cyan-400/40 rounded-md transition-all bg-white/[0.01] cursor-pointer"
+                onClick={() => mainInputRef.current?.click()}
+              >
+                <input ref={mainInputRef} type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) processMainFile(f); }} />
+                <div className="w-16 h-16 rounded bg-white/5 flex items-center justify-center text-white/20 mb-6 group-hover:text-cyan-400 transition-colors border border-white/10">
+                  <ImageIcon size={24} />
                 </div>
-              ) : (
-                <div className="space-y-8">
-                  <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
-                    <div className="flex items-center gap-4">
-                      <div className="p-3 bg-accent-purple/10 text-accent-purple rounded-xl">
-                        <ImageIcon size={20} />
+                <p className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2">Initialize Composite</p>
+                <p className="text-[9px] font-mono text-white/20 uppercase tracking-tighter italic">Source Image Buffer</p>
+              </div>
+            ) : (
+              <div className="flex-1 flex flex-col space-y-6">
+                {/* Mode Selector */}
+                <div className="flex p-1 bg-white/5 rounded border border-white/5">
+                  <button onClick={() => setType('text')} className={cn("flex-1 py-2 rounded text-[10px] font-bold transition-all font-mono uppercase", type === 'text' ? "bg-cyan-400 text-black shadow-lg" : "text-white/30 hover:text-white")}>
+                    Alpha Text
+                  </button>
+                  <button onClick={() => setType('image')} className={cn("flex-1 py-2 rounded text-[10px] font-bold transition-all font-mono uppercase", type === 'image' ? "bg-cyan-400 text-black shadow-lg" : "text-white/30 hover:text-white")}>
+                    Logo Matrix
+                  </button>
+                </div>
+
+                {/* Configuration Stack */}
+                <div className="space-y-6 flex-1">
+                  {type === 'text' ? (
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <label className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] ml-1">Signature String</label>
+                        <input type="text" value={text} onChange={e => setText(e.target.value)} className="w-full bg-white/[0.03] border border-white/10 rounded p-4 text-xs text-white focus:border-cyan-400/50 outline-none transition-all font-mono" />
                       </div>
-                      <div>
-                        <p className="text-sm font-bold text-white truncate max-w-[200px]">{inputFile.name}</p>
-                        <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Target Image</p>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] ml-1">Scale (PX)</label>
+                          <input type="number" value={fontSize} onChange={e => setFontSize(Number(e.target.value))} className="w-full bg-white/[0.03] border border-white/10 rounded p-3 text-xs text-white focus:border-cyan-400/50 outline-none font-mono" />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] ml-1">Hex Code</label>
+                          <div className="flex items-center gap-2 bg-white/[0.03] border border-white/10 rounded p-1">
+                            <input type="color" value={color} onChange={e => setColor(e.target.value)} className="w-8 h-8 rounded border-none bg-transparent cursor-pointer" />
+                            <span className="text-[10px] font-mono text-white/60 uppercase">{color}</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <button 
-                      onClick={() => { 
-                        if (inputPreview) URL.revokeObjectURL(inputPreview);
-                        if (outputUrl) URL.revokeObjectURL(outputUrl);
-                        setInputFile(null); 
-                        setInputPreview(null); 
-                        setOutputUrl(null); 
-                      }}
-                      className="p-3 hover:bg-red-500/10 text-white/20 hover:text-red-400 rounded-xl transition-all"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
-
-                  <div className="space-y-6">
-                    <div className="flex p-1.5 bg-black/40 rounded-2xl border border-white/5">
-                      <button onClick={() => setType('text')} className={cn("flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold transition-all", type === 'text' ? 'bg-accent-purple text-white shadow-lg' : 'text-white/40 hover:text-white/60')}>
-                        <Type size={16} /> Text Mark
-                      </button>
-                      <button onClick={() => setType('image')} className={cn("flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold transition-all", type === 'image' ? 'bg-accent-purple text-white shadow-lg' : 'text-white/40 hover:text-white/60')}>
-                        <ImageIcon size={16} /> Logo Mark
-                      </button>
-                    </div>
-
-                    <div className="space-y-6">
-                      {type === 'text' ? (
-                        <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
-                          <div className="space-y-2">
-                            <label className="text-[10px] font-bold text-white/40 uppercase ml-2">Watermark Content</label>
-                            <input type="text" value={text} onChange={e => setText(e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-sm text-white focus:outline-none focus:border-accent-purple" />
-                          </div>
-                          <div className="grid grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                              <label className="text-[10px] font-bold text-white/40 uppercase ml-2">Color</label>
-                              <div className="flex items-center gap-3 bg-black/40 border border-white/10 rounded-2xl p-2.5">
-                                <input type="color" value={color} onChange={e => setColor(e.target.value)} className="w-10 h-10 rounded-xl cursor-pointer bg-transparent border-none" />
-                                <span className="text-xs font-mono text-white/60">{color.toUpperCase()}</span>
-                              </div>
-                            </div>
-                            <div className="space-y-2">
-                              <div className="flex justify-between text-[10px] font-bold text-white/40 uppercase ml-1">
-                                <span>Size</span>
-                                <span className="text-accent-purple">{fontSize}px</span>
-                              </div>
-                              <div className="p-4 bg-black/40 rounded-2xl border border-white/10">
-                                <input type="range" min={12} max={200} value={fontSize} onChange={e => setFontSize(Number(e.target.value))} className="w-full accent-accent-purple" />
-                              </div>
-                            </div>
-                          </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <label className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] ml-1">Logo Payload</label>
+                      {!watermarkImage ? (
+                        <div onClick={() => watermarkInputRef.current?.click()} className="border border-dashed border-white/10 rounded p-8 flex flex-col items-center gap-2 hover:bg-white/5 cursor-pointer transition-all group">
+                          <Upload size={16} className="text-white/20 group-hover:text-cyan-400 transition-colors" />
+                          <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest">Select Mark</p>
+                          <input ref={watermarkInputRef} type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) processWatermarkFile(f); }} />
                         </div>
                       ) : (
-                        <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
-                          <label className="text-[10px] font-bold text-white/40 uppercase ml-2">Watermark Image</label>
-                          {!watermarkImage ? (
-                            <div onClick={() => watermarkInputRef.current?.click()} className="border-2 border-dashed border-white/10 rounded-2xl p-10 flex flex-col items-center gap-3 hover:bg-white/5 cursor-pointer transition-all group">
-                              <Upload size={24} className="text-white/20 group-hover:text-accent-purple transition-colors" />
-                              <p className="text-xs font-bold text-white/40 uppercase tracking-widest">Select Logo</p>
-                              <input ref={watermarkInputRef} type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) processWatermarkFile(f); }} />
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-6 bg-black/40 border border-white/10 rounded-[24px] p-5">
-                              <div className="relative">
-                                <img src={watermarkImagePreview!} className="w-20 h-20 rounded-xl object-contain bg-white/5 p-2 shadow-xl" />
-                                <button onClick={() => { setWatermarkImage(null); setWatermarkImagePreview(null); }} className="absolute -top-2 -right-2 p-1.5 bg-red-500 text-white rounded-lg shadow-lg hover:bg-red-400 transition-all">
-                                  <Trash2 size={12} />
-                                </button>
-                              </div>
-                              <div className="flex-1 space-y-3">
-                                <div className="flex justify-between text-[10px] font-bold text-white/40 uppercase">
-                                  <span>Relative Size</span>
-                                  <span className="text-accent-cyan">{imageSize}%</span>
-                                </div>
-                                <input type="range" min={5} max={80} value={imageSize} onChange={e => setImageSize(Number(e.target.value))} className="w-full accent-accent-cyan" />
-                                <p className="text-[9px] text-white/20 font-medium">Size is relative to background dimensions.</p>
-                              </div>
-                            </div>
-                          )}
+                        <div className="flex items-center gap-4 bg-white/[0.03] border border-white/10 rounded p-4">
+                          <img src={watermarkImagePreview!} className="w-12 h-12 rounded object-contain bg-black/40 border border-white/10 p-1" />
+                          <div className="flex-1">
+                            <p className="text-[10px] font-bold text-white/80 truncate uppercase tracking-widest">{watermarkImage.name}</p>
+                            <button onClick={() => { setWatermarkImage(null); setWatermarkImagePreview(null); }} className="text-[8px] font-bold text-red-400 uppercase tracking-[0.2em] mt-1 hover:text-red-300 transition-colors">Discard</button>
+                          </div>
+                          <div className="w-24 space-y-1">
+                            <span className="text-[8px] font-mono text-white/30 uppercase tracking-widest">Scale: {imageSize}%</span>
+                            <input type="range" min={5} max={80} value={imageSize} onChange={e => setImageSize(Number(e.target.value))} className="w-full h-1 bg-white/5 rounded-full appearance-none accent-cyan-400 cursor-pointer" />
+                          </div>
                         </div>
                       )}
+                    </div>
+                  )}
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 border-t border-white/5">
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between">
-                            <label className="text-[10px] font-bold text-white/40 uppercase ml-2">Anchor Position</label>
-                            <button onClick={() => setPosition('tile')} className={cn("flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all border", position === 'tile' ? 'bg-accent-purple border-accent-purple text-white shadow-lg' : 'bg-white/5 border-white/5 text-white/40 hover:bg-white/10')}>
-                              <LayoutGrid size={12} /> TILE MODE
-                            </button>
-                          </div>
-                          <div className="grid grid-cols-3 gap-2 w-full max-w-[150px] mx-auto md:mx-0">
-                            {positions.map(p => (
-                              <button key={p.key} onClick={() => setPosition(p.key)} className={cn("w-full aspect-square rounded-xl flex items-center justify-center transition-all border", position === p.key ? 'bg-accent-purple border-accent-purple text-white shadow-lg' : 'bg-white/5 border-white/5 text-white/20 hover:bg-white/10')}>
-                                {p.label}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div className="space-y-4">
-                          <div className="flex justify-between text-[10px] font-bold text-white/40 uppercase ml-2">
-                            <span>Transparency</span>
-                            <span className="text-accent-cyan">{Math.round(opacity * 100)}%</span>
-                          </div>
-                          <div className="p-6 bg-black/40 rounded-3xl border border-white/10">
-                            <input type="range" min={0} max={100} value={opacity * 100} onChange={e => setOpacity(Number(e.target.value) / 100)} className="w-full accent-accent-cyan" />
-                          </div>
-                          <button 
-                            onClick={applyWatermark} 
-                            disabled={isProcessing || !inputFile} 
-                            className="w-full py-4 rounded-2xl bg-white text-black font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 shadow-2xl transition-all hover:bg-accent-purple hover:text-white disabled:opacity-30"
-                          >
-                            {isProcessing ? <RefreshCw size={18} className="animate-spin" /> : <Droplets size={18} />}
-                            {isProcessing ? 'Baking Mark...' : 'Apply & Preview'}
-                          </button>
-                        </div>
-                      </div>
+                  {/* Anchor Matrix */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] ml-1">Anchor Matrix</label>
+                      <button onClick={() => setPosition('tile')} className={cn("px-2 py-1 rounded text-[8px] font-bold transition-all border", position === 'tile' ? "bg-cyan-400 text-black border-cyan-400" : "bg-white/5 border-white/5 text-white/40")}>TILE_MODE</button>
+                    </div>
+                    <div className="grid grid-cols-3 gap-1.5 w-full max-w-[120px] mx-auto lg:mx-0">
+                      {POSITIONS.map(p => (
+                        <button key={p.key} onClick={() => setPosition(p.key)} className={cn("aspect-square rounded border transition-all flex items-center justify-center text-[8px] font-mono", position === p.key ? "bg-cyan-400 text-black border-cyan-400 shadow-lg shadow-cyan-400/10" : "bg-white/5 border-white/5 text-white/30 hover:text-white/60")}>
+                          {p.label}
+                        </button>
+                      ))}
                     </div>
                   </div>
+
+                  {/* Luminosity / Opacity */}
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center px-1">
+                      <label className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em]">Alpha Density</label>
+                      <span className="text-[10px] font-mono text-cyan-400">{Math.round(opacity * 100)}%</span>
+                    </div>
+                    <input type="range" min={0} max={100} value={opacity * 100} onChange={e => setOpacity(Number(e.target.value) / 100)} className="w-full h-1 bg-white/5 rounded-full appearance-none accent-cyan-400 cursor-pointer" />
+                  </div>
                 </div>
-              )}
-            </div>
-          </motion.div>
-        </div>
 
-        {/* Preview Panel (5 Columns) */}
-        <div className="lg:col-span-5 sticky top-24 space-y-6">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white/5 border border-white/10 rounded-[40px] p-8 md:p-10 flex flex-col items-center justify-center text-center shadow-2xl relative overflow-hidden group min-h-[500px]"
-          >
-            {/* Glows */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-accent-purple/5 blur-[120px] rounded-full group-hover:bg-accent-purple/10 transition-all duration-1000" />
-            
-            <div className="relative z-10 w-full flex flex-col items-center h-full">
-              <div className="mb-8">
-                <div className="text-[10px] font-black tracking-[0.2em] text-accent-cyan uppercase mb-2">Live Canvas</div>
-                <h2 className="text-xl font-bold font-syne">Watermark Preview</h2>
-              </div>
-
-              <div className="flex-1 flex items-center justify-center w-full relative">
-                <AnimatePresence mode="wait">
-                  {outputUrl ? (
-                    <motion.div
-                      key="output"
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="relative p-2 bg-white rounded-[32px] shadow-2xl overflow-hidden"
-                    >
-                      <img src={outputUrl} alt="Result" className="max-w-full max-h-[350px] object-contain rounded-2xl" />
-                      <div className="absolute top-4 right-4 bg-accent-purple text-white text-[9px] font-black px-3 py-1.5 rounded-full shadow-xl uppercase tracking-widest border border-white/20">
-                        Processed
-                      </div>
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="empty"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="flex flex-col items-center gap-6 opacity-20"
-                    >
-                      <div className="p-10 rounded-full bg-white/5 border border-white/5">
-                        <ImageIcon size={64} strokeWidth={1} />
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-sm font-bold uppercase tracking-widest">No Output</p>
-                        <p className="text-[10px] font-medium max-w-[200px]">Configure your mark and click apply to see the result</p>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {outputUrl && (
-                <motion.div 
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mt-10 grid grid-cols-2 gap-4 w-full"
+                <button 
+                  onClick={applyWatermark} 
+                  disabled={isProcessing || !inputFile} 
+                  className="w-full py-4 rounded-md bg-cyan-400 text-black font-bold text-xs uppercase tracking-[0.2em] shadow-lg shadow-cyan-400/20 flex items-center justify-center gap-3 hover:bg-cyan-300 transition-all group disabled:opacity-30 mt-auto"
                 >
-                  <button
-                    onClick={handleDownload}
-                    className="flex items-center justify-center gap-3 py-4 bg-accent-cyan text-black rounded-2xl font-black text-xs uppercase tracking-wider shadow-xl transition-all hover:scale-105 active:scale-95"
-                  >
-                    <Download size={16} />
-                    Download
-                  </button>
-                  <button
-                    onClick={() => { setOutputUrl(null); applyWatermark(); }}
-                    className="flex items-center justify-center gap-3 py-4 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-white/10 transition-all"
-                  >
-                    <RefreshCw size={16} />
-                    Re-Apply
-                  </button>
-                </motion.div>
-              )}
-            </div>
-
-            {isProcessing && (
-              <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 flex flex-col items-center justify-center rounded-[40px]">
-                <div className="relative">
-                  <div className="w-16 h-16 border-4 border-accent-purple/20 border-t-accent-purple rounded-full animate-spin" />
-                  <Droplets size={24} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white animate-bounce" />
-                </div>
-                <span className="mt-4 text-xs font-black uppercase tracking-[0.3em] text-white/70">Baking Watermark...</span>
+                  {isProcessing ? <Loader2 size={16} className="animate-spin" /> : <><Zap size={16} fill="currentColor" /> Apply Composite <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" /></>}
+                </button>
               </div>
             )}
-          </motion.div>
+          </div>
+        </section>
+      </div>
 
-          <div className="bg-gradient-to-br from-accent-purple/10 to-accent-cyan/10 p-6 rounded-[32px] border border-white/10 space-y-4">
-            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 text-white/40">
-              <Zap size={14} className="text-yellow-400" />
-              Pro Features
-            </h4>
-            <div className="space-y-3">
-              <div className="flex items-start gap-3">
-                <div className="p-1.5 rounded-lg bg-white/5 text-accent-cyan">
-                  <MousePointer2 size={12} />
+      {/* Right Panel: Layered Composite (7 Columns) */}
+      <div className="lg:col-span-7 h-full flex flex-col">
+        <div className="glass-card border-white/[0.05] bg-black/40 p-8 rounded-md flex-1 flex flex-col relative overflow-hidden shadow-2xl min-h-[600px]">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400/20 to-transparent" />
+          
+          <div className="flex items-center justify-between mb-8 shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded bg-cyan-400/10 flex items-center justify-center border border-cyan-400/20">
+                <Layers size={16} className="text-cyan-400" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-white font-outfit uppercase tracking-wider">Layered Composite</h2>
+                <p className="text-[10px] text-white/30 uppercase tracking-widest font-mono">Baking Stream // Visual Result</p>
+              </div>
+            </div>
+            {outputUrl && (
+              <button 
+                onClick={handleDownload}
+                className="flex items-center gap-2 px-6 py-2.5 rounded bg-white text-black text-[10px] font-bold uppercase tracking-widest hover:bg-cyan-50 transition-all shadow-lg"
+              >
+                <Download size={14} /> Extract Stream
+              </button>
+            )}
+          </div>
+
+          <div className="flex-1 flex flex-col">
+            <div className="relative rounded-md overflow-hidden bg-black/60 border border-white/10 flex-1 min-h-[400px] flex items-center justify-center group mb-6 shadow-inner checkerboard">
+              <AnimatePresence mode="wait">
+                {outputUrl ? (
+                  <motion.img 
+                    key="output"
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 1.02 }}
+                    src={outputUrl} 
+                    alt="Composite" 
+                    className="w-full h-full object-contain p-4 drop-shadow-[0_0_40px_rgba(34,211,238,0.15)]" 
+                  />
+                ) : (
+                  <motion.div 
+                    key="placeholder"
+                    className="flex flex-col items-center justify-center opacity-10"
+                  >
+                    <Grid3X3 size={60} className="mb-4" />
+                    <p className="text-[10px] font-mono uppercase tracking-[0.3em]">Awaiting Composite Loop</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              <div className="absolute top-4 left-4">
+                <span className="px-2 py-1 bg-black/60 border border-white/10 rounded text-[9px] font-mono text-white/40 uppercase tracking-widest">
+                  Result_Stream
+                </span>
+              </div>
+            </div>
+
+            {/* Feature Highlights */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 rounded bg-white/[0.02] border border-white/[0.05] space-y-2">
+                <div className="flex items-center gap-2 text-[9px] font-bold text-cyan-400 uppercase tracking-widest">
+                  <Zap size={12} /> Smart Masking
                 </div>
-                <p className="text-[11px] text-white/50 leading-relaxed">
-                  <span className="text-white/70 font-bold">Smart Clipping:</span> Automatically adjusts mark visibility based on background luminosity.
+                <p className="text-[10px] text-white/30 italic leading-relaxed">
+                  Composite engine preserves luminance data while injecting watermark layers.
                 </p>
               </div>
-              <div className="flex items-start gap-3">
-                <div className="p-1.5 rounded-lg bg-white/5 text-accent-purple">
-                  <Sparkles size={12} />
+              <div className="p-4 rounded bg-white/[0.02] border border-white/[0.05] space-y-2">
+                <div className="flex items-center gap-2 text-[9px] font-bold text-cyan-400 uppercase tracking-widest">
+                  <Settings size={12} /> Metadata Sync
                 </div>
-                <p className="text-[11px] text-white/50 leading-relaxed">
-                  <span className="text-white/70 font-bold">Retina Ready:</span> Generates 2x resolution marks for crisp display on high-DPI screens.
+                <p className="text-[10px] text-white/30 italic leading-relaxed">
+                  Exported streams maintain original color profiles and EXIF orientation.
                 </p>
               </div>
             </div>

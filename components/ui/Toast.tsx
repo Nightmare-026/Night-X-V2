@@ -56,15 +56,15 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               className="pointer-events-auto"
             >
               <div className={cn(
-                "relative group overflow-hidden glass-card p-4 rounded-2xl border min-w-[320px] max-w-[400px] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] transition-all",
-                t.type === "success" && "border-green-500/20 bg-green-500/[0.02]",
-                t.type === "error" && "border-red-500/20 bg-red-500/[0.02]",
-                t.type === "info" && "border-blue-500/20 bg-blue-500/[0.02]",
-                t.type === "premium" && "border-accent-purple/20 bg-accent-purple/[0.02]"
+                "relative group overflow-hidden glass-card p-4 pl-5 rounded-2xl border min-w-[320px] max-w-[400px] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] transition-all",
+                t.type === "success" && "border-green-500/20 bg-green-500/[0.02] border-l-green-500 border-l-[4px]",
+                t.type === "error" && "border-red-500/20 bg-red-500/[0.02] border-l-red-500 border-l-[4px]",
+                t.type === "info" && "border-blue-500/20 bg-blue-500/[0.02] border-l-blue-500 border-l-[4px]",
+                t.type === "premium" && "border-accent-purple/20 bg-accent-purple/[0.02] border-l-accent-purple border-l-[4px]"
               )}>
                 {/* Glow Effect */}
                 <div className={cn(
-                  "absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity",
+                  "absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none",
                   t.type === "success" && "bg-green-500",
                   t.type === "error" && "bg-red-500",
                   t.type === "info" && "bg-blue-500",
@@ -86,8 +86,14 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                   </div>
                   
                   <div className="flex-1 pt-0.5">
-                    <p className="text-white text-sm font-bold leading-tight mb-1">{t.type.toUpperCase()}</p>
-                    <p className="text-white/60 text-xs font-medium leading-relaxed">{t.message}</p>
+                    <p className={cn(
+                      "text-[0.625rem] font-black uppercase tracking-[0.2em] mb-1",
+                      t.type === "success" && "text-green-500",
+                      t.type === "error" && "text-red-500",
+                      t.type === "info" && "text-blue-500",
+                      t.type === "premium" && "text-accent-purple"
+                    )}>{t.type}</p>
+                    <p className="text-white/90 text-[0.8125rem] font-medium leading-relaxed">{t.message}</p>
                   </div>
                   
                   <button 

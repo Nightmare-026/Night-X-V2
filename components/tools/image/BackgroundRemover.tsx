@@ -2,8 +2,25 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { removeBackground } from '@imgly/background-removal';
-import { Upload, Download, RefreshCw, Loader2, Image as ImageIcon, Settings, Sparkles, AlertTriangle } from 'lucide-react';
+import { 
+  Upload, 
+  Download, 
+  RefreshCw, 
+  Loader2, 
+  Image as ImageIcon, 
+  Settings, 
+  Sparkles, 
+  AlertTriangle,
+  Zap,
+  ChevronRight,
+  Maximize2,
+  Trash2,
+  Monitor,
+  Cpu,
+  Layers
+, Check} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 export default function BackgroundRemover() {
   const [inputFile, setInputFile] = useState<File | null>(null);
@@ -20,7 +37,7 @@ export default function BackgroundRemover() {
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isProcessing) {
-      const texts = ['Loading AI model...', 'Processing image...', 'Detecting subject...', 'Removing background...', 'Refining edges...'];
+      const texts = ['Initializing AI...', 'Warming Model...', 'Segmenting Pixels...', 'Removing Background...', 'Refining Edges...'];
       let i = 0;
       setProgressText(texts[0]);
       interval = setInterval(() => {
@@ -32,9 +49,9 @@ export default function BackgroundRemover() {
   }, [isProcessing]);
 
   const formatBytes = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return '0 B';
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
@@ -52,7 +69,7 @@ export default function BackgroundRemover() {
       if (file.type.startsWith('image/')) {
         processFile(file);
       } else {
-        setError("Please drop a valid image file.");
+        setError("Invalid format. Please use image files.");
       }
     }
   }, []);
@@ -84,7 +101,7 @@ export default function BackgroundRemover() {
       setOutputPreview(URL.createObjectURL(blob));
     } catch (err: any) {
       console.error(err);
-      setError(err.message || 'Failed to process image. Make sure the image has a clear subject.');
+      setError(err.message || 'Failed to process image. Make sure the subject is clear.');
     } finally {
       setIsProcessing(false);
     }
@@ -106,14 +123,14 @@ export default function BackgroundRemover() {
         
         const link = document.createElement('a');
         link.href = canvas.toDataURL('image/png');
-        link.download = `white-bg-${inputFile.name.split('.')[0]}.png`;
+        link.download = `cleared-${inputFile.name.split('.')[0]}-white.png`;
         link.click();
       };
       img.src = outputPreview;
     } else {
       const link = document.createElement('a');
       link.href = outputPreview;
-      link.download = `no-bg-${inputFile.name.split('.')[0]}.png`;
+      link.download = `cleared-${inputFile.name.split('.')[0]}.png`;
       link.click();
     }
   };
@@ -128,7 +145,6 @@ export default function BackgroundRemover() {
     setError(null);
   }, [inputPreview, outputPreview]);
 
-  // Clean up blob URLs on unmount
   useEffect(() => {
     return () => {
       if (inputPreview) URL.revokeObjectURL(inputPreview);
@@ -137,169 +153,232 @@ export default function BackgroundRemover() {
   }, [inputPreview, outputPreview]);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 relative">
-      {/* Processing Overlay */}
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start relative">
+      {/* Processing Overlay Scoped to Grid */}
       <AnimatePresence>
         {isProcessing && (
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-50 rounded-2xl bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center border border-accent-purple/20"
+            className="absolute inset-0 z-50 rounded-md bg-black/80 backdrop-blur-md flex flex-col items-center justify-center border border-cyan-400/20"
           >
-            <div className="w-24 h-24 mb-6 relative">
-              <div className="absolute inset-0 rounded-full border-4 border-white/10"></div>
-              <div className="absolute inset-0 rounded-full border-4 border-accent-purple border-t-transparent animate-spin"></div>
-              <div className="absolute inset-0 flex items-center justify-center text-accent-purple">
+            <div className="w-24 h-24 mb-8 relative">
+              <div className="absolute inset-0 rounded-full border-2 border-cyan-400/10" />
+              <div className="absolute inset-0 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin" />
+              <div className="absolute inset-0 flex items-center justify-center text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.4)]">
                 <Sparkles size={32} />
               </div>
             </div>
-            <h3 className="text-2xl font-syne font-bold text-white mb-2">AI Magic in Progress</h3>
-            <p className="text-white/60">{progressText}</p>
+            <h3 className="text-sm font-bold text-white font-outfit uppercase tracking-[0.3em] mb-3">AI Synthesis</h3>
+            <p className="text-[10px] font-mono text-cyan-400/60 uppercase tracking-widest animate-pulse">{progressText}</p>
             
-            <div className="mt-8 bg-accent-purple/10 border border-accent-purple/20 px-6 py-3 rounded-xl flex items-center gap-3 text-accent-purple/80 text-sm max-w-sm text-center">
-              <AlertTriangle size={16} className="flex-shrink-0" />
-              <p>This process runs entirely in your browser. No images are uploaded to our servers.</p>
+            <div className="mt-12 bg-cyan-400/5 border border-cyan-400/20 px-6 py-4 rounded-md flex items-center gap-3 text-cyan-400/80 text-[10px] max-w-sm text-center uppercase tracking-widest font-mono">
+              <Monitor size={14} className="flex-shrink-0" />
+              <p>Edge Isolation Active // Local GPU Acceleration</p>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* INPUT PANEL */}
-      <div className="glass-card p-6 flex flex-col h-full border border-white/10 bg-white/[0.02]">
-        <div className="flex items-center gap-2 mb-6">
-          <Settings className="text-accent-cyan" size={20} />
-          <h2 className="text-xl font-syne font-bold">Input</h2>
-        </div>
+      {/* Left Panel: Semantic Decomposition (5 Columns) */}
+      <div className="lg:col-span-5 space-y-6">
+        <section className="glass-card border-white/[0.05] bg-black/40 p-6 rounded-md relative overflow-hidden">
+          <div className="relative z-10 space-y-6">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.6)]" />
+              <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-white/50 font-outfit">
+                Semantic Decomposition
+              </h2>
+            </div>
 
-        {!inputFile ? (
-          <div 
-            className="flex-grow flex flex-col items-center justify-center p-8 border-2 border-dashed border-white/10 hover:border-accent-purple/50 rounded-2xl transition-all group bg-white/[0.01]"
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={handleDrop}
-          >
-            <input 
-              type="file" 
-              accept="image/*" 
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-              onChange={handleFileChange}
-              title=""
-            />
-            <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center text-white/40 mb-4 group-hover:scale-110 group-hover:text-accent-purple transition-all">
-              <Upload size={32} />
-            </div>
-            <p className="text-lg font-medium text-center">Drag & drop your image here</p>
-            <p className="text-sm text-white/40 mt-2">or click to browse</p>
-          </div>
-        ) : (
-          <div className="space-y-6 flex-grow flex flex-col">
-            <div className="relative rounded-2xl overflow-hidden bg-black/40 border border-white/10 aspect-video flex-shrink-0 flex items-center justify-center">
-              {inputPreview && (
-                <img src={inputPreview} alt="Original" className="w-full h-full object-contain" />
-              )}
-            </div>
-            
-            <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5">
-              <div className="flex items-center gap-3 overflow-hidden">
-                <ImageIcon className="text-white/40 flex-shrink-0" size={20} />
-                <div className="min-w-0">
-                  <p className="text-sm font-medium truncate">{inputFile.name}</p>
-                  <p className="text-xs text-white/50">{formatBytes(inputFile.size)}</p>
+            {!inputFile ? (
+              <div 
+                className="group relative flex flex-col items-center justify-center py-20 px-6 border border-dashed border-white/10 hover:border-cyan-400/40 rounded-md transition-all bg-white/[0.01]"
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={handleDrop}
+              >
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  onChange={handleFileChange}
+                />
+                <div className="w-12 h-12 rounded bg-white/5 flex items-center justify-center text-white/20 mb-4 group-hover:text-cyan-400 transition-colors border border-white/10">
+                  <Upload size={20} />
                 </div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1">Drag image here</p>
+                <p className="text-[9px] font-mono text-white/20 uppercase tracking-tighter italic">or click to initiate sequence</p>
               </div>
-            </div>
+            ) : (
+              <div className="space-y-6">
+                {/* Source Preview */}
+                <div className="relative rounded-md overflow-hidden bg-black/60 border border-white/10 aspect-[4/3] flex items-center justify-center group">
+                  {inputPreview && (
+                    <img src={inputPreview} alt="Original" className="w-full h-full object-contain opacity-60 group-hover:opacity-100 transition-opacity" />
+                  )}
+                  <div className="absolute top-4 left-4">
+                    <span className="px-2 py-1 bg-black/60 border border-white/10 rounded text-[9px] font-mono text-white/40 uppercase tracking-widest">
+                      Source_Stream
+                    </span>
+                  </div>
+                </div>
 
-            <div className="flex-grow flex flex-col justify-end">
-              <div className="pt-4 flex gap-4">
-                <button 
-                  onClick={reset}
-                  className="p-3 rounded-xl bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-all flex-shrink-0"
-                  title="Reset"
-                >
-                  <RefreshCw size={20} />
-                </button>
+                {/* File Metadata */}
+                <div className="flex items-center justify-between p-4 rounded-md bg-white/[0.02] border border-white/[0.05]">
+                  <div className="flex items-center gap-3">
+                    <ImageIcon className="text-cyan-400" size={16} />
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-bold text-white/80 truncate uppercase tracking-widest">{inputFile.name}</p>
+                      <p className="text-[9px] font-mono text-white/30">{formatBytes(inputFile.size)} // {inputFile.type.split('/')[1].toUpperCase()}</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={reset}
+                    className="p-2 rounded bg-red-400/10 border border-red-400/20 text-red-400 hover:bg-red-400/20 transition-all"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+
+                {/* Action Trigger */}
                 <button 
                   onClick={removeBg}
                   disabled={isProcessing}
-                  className="flex-grow py-3 rounded-xl bg-gradient-to-r from-accent-purple to-accent-pink text-white font-bold hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full py-4 rounded-md bg-cyan-400 text-black font-bold text-xs uppercase tracking-[0.2em] shadow-lg shadow-cyan-400/20 flex items-center justify-center gap-3 hover:bg-cyan-300 transition-all group disabled:opacity-30"
                 >
-                  <Sparkles size={18} />
-                  Remove Background
+                  <Zap size={16} fill="currentColor" />
+                  Decompose Background
+                  <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
-              {error && <p className="text-red-400 text-sm text-center mt-3">{error}</p>}
-            </div>
+            )}
           </div>
-        )}
+        </section>
+
+        {/* Intelligence Module */}
+        <section className="glass-card border-white/[0.05] bg-black/40 p-6 rounded-md">
+          <div className="flex items-center gap-2 mb-4">
+            <Layers size={14} className="text-cyan-400" />
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/50">Processing Core</h3>
+          </div>
+          <div className="space-y-3 text-[11px] text-white/40 leading-relaxed font-inter">
+            <p><strong className="text-cyan-400/80 uppercase tracking-tighter">Client Isolation:</strong> The AI model executes entirely within your browser sandbox. Your data never leaves your environment.</p>
+            <p><strong className="text-cyan-400/80 uppercase tracking-tighter">Edge Detection:</strong> Uses ISNet Neural Architecture for pixel-perfect subject isolation and edge feathering.</p>
+          </div>
+        </section>
       </div>
 
-      {/* OUTPUT PANEL */}
-      <div className="glass-card p-6 flex flex-col h-full border border-white/10 bg-white/[0.02]">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            <Sparkles className="text-accent-purple" size={20} />
-            <h2 className="text-xl font-syne font-bold">Output</h2>
-          </div>
+      {/* Right Panel: Refined Synthetic Output (7 Columns) */}
+      <div className="lg:col-span-7">
+        <div className="glass-card border-white/[0.05] bg-black/40 p-8 rounded-md min-h-[600px] flex flex-col relative overflow-hidden h-full">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400/20 to-transparent" />
           
-          {outputPreview && (
-            <div className="flex bg-white/5 p-1 rounded-lg border border-white/10">
-              <button 
-                onClick={() => setPreviewBg('transparent')}
-                className={`px-3 py-1 text-xs font-bold rounded transition-all ${previewBg === 'transparent' ? 'bg-white/20 text-white' : 'text-white/40 hover:text-white'}`}
-              >
-                Transp.
-              </button>
-              <button 
-                onClick={() => setPreviewBg('white')}
-                className={`px-3 py-1 text-xs font-bold rounded transition-all ${previewBg === 'white' ? 'bg-white/20 text-white' : 'text-white/40 hover:text-white'}`}
-              >
-                White
-              </button>
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded bg-cyan-400/10 flex items-center justify-center border border-cyan-400/20">
+                <Maximize2 size={16} className="text-cyan-400" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-white font-outfit uppercase tracking-wider">Refined Output</h2>
+                <p className="text-[10px] text-white/30 uppercase tracking-widest font-mono">Synthetic Reconstitution // Neural Buffer</p>
+              </div>
             </div>
-          )}
-        </div>
-
-        {!outputBlob ? (
-          <div className="flex-grow flex flex-col items-center justify-center border-2 border-dashed border-white/5 rounded-2xl bg-white/[0.01]">
-            <p className="text-white/30 text-sm">Your AI processed image will appear here</p>
+            
+            {outputPreview && (
+              <div className="flex bg-white/5 p-1 rounded border border-white/10">
+                <button 
+                  onClick={() => setPreviewBg('transparent')}
+                  className={cn(
+                    "px-3 py-1 text-[9px] font-bold rounded uppercase tracking-widest transition-all",
+                    previewBg === 'transparent' ? "bg-cyan-400 text-black shadow-lg shadow-cyan-400/20" : "text-white/40 hover:text-white"
+                  )}
+                >
+                  Alpha
+                </button>
+                <button 
+                  onClick={() => setPreviewBg('white')}
+                  className={cn(
+                    "px-3 py-1 text-[9px] font-bold rounded uppercase tracking-widest transition-all",
+                    previewBg === 'white' ? "bg-white text-black" : "text-white/40 hover:text-white"
+                  )}
+                >
+                  White
+                </button>
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="space-y-6 flex-grow flex flex-col">
-            <div className={`relative rounded-2xl overflow-hidden border border-white/10 aspect-video flex-shrink-0 flex items-center justify-center ${previewBg === 'transparent' ? "checkerboard" : "bg-white"}`}>
-              {outputPreview && (
-                <img src={outputPreview} alt="No Background" className="w-full h-full object-contain" />
+
+          <div className="flex-1 flex flex-col space-y-6">
+            <div className={cn(
+              "relative rounded-md overflow-hidden border border-white/10 aspect-video flex items-center justify-center transition-all",
+              previewBg === 'transparent' ? "checkerboard bg-black/20" : "bg-white"
+            )}>
+              {outputPreview ? (
+                <motion.img 
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  src={outputPreview} 
+                  alt="Synthetic Output" 
+                  className="w-full h-full object-contain p-4 drop-shadow-2xl" 
+                />
+              ) : (
+                <div className="flex flex-col items-center justify-center opacity-10">
+                  <Cpu size={60} className="mb-4" />
+                  <p className="text-[10px] font-mono uppercase tracking-[0.3em]">Awaiting Reconstitution</p>
+                </div>
               )}
             </div>
 
-            <div className="glass-card p-6 border border-accent-purple/20 bg-accent-purple/5 rounded-2xl flex-grow flex flex-col items-center justify-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-accent-purple/20 flex items-center justify-center text-accent-purple mb-2">
-                <Sparkles size={32} />
-              </div>
-              <div className="text-center">
-                <h3 className="text-xl font-syne font-bold text-white mb-1">Background Removed!</h3>
-                <p className="text-sm text-white/60">Your image is ready to download.</p>
-              </div>
-            </div>
+            {outputBlob && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-4 pt-4 mt-auto"
+              >
+                <div className="p-6 border border-cyan-400/20 bg-cyan-400/5 rounded-md flex items-center gap-6">
+                  <div className="h-12 w-12 rounded-full bg-cyan-400/20 flex items-center justify-center text-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.2)]">
+                    <Check size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-bold text-white uppercase tracking-[0.2em] mb-1">Isolation Complete</h3>
+                    <p className="text-[10px] text-white/40 uppercase tracking-widest font-mono">Neural network has processed {inputFile?.name}</p>
+                  </div>
+                </div>
 
-            <div className="flex flex-col gap-3 mt-auto">
-              <button 
-                onClick={() => handleDownload(false)}
-                className="w-full py-3 rounded-xl bg-white text-black font-bold hover:bg-white/90 transition-all flex items-center justify-center gap-2 text-sm"
-              >
-                <Download size={18} />
-                Download Transparent PNG
-              </button>
-              <button 
-                onClick={() => handleDownload(true)}
-                className="w-full py-3 rounded-xl bg-white/10 text-white font-bold hover:bg-white/20 border border-white/10 transition-all flex items-center justify-center gap-2 text-sm"
-              >
-                <Download size={18} />
-                Download with White Background
-              </button>
-            </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <button 
+                    onClick={() => handleDownload(false)}
+                    className="py-4 rounded-md bg-white text-black font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-cyan-50 transition-all flex items-center justify-center gap-3"
+                  >
+                    <Download size={14} />
+                    Export Transparent
+                  </button>
+                  <button 
+                    onClick={() => handleDownload(true)}
+                    className="py-4 rounded-md bg-white/5 border border-white/10 text-white font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-white/10 transition-all flex items-center justify-center gap-3"
+                  >
+                    <Download size={14} />
+                    Export White BG
+                  </button>
+                </div>
+              </motion.div>
+            )}
           </div>
-        )}
+        </div>
       </div>
+
+      <style jsx>{`
+        .checkerboard {
+          background-image: linear-gradient(45deg, rgba(255,255,255,0.03) 25%, transparent 25%),
+            linear-gradient(-45deg, rgba(255,255,255,0.03) 25%, transparent 25%),
+            linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.03) 75%),
+            linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.03) 75%);
+          background-size: 20px 20px;
+          background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+      `}</style>
     </div>
   );
 }
+

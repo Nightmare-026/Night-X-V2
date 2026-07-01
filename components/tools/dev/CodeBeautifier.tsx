@@ -1,7 +1,8 @@
+import { AnimatePresence , motion} from 'framer-motion';
 'use client';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 import { 
   Code2, 
   Copy, 
@@ -10,7 +11,10 @@ import {
   Settings2,
   FileCode2,
   FileJson,
-  Braces
+  Braces,
+  Sparkles,
+  ShieldCheck,
+  Zap
 } from 'lucide-react';
 import * as prettier from 'prettier/standalone';
 import * as parserHtml from 'prettier/plugins/html';
@@ -27,10 +31,12 @@ export default function CodeBeautifier() {
   const [indentSize, setIndentSize] = useState(2);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isFormatting, setIsFormatting] = useState(false);
 
   const formatCode = async () => {
     if (!input.trim()) return;
     setError(null);
+    setIsFormatting(true);
 
     try {
       let parser = '';
@@ -66,7 +72,9 @@ export default function CodeBeautifier() {
       setOutput(formatted);
     } catch (err: any) {
       console.error(err);
-      setError(err.message || 'Failed to format code. Please check for syntax errors.');
+      setError(err.message || 'Syntax parsing failed. Please check the source protocol.');
+    } finally {
+      setIsFormatting(false);
     }
   };
 
@@ -84,140 +92,155 @@ export default function CodeBeautifier() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap gap-4 items-center justify-between bg-white/5 p-4 rounded-2xl border border-white/10">
-        <div className="flex gap-2">
-          {(['javascript', 'html', 'css', 'json'] as Language[]).map((lang) => (
-            <button
-              key={lang}
-              onClick={() => setLanguage(lang)}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                language === lang 
-                  ? 'bg-accent-purple text-white shadow-lg shadow-purple-500/20' 
-                  : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'
-              }`}
-            >
-              {lang.toUpperCase()}
-            </button>
-          ))}
-        </div>
-
-        <div className="flex items-center gap-3">
-          <label className="text-sm text-white/40 flex items-center gap-2">
-            <Settings2 className="w-4 h-4" />
-            Indent:
-          </label>
-          <select
-            value={indentSize}
-            onChange={(e) => setIndentSize(Number(e.target.value))}
-            className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-          >
-            <option value={2}>2 Spaces</option>
-            <option value={4}>4 Spaces</option>
-            <option value={8}>8 Spaces</option>
-          </select>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Input */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between px-2">
-            <label className="text-sm font-medium text-white/60 flex items-center gap-2">
-              <Code2 className="w-4 h-4 text-accent-purple" />
-              Source Code
-            </label>
-            <button 
-              onClick={handleClear}
-              className="text-white/40 hover:text-red-400 transition-colors p-1"
-              title="Clear input"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
-          </div>
-          <textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder={`Paste your ${language.toUpperCase()} code here...`}
-            className="w-full h-[400px] bg-black/40 border border-white/10 rounded-2xl p-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all resize-none"
-          />
-        </div>
-
-        {/* Output */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between px-2">
-            <label className="text-sm font-medium text-white/60 flex items-center gap-2">
-              <Braces className="w-4 h-4 text-accent-cyan" />
-              Beautified Code
-            </label>
-            <button
-              onClick={handleCopy}
-              disabled={!output}
-              className={`flex items-center gap-2 px-3 py-1 rounded-lg text-xs font-medium transition-all ${
-                copied 
-                  ? 'bg-green-500/20 text-green-400 border border-green-500/50' 
-                  : 'bg-white/5 text-white/60 hover:bg-white/10 border border-white/10 disabled:opacity-50'
-              }`}
-            >
-              {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-              {copied ? 'Copied' : 'Copy'}
-            </button>
-          </div>
-          <div className="relative group">
-            <textarea
-              value={output}
-              readOnly
-              placeholder="Beautified code will appear here..."
-              className="w-full h-[400px] bg-black/40 border border-white/10 rounded-2xl p-4 font-mono text-sm focus:outline-none transition-all resize-none"
-            />
-            {error && (
-              <div className="absolute inset-x-4 top-4 bg-red-500/10 border border-red-500/50 rounded-xl p-3">
-                <p className="text-xs text-red-400 font-mono line-clamp-3">{error}</p>
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        {/* Left Panel: Protocol Parameters */}
+        <div className="lg:col-span-5 space-y-6">
+          <div className="bg-white/[0.02] border border-white/[0.05] rounded-md p-8 space-y-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Code2 className="text-cyan-400" size={16} />
+                <h3 className="text-xs font-outfit font-bold uppercase tracking-widest text-white/80">Protocol Parameters</h3>
               </div>
-            )}
-          </div>
-        </div>
-      </div>
+              <button 
+                onClick={handleClear}
+                className="text-white/20 hover:text-red-400 transition-colors"
+                title="Flush Buffer"
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
 
-      <div className="flex justify-center">
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={formatCode}
-          disabled={!input.trim()}
-          className="px-8 py-4 bg-gradient-to-r from-purple-600 to-cyan-600 rounded-2xl font-syne font-bold text-lg shadow-xl shadow-purple-500/20 hover:shadow-purple-500/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Beautify Code ✨
-        </motion.button>
-      </div>
+            {/* Language Selector */}
+            <div className="grid grid-cols-2 gap-2 p-1 bg-black/40 rounded-md border border-white/[0.05]">
+              {(['javascript', 'html', 'css', 'json'] as Language[]).map((lang) => (
+                <button
+                  key={lang}
+                  onClick={() => setLanguage(lang)}
+                  className={cn(
+                    "py-2.5 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all",
+                    language === lang ? "bg-cyan-400 text-black" : "text-white/40 hover:text-white"
+                  )}
+                >
+                  {lang}
+                </button>
+              ))}
+            </div>
 
-      {/* Info Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6">
-        <div className="bg-white/5 p-4 rounded-2xl border border-white/10 flex items-start gap-3">
-          <div className="p-2 bg-purple-500/10 rounded-lg">
-            <FileCode2 className="w-5 h-5 text-purple-400" />
-          </div>
-          <div>
-            <h4 className="text-sm font-bold mb-1">Prettier Engine</h4>
-            <p className="text-xs text-white/40">Uses industry-standard Prettier for consistent formatting.</p>
+            {/* Settings */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between px-1">
+                <label className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Indentation Strategy</label>
+                <select
+                  value={indentSize}
+                  onChange={(e) => setIndentSize(Number(e.target.value))}
+                  className="bg-transparent border-none text-[10px] font-bold text-cyan-400 uppercase tracking-widest focus:ring-0 cursor-pointer"
+                >
+                  <option value={2} className="bg-neutral-900">2 Spaces</option>
+                  <option value={4} className="bg-neutral-900">4 Spaces</option>
+                  <option value={8} className="bg-neutral-900">8 Spaces</option>
+                </select>
+              </div>
+              
+              <div className="space-y-3">
+                <label className="text-[10px] font-bold text-white/20 uppercase tracking-widest px-1">Source Code Payload</label>
+                <textarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder={`Paste ${language.toUpperCase()} protocol here...`}
+                  className="w-full h-64 bg-black/40 border border-white/[0.05] rounded-md px-6 py-5 text-sm font-mono focus:outline-none focus:border-cyan-400/50 transition-all resize-none scrollbar-hide"
+                />
+              </div>
+            </div>
+
+            <button
+              onClick={formatCode}
+              disabled={!input.trim() || isFormatting}
+              className="w-full py-4 bg-cyan-400 hover:bg-cyan-300 disabled:bg-white/5 disabled:text-white/20 text-black rounded-md font-outfit font-bold text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 shadow-lg shadow-cyan-400/10"
+            >
+              {isFormatting ? (
+                <span className="flex items-center gap-2">
+                  <div className="w-3 h-3 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                  Processing...
+                </span>
+              ) : (
+                <>
+                  <Sparkles size={14} />
+                  Refine Syntactic Structure
+                </>
+              )}
+            </button>
           </div>
         </div>
-        <div className="bg-white/5 p-4 rounded-2xl border border-white/10 flex items-start gap-3">
-          <div className="p-2 bg-cyan-500/10 rounded-lg">
-            <FileJson className="w-5 h-5 text-cyan-400" />
-          </div>
-          <div>
-            <h4 className="text-sm font-bold mb-1">Multi-Format</h4>
-            <p className="text-xs text-white/40">Support for HTML, CSS, JavaScript, and JSON code.</p>
-          </div>
-        </div>
-        <div className="bg-white/5 p-4 rounded-2xl border border-white/10 flex items-start gap-3">
-          <div className="p-2 bg-green-500/10 rounded-lg">
-            <Settings2 className="w-5 h-5 text-green-400" />
-          </div>
-          <div>
-            <h4 className="text-sm font-bold mb-1">Custom Indent</h4>
-            <p className="text-xs text-white/40">Choose between 2, 4, or 8 space indentation.</p>
+
+        {/* Right Panel: Syntactic Refinement */}
+        <div className="lg:col-span-7 space-y-6">
+          <div className="bg-white/[0.02] border border-white/[0.05] rounded-md p-8 relative overflow-hidden min-h-[600px] flex flex-col">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-400/5 blur-[100px] rounded-full" />
+            
+            <div className="relative z-10 flex flex-col h-full flex-1">
+              <div className="flex items-center justify-between mb-12">
+                <div>
+                  <div className="text-[10px] font-bold tracking-[0.2em] text-cyan-400 uppercase mb-2">Refined Protocol</div>
+                  <h2 className="text-xl font-outfit font-bold text-white uppercase tracking-widest">Syntactic Output</h2>
+                </div>
+                {output && !error && (
+                  <button
+                    onClick={handleCopy}
+                    className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-md border border-white/[0.05] transition-all"
+                  >
+                    {copied ? <Check size={14} className="text-cyan-400" /> : <Copy size={14} className="text-white/40" />}
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-white/60">{copied ? 'Copied' : 'Export'}</span>
+                  </button>
+                )}
+              </div>
+
+              <div className="flex-1 space-y-8">
+                <AnimatePresence mode="wait">
+                  {error ? (
+                    <motion.div
+                      key="error"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="p-6 bg-red-500/5 border border-red-500/10 rounded-md flex items-center gap-4 text-red-400"
+                    >
+                      <Trash2 size={20} />
+                      <p className="text-[10px] font-bold uppercase tracking-widest">{error}</p>
+                    </motion.div>
+                  ) : (
+                    <div className="w-full flex-1 min-h-[300px] bg-black/60 border border-white/[0.05] rounded-md p-6 font-mono text-sm overflow-y-auto text-white/80 scrollbar-hide">
+                      {output ? (
+                        <pre className="whitespace-pre-wrap">{output}</pre>
+                      ) : (
+                        <span className="text-white/10 italic">Awaiting Syntactic Feed...</span>
+                      )}
+                    </div>
+                  )}
+                </AnimatePresence>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-8 border-t border-white/[0.05]">
+                  <div className="p-6 bg-white/[0.02] border border-white/[0.05] rounded-md space-y-4">
+                    <div className="flex items-center gap-3 text-cyan-400">
+                      <Zap size={14} />
+                      <span className="text-[10px] font-bold uppercase tracking-widest">Prettier Engine</span>
+                    </div>
+                    <p className="text-[10px] text-white/40 leading-relaxed font-inter uppercase tracking-widest">
+                      Leverages industry-standard AST parsing for consistent formatting across protocols.
+                    </p>
+                  </div>
+                  <div className="p-6 bg-white/[0.02] border border-white/[0.05] rounded-md space-y-4">
+                    <div className="flex items-center gap-3 text-emerald-400">
+                      <ShieldCheck size={14} />
+                      <span className="text-[10px] font-bold uppercase tracking-widest">Privacy Protocol</span>
+                    </div>
+                    <p className="text-[10px] text-white/40 leading-relaxed font-inter uppercase tracking-widest">
+                      Processing is executed locally within the Sovereign sandbox environment.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

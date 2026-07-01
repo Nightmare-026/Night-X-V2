@@ -1,10 +1,26 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Send, Copy, Check, RotateCcw, Sparkles, Loader2, Info, Languages, History } from 'lucide-react';
+import { 
+  Send, 
+  Copy, 
+  Check, 
+  RotateCcw, 
+  Sparkles, 
+  Loader2, 
+  Info, 
+  Languages, 
+  History,
+  Brain,
+  Cpu,
+  Layers,
+  Zap,
+  ChevronRight
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AIErrorMessage from '@/components/ui/AIErrorMessage';
 import { safeFetch } from '@/lib/fetch-utils';
+import { cn } from '@/lib/utils';
 
 const AiParaphraser = () => {
   const [text, setText] = useState('');
@@ -60,138 +76,183 @@ const AiParaphraser = () => {
   const tones = ['Standard', 'Formal', 'Creative', 'Casual', 'Academic', 'Shorten', 'Expand'];
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
-      {/* Usage Header */}
-      <div className="flex justify-between items-center bg-white/5 border border-white/10 rounded-2xl p-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-accent-purple/20 flex items-center justify-center text-accent-purple">
-            <Sparkles size={20} />
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      {/* Left Panel: Semantic Parameters (5 Columns) */}
+      <div className="lg:col-span-5 space-y-6">
+        <section className="glass-card border-white/[0.05] bg-black/40 p-6 rounded-md relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-4 opacity-5">
+            <Brain size={120} />
           </div>
-          <div>
-            <h3 className="text-sm font-bold">AI Usage</h3>
-            <p className="text-[10px] text-white/40 uppercase tracking-widest">Free Daily Credits</p>
+
+          <div className="relative z-10 space-y-6">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="h-2 w-2 rounded-full bg-violet-400 shadow-[0_0_8px_rgba(167,139,250,0.6)]" />
+              <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-white/50 font-outfit">
+                Semantic Parameters
+              </h2>
+            </div>
+
+            {/* Input Section */}
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest flex items-center gap-2">
+                  <Languages size={12} />
+                  Source Intelligence
+                </label>
+                <button
+                  onClick={() => setText('')}
+                  className="p-1.5 text-white/20 hover:text-red-400 transition-colors"
+                  title="Reset Input"
+                >
+                  <RotateCcw size={14} />
+                </button>
+              </div>
+              
+              <textarea
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                placeholder="Initialize semantic input here..."
+                className="w-full h-64 bg-white/[0.02] border border-white/[0.05] rounded-md px-4 py-3 focus:outline-none focus:border-violet-400/50 transition-all resize-none text-sm text-white/80 leading-relaxed font-inter custom-scrollbar"
+              />
+            </div>
+
+            {/* Tone Selector */}
+            <div className="space-y-4 pt-2">
+              <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest block">
+                Rewrite Protocol (Tone)
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {tones.map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setTone(t)}
+                    className={cn(
+                      "px-3 py-2 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all border",
+                      tone === t 
+                        ? "bg-violet-400/10 border-violet-400/30 text-violet-400 shadow-[0_0_15px_rgba(167,139,250,0.1)]" 
+                        : "bg-white/[0.02] border-white/[0.05] text-white/40 hover:bg-white/[0.05] hover:text-white"
+                    )}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Action Trigger */}
+            <button
+              onClick={handleParaphrase}
+              disabled={!text.trim() || isLoading || usage.count >= usage.limit}
+              className="w-full py-4 rounded-md bg-violet-400 text-black font-bold text-xs uppercase tracking-[0.2em] shadow-lg shadow-violet-400/20 flex items-center justify-center gap-3 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-violet-300 transition-all group"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="animate-spin" size={16} />
+                  Processing Matrix...
+                </>
+              ) : (
+                <>
+                  <Zap size={16} fill="currentColor" />
+                  Execute Rewrite
+                  <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
+            </button>
+
+            {error && <AIErrorMessage error={error} />}
           </div>
-        </div>
-        <div className="text-right">
-          <p className="text-lg font-mono font-bold text-white">{usage.count}/{usage.limit}</p>
-          <div className="w-24 h-1.5 bg-white/10 rounded-full mt-1 overflow-hidden">
-            <motion.div 
-              initial={{ width: 0 }}
-              animate={{ width: `${(usage.count / usage.limit) * 100}%` }}
-              className="h-full bg-gradient-to-r from-accent-purple to-accent-cyan"
-            />
+
+          {/* Footer Trace */}
+          <div className="mt-8 pt-6 border-t border-white/[0.05] flex items-center justify-between opacity-50">
+            <div className="flex items-center gap-2">
+              <Cpu size={12} className="text-violet-400" />
+              <span className="text-[10px] font-mono text-white/40 tracking-tighter">ENGINE: GPT-4O-PRO</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <span className="text-[10px] font-mono text-white/40 block">QUOTA</span>
+                <span className="text-xs font-mono font-bold text-white">{usage.count}/{usage.limit}</span>
+              </div>
+            </div>
           </div>
-        </div>
+        </section>
+
+        {/* Documentation Module */}
+        <section className="glass-card border-white/[0.05] bg-black/40 p-6 rounded-md">
+          <div className="flex items-center gap-2 mb-4">
+            <Info size={14} className="text-violet-400" />
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/50">Optimizing AI Output</h3>
+          </div>
+          <div className="space-y-3 text-[11px] text-white/40 leading-relaxed font-inter">
+            <p><strong className="text-violet-400/80">Formal Protocol:</strong> Recommended for technical documentation, cross-departmental reports, and high-stakes communication.</p>
+            <p><strong className="text-violet-400/80">Creative Protocol:</strong> Best for brand identity work, social storytelling, and breaking through generic messaging.</p>
+            <p><strong className="text-violet-400/80">Context Integrity:</strong> Ensure your input maintains logical coherence for the highest quality neural transformation.</p>
+          </div>
+        </section>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Input Panel */}
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm space-y-4">
-          <div className="flex justify-between items-center">
-            <label className="text-xs text-white/40 uppercase tracking-widest font-bold flex items-center gap-2">
-              <Languages size={14} />
-              SOURCE TEXT
-            </label>
-            <button
-              onClick={() => setText('')}
-              className="p-1.5 text-white/40 hover:text-white transition-colors"
-              title="Clear"
-            >
-              <RotateCcw size={16} />
-            </button>
-          </div>
+      {/* Right Panel: Rephrasing Engine (7 Columns) */}
+      <div className="lg:col-span-7 h-full">
+        <div className="glass-card border-white/[0.05] bg-black/40 p-8 rounded-md min-h-[600px] flex flex-col relative overflow-hidden h-full">
+          {/* Subtle Background Detail */}
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-violet-400/20 to-transparent" />
           
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="Paste the text you want to rewrite..."
-            className="w-full h-80 bg-black/30 border border-white/10 rounded-xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-accent-purple/50 transition-all resize-none text-white/90 leading-relaxed font-light custom-scrollbar"
-          />
-
-          <div className="space-y-3">
-            <label className="text-[10px] text-white/40 uppercase tracking-widest font-bold">Select Tone</label>
-            <div className="flex flex-wrap gap-2">
-              {tones.map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setTone(t)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                    tone === t 
-                    ? 'bg-accent-purple text-white' 
-                    : 'bg-white/5 text-white/40 hover:bg-white/10 hover:text-white'
-                  }`}
-                >
-                  {t}
-                </button>
-              ))}
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded bg-violet-400/10 flex items-center justify-center border border-violet-400/20">
+                <Layers size={16} className="text-violet-400" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-white font-outfit uppercase tracking-wider">Neural Variations</h2>
+                <p className="text-[10px] text-white/30 uppercase tracking-widest font-mono">Output Stack // Variations Generated</p>
+              </div>
             </div>
           </div>
 
-          <button
-            onClick={handleParaphrase}
-            disabled={!text.trim() || isLoading || usage.count >= usage.limit}
-            className="w-full py-4 rounded-xl bg-gradient-to-r from-accent-purple to-accent-cyan text-white font-bold text-sm shadow-lg shadow-accent-purple/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-all"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="animate-spin" size={18} />
-                Paraphrasing...
-              </>
-            ) : (
-              <>
-                <Send size={18} />
-                REWRITE WITH AI
-              </>
-            )}
-          </button>
-          
-          {error && (
-            <AIErrorMessage error={error} />
-          )}
-        </div>
-
-        {/* Results Panel */}
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm flex flex-col">
-          <label className="text-xs text-white/40 uppercase tracking-widest font-bold flex items-center gap-2 mb-4">
-            <History size={14} />
-            AI VARIATIONS
-          </label>
-
-          <div className="flex-1 space-y-4 overflow-y-auto max-h-[500px] no-scrollbar pr-2">
+          <div className="flex-1 space-y-6 overflow-y-auto no-scrollbar pr-2">
             <AnimatePresence mode="popLayout">
               {results.length > 0 ? (
                 results.map((result, idx) => (
                   <motion.div
                     key={idx}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: idx * 0.1 }}
-                    className="group relative bg-white/5 border border-white/5 rounded-xl p-4 hover:border-accent-purple/30 transition-all"
+                    className="group relative bg-white/[0.03] border border-white/[0.05] rounded-md p-6 hover:bg-white/[0.05] hover:border-violet-400/30 transition-all shadow-inner"
                   >
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-accent-purple/10 text-accent-purple font-bold uppercase">
-                        {result.tone}
-                      </span>
+                    <div className="flex justify-between items-center mb-4">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[9px] px-2 py-0.5 rounded-full bg-violet-400/10 text-violet-400 font-bold uppercase tracking-tighter border border-violet-400/20">
+                          {result.tone}
+                        </span>
+                        <span className="text-[9px] text-white/20 font-mono">VAR_{idx + 1}.LOG</span>
+                      </div>
                       <button
                         onClick={() => handleCopy(result.text, idx)}
-                        className="opacity-0 group-hover:opacity-100 p-1.5 text-white/40 hover:text-white transition-all"
-                        title="Copy Variation"
+                        className="p-2 rounded-md bg-black/40 border border-white/[0.05] text-white/40 hover:text-violet-400 hover:border-violet-400/30 transition-all opacity-0 group-hover:opacity-100"
+                        title="Copy to Clipboard"
                       >
                         {copiedIndex === idx ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
                       </button>
                     </div>
-                    <p className="text-sm text-white/70 leading-relaxed font-light">
-                      {result.text}
+                    <p className="text-sm text-white/80 leading-relaxed font-inter italic">
+                      &quot;{result.text}&quot;
                     </p>
                   </motion.div>
                 ))
               ) : (
                 <div className="h-full flex flex-col items-center justify-center text-center py-20">
-                  <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center text-white/10 mb-4 border border-white/5">
-                    <Sparkles size={32} />
+                  <div className="w-20 h-20 rounded-md bg-white/[0.02] border border-white/[0.05] flex items-center justify-center text-white/5 mb-6 relative">
+                    <Sparkles size={40} className="relative z-10" />
+                    <div className="absolute inset-0 bg-violet-400/5 blur-xl rounded-full" />
                   </div>
-                  <p className="text-sm text-white/20 font-medium italic">
-                    {isLoading ? "Analyzing and rewriting..." : "Enter text and click rewrite to see magic"}
+                  <h3 className="text-sm font-bold text-white/40 uppercase tracking-[0.2em] mb-2 font-outfit">
+                    {isLoading ? "Analyzing Semantic Matrix..." : "Awaiting Matrix Initialization"}
+                  </h3>
+                  <p className="text-[11px] text-white/20 max-w-xs mx-auto leading-relaxed uppercase tracking-widest font-mono">
+                    {isLoading 
+                      ? "Neural nodes are processing your request. Estimated completion: < 2s" 
+                      : "Enter source text in the left control module to generate neural rephrasing variations."}
                   </p>
                 </div>
               )}
@@ -199,21 +260,11 @@ const AiParaphraser = () => {
           </div>
         </div>
       </div>
-
-      <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-        <h4 className="text-white/80 font-medium mb-3 flex items-center gap-2">
-          <Info size={18} className="text-accent-purple" />
-          Pro Tips for Paraphrasing
-        </h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-white/60 leading-relaxed">
-          <p>• Select <b>Formal</b> for business emails, reports, or academic papers to maintain a professional standard.</p>
-          <p>• Use <b>Creative</b> mode for blog posts, social media, or storytelling to add flair and unique expression.</p>
-          <p>• Try <b>Shorten</b> when you need to be concise or meet character limits without losing the core message.</p>
-          <p>• All AI processing is private and happens securely via our advanced language models.</p>
-        </div>
-      </div>
     </div>
   );
 };
+
+
+
 
 export default AiParaphraser;

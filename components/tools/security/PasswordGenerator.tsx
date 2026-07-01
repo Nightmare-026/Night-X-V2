@@ -68,24 +68,20 @@ export default function PasswordGenerator() {
   const isValid = upper || lower || numbers || symbols;
 
   const generate = useCallback(() => {
-    if (!isValid) {
-      toast("Please select at least one character set", "error");
-      return;
-    }
+    if (!isValid) return;
     setIsGenerating(true);
     setTimeout(() => {
       const pw = generatePassword(length, { upper, lower, numbers, symbols });
       setPassword(pw);
       setIsGenerating(false);
-      toast("Secure password generated", "success");
     }, 400);
-  }, [length, upper, lower, numbers, symbols, isValid, toast]);
+  }, [length, upper, lower, numbers, symbols, isValid]);
 
   const handleCopy = async () => {
     if (!password) return;
     const success = await copyToClipboard(password);
     if (success) {
-      toast("Password copied to clipboard", "success");
+      toast("Copied to clipboard", "success");
     }
   };
 
@@ -95,214 +91,201 @@ export default function PasswordGenerator() {
     <button
       onClick={onChange}
       className={cn(
-        "flex items-center justify-between p-4 rounded-2xl border transition-all w-full group",
-        value ? "bg-accent-purple/10 border-accent-purple/30 text-white" : "bg-white/5 border-white/5 text-white/40 hover:bg-white/10"
+        "flex items-center justify-between p-4 rounded-md border transition-all w-full",
+        value 
+          ? "bg-emerald-400/10 border-emerald-400/30 text-emerald-400" 
+          : "bg-white/[0.01] border-white/[0.05] text-white/20 hover:text-white/40 hover:border-white/10"
       )}
     >
       <div className="flex items-center gap-3">
-        <div className={cn("p-2 rounded-lg transition-colors", value ? "bg-accent-purple/20 text-accent-purple" : "bg-black/20")}>
-          <Icon size={14} />
-        </div>
-        <span className="text-xs font-bold">{label}</span>
+        <Icon size={14} className={value ? "text-emerald-400" : "text-white/10"} />
+        <span className="text-[10px] font-bold uppercase tracking-widest font-inter">{label}</span>
       </div>
       <div className={cn(
-        "w-8 h-4 rounded-full relative transition-colors",
-        value ? "bg-accent-purple" : "bg-white/10"
+        "w-6 h-3 rounded-full relative transition-colors",
+        value ? "bg-emerald-400" : "bg-white/10"
       )}>
         <div className={cn(
-          "absolute top-1 w-2 h-2 rounded-full bg-white transition-all",
-          value ? "left-5" : "left-1"
+          "absolute top-0.5 w-2 h-2 rounded-full bg-white transition-all",
+          value ? "left-3.5" : "left-0.5"
         )} />
       </div>
     </button>
   );
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="space-y-8">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
         {/* Settings Panel */}
         <div className="lg:col-span-5 space-y-6">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="bg-white/5 border border-white/10 rounded-[32px] p-8 space-y-8"
-          >
+          <div className="bg-white/[0.02] border border-white/[0.05] rounded-md p-8 space-y-8">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-accent-purple/10 text-accent-purple">
-                <Lock size={18} />
-              </div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-white/70">Configuration</h3>
+              <Lock className="text-emerald-400" size={16} />
+              <h3 className="text-xs font-outfit font-bold uppercase tracking-widest text-white/80">Security Protocol</h3>
             </div>
 
             <div className="space-y-6">
               <div className="space-y-4">
-                <div className="flex justify-between text-[10px] font-bold text-white/40 uppercase ml-1">
-                  <span>Password Length</span>
-                  <span className="text-accent-purple">{length} Characters</span>
+                <div className="flex justify-between text-[10px] font-bold text-white/20 uppercase tracking-widest font-inter">
+                  <span>Length</span>
+                  <span className="text-emerald-400">{length} Units</span>
                 </div>
-                <div className="p-6 bg-black/40 rounded-3xl border border-white/10">
+                <div className="px-4 py-8 bg-black/40 rounded-md border border-white/[0.05]">
                   <input 
                     type="range" min={8} max={64} value={length}
                     onChange={e => setLength(Number(e.target.value))}
-                    className="w-full accent-accent-purple"
+                    className="w-full h-1 bg-white/[0.05] rounded-full appearance-none accent-emerald-400 cursor-pointer"
                   />
-                  <div className="flex justify-between mt-2 px-1 font-mono text-[8px] text-white/20">
-                    <span>8</span>
-                    <span>16</span>
-                    <span>32</span>
-                    <span>64</span>
-                  </div>
                 </div>
               </div>
 
               <div className="space-y-3">
-                <Toggle label="Uppercase (A-Z)" value={upper} onChange={() => setUpper(!upper)} icon={Type} />
-                <Toggle label="Lowercase (a-z)" value={lower} onChange={() => setLower(!lower)} icon={Type} />
-                <Toggle label="Numbers (0-9)" value={numbers} onChange={() => setNumbers(!numbers)} icon={Hash} />
-                <Toggle label="Symbols (!@#$...)" value={symbols} onChange={() => setSymbols(!symbols)} icon={Sparkles} />
+                <Toggle label="Uppercase" value={upper} onChange={() => setUpper(!upper)} icon={Type} />
+                <Toggle label="Lowercase" value={lower} onChange={() => setLower(!lower)} icon={Type} />
+                <Toggle label="Numbers" value={numbers} onChange={() => setNumbers(!numbers)} icon={Hash} />
+                <Toggle label="Symbols" value={symbols} onChange={() => setSymbols(!symbols)} icon={Sparkles} />
               </div>
 
               <button
                 onClick={generate}
                 disabled={!isValid || isGenerating}
-                className={cn(
-                  "w-full flex items-center justify-center gap-3 py-4 bg-accent-purple text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-accent-purple/20",
-                  (isGenerating || !isValid) ? "opacity-50" : "hover:scale-[1.02] active:scale-[0.98] hover:bg-white hover:text-black"
-                )}
+                className="w-full flex items-center justify-center gap-3 py-4 bg-emerald-400 text-black rounded-md font-bold text-[10px] uppercase tracking-widest transition-all hover:bg-emerald-300 disabled:opacity-30 shadow-xl"
               >
                 {isGenerating ? (
-                  <RefreshCw size={18} className="animate-spin" />
+                  <RefreshCw size={14} className="animate-spin" />
                 ) : (
                   <>
-                    <Zap size={18} />
-                    Generate Key
+                    <ShieldCheck size={14} />
+                    Synthesize Key
                   </>
                 )}
               </button>
             </div>
-          </motion.div>
+          </div>
+
+          <div className="p-6 bg-emerald-400/5 border border-emerald-400/10 rounded-md">
+            <div className="flex items-center gap-3 mb-3 text-emerald-400">
+              <Zap size={14} />
+              <span className="text-[10px] font-bold uppercase tracking-widest">Randomness Engine</span>
+            </div>
+            <p className="text-[10px] text-white/40 uppercase tracking-widest font-inter leading-relaxed">
+              Powered by window.crypto.getRandomValues() for absolute cryptographic security.
+            </p>
+          </div>
         </div>
 
         {/* Output Panel */}
         <div className="lg:col-span-7 space-y-6">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white/5 border border-white/10 rounded-[40px] p-8 md:p-10 flex flex-col relative overflow-hidden group min-h-[500px]"
-          >
-            {/* Decoration */}
-            <div className="absolute top-0 right-0 w-80 h-80 bg-accent-purple/5 blur-[120px] rounded-full group-hover:bg-accent-purple/10 transition-all duration-1000" />
+          <div className="bg-white/[0.02] border border-white/[0.05] rounded-md p-8 min-h-[500px] flex flex-col relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-400/5 blur-[100px] rounded-full" />
             
-            <div className="relative z-10 flex flex-col h-full w-full">
-              <div className="mb-12">
-                <div className="text-[10px] font-black tracking-[0.2em] text-accent-cyan uppercase mb-2">Secure Output</div>
-                <h2 className="text-2xl font-bold font-syne">Your Generated Password</h2>
-              </div>
-
-              <div className="flex-1 flex flex-col items-center justify-center space-y-8">
-                <div className="w-full relative">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-accent-purple/20 to-accent-cyan/20 rounded-3xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="relative p-8 bg-[#0A0C14] border border-white/10 rounded-3xl flex items-center gap-4 group/box shadow-2xl">
-                    <div className="flex-1 overflow-hidden">
-                      <AnimatePresence mode="wait">
-                        <motion.span 
-                          key={password + showPw}
-                          initial={{ opacity: 0, y: 5 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -5 }}
-                          className="font-mono text-xl md:text-3xl text-white tracking-[0.1em] break-all block"
-                        >
-                          {showPw 
-                            ? (password || <span className="text-white/10 italic">Waiting for input...</span>) 
-                            : (password ? '•'.repeat(password.length) : '••••••••••••••••')}
-                        </motion.span>
-                      </AnimatePresence>
-                    </div>
+            <div className="relative z-10 flex flex-col h-full flex-1">
+              <div className="flex items-center justify-between mb-12">
+                <div>
+                  <div className="text-[10px] font-bold tracking-[0.2em] text-emerald-400 uppercase mb-2">Registry</div>
+                  <h2 className="text-xl font-outfit font-bold text-white uppercase tracking-widest">Shielded Key</h2>
+                </div>
+                {password && (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleCopy}
+                      className="p-3 bg-white/[0.02] hover:bg-white/[0.05] text-white/40 hover:text-white rounded-md border border-white/[0.05] transition-all"
+                    >
+                      <Copy size={16} />
+                    </button>
                     <button 
                       onClick={() => setShowPw(!showPw)}
-                      className="p-3 hover:bg-white/5 text-white/20 hover:text-white rounded-xl transition-all shrink-0"
+                      className="p-3 bg-white/[0.02] hover:bg-white/[0.05] text-white/40 hover:text-white rounded-md border border-white/[0.05] transition-all"
                     >
-                      {showPw ? <EyeOff size={20} /> : <Eye size={20} />}
+                      {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex-1 flex flex-col items-center justify-center space-y-12 py-12">
+                <div className="w-full relative group">
+                  <div className="absolute -inset-1 bg-emerald-400/10 blur opacity-0 group-hover:opacity-100 transition-opacity rounded-md" />
+                  <div className="relative p-10 bg-black/60 border border-white/[0.1] rounded-md backdrop-blur-sm group-hover:border-emerald-400/30 transition-all flex items-center justify-center min-h-[140px]">
+                    <span className="font-mono text-2xl md:text-3xl text-white tracking-[0.2em] break-all block text-center leading-relaxed">
+                      {showPw 
+                        ? (password || <span className="text-white/5 lowercase tracking-normal">awaiting synthesis...</span>) 
+                        : (password ? '•'.repeat(password.length) : '••••••••••••••••')}
+                    </span>
                   </div>
                 </div>
 
                 {password && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="w-full space-y-4 bg-white/5 p-6 rounded-3xl border border-white/5"
-                  >
-                    <div className="flex items-center justify-between">
+                  <div className="w-full space-y-6">
+                    <div className="flex items-center justify-between px-2">
                       <div className="flex items-center gap-3">
-                        <div className={cn("p-2 rounded-lg bg-black/40", strength.color.replace('bg-', 'text-'))}>
+                        <div className={cn("transition-colors", strength.label === 'Secure' ? "text-emerald-400" : "text-white/40")}>
                           {strength.icon}
                         </div>
-                        <div>
-                          <p className="text-[10px] font-black text-white/20 uppercase tracking-widest leading-none mb-1">Security Rating</p>
-                          <p className="text-xs font-bold text-white/70">{strength.label} Strength</p>
-                        </div>
+                        <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest font-inter">
+                          Integrity Level: <span className="text-white/80">{strength.label}</span>
+                        </span>
                       </div>
-                      <div className="text-[10px] font-black text-accent-cyan bg-accent-cyan/10 px-3 py-1 rounded-full uppercase tracking-widest">
-                        Validated
+                      <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest">
+                        Score: {strength.score}/5
                       </div>
                     </div>
-                    <div className="h-1.5 rounded-full bg-black/40 overflow-hidden flex gap-1">
+                    <div className="grid grid-cols-5 gap-1.5 h-1.5">
                       {[...Array(5)].map((_, i) => (
-                        <motion.div 
+                        <div 
                           key={i}
-                          initial={{ scaleX: 0 }}
-                          animate={{ scaleX: 1 }}
                           className={cn(
-                            "h-full flex-1 rounded-full transition-colors duration-500",
-                            i < strength.score ? strength.color : "bg-white/5"
+                            "rounded-full transition-all duration-700",
+                            i < strength.score 
+                              ? strength.color 
+                              : "bg-white/5"
                           )}
                         />
                       ))}
                     </div>
-                  </motion.div>
+                  </div>
                 )}
               </div>
 
               {password && (
-                <div className="mt-12 grid grid-cols-2 gap-4">
-                  <button
-                    onClick={handleCopy}
-                    className="flex items-center justify-center gap-3 py-4 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider shadow-xl transition-all hover:scale-105 active:scale-95"
-                  >
-                    <Copy size={16} />
-                    Copy Key
-                  </button>
-                  <button
-                    onClick={generate}
-                    className="flex items-center justify-center gap-3 py-4 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-white/10 transition-all"
-                  >
-                    <RefreshCw size={16} />
-                    Regenerate
-                  </button>
+                <div className="mt-auto pt-12">
+                  <div className="p-6 bg-white/[0.02] border border-white/[0.05] rounded-md flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-md bg-emerald-400/10 flex items-center justify-center">
+                        <Shield size={16} className="text-emerald-400" />
+                      </div>
+                      <div>
+                        <div className="text-[10px] font-bold uppercase text-white/30 tracking-widest">Buffer</div>
+                        <div className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Ready for deployment</div>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleCopy}
+                        className="px-6 py-3 bg-white text-black rounded-md font-bold text-[10px] uppercase tracking-widest hover:bg-white/90 transition-all shadow-lg"
+                      >
+                        Execute Copy
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {!password && (
+                <div className="flex-1 flex flex-col items-center justify-center opacity-10 space-y-4">
+                  <Lock size={48} strokeWidth={1} />
+                  <p className="text-[10px] font-bold uppercase tracking-widest">Registry Locked</p>
                 </div>
               )}
             </div>
 
             {isGenerating && (
-              <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 flex flex-col items-center justify-center rounded-[40px]">
-                <div className="w-12 h-12 border-4 border-accent-purple/20 border-t-accent-purple rounded-full animate-spin mb-4" />
-                <span className="text-xs font-black uppercase tracking-[0.3em] text-white/70">Scrambling Bits...</span>
+              <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
+                <RefreshCw className="w-10 h-10 text-emerald-400 animate-spin mb-4" />
+                <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/40">Encrypting...</span>
               </div>
             )}
-          </motion.div>
-
-          <div className="bg-gradient-to-br from-accent-purple/10 to-accent-cyan/10 p-6 rounded-[32px] border border-white/10 flex items-center gap-4">
-            <div className="p-3 bg-accent-cyan/10 text-accent-cyan rounded-2xl">
-              <ShieldCheck size={24} />
-            </div>
-            <div>
-              <h4 className="text-xs font-bold text-white/80">Quantum Safe Entropy</h4>
-              <p className="text-[10px] text-white/40 leading-relaxed mt-1">
-                Passwords are generated using cryptographically secure random number generators (Web Crypto API) and never leave your browser.
-              </p>
-            </div>
           </div>
         </div>
       </div>

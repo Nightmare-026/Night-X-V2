@@ -1,4 +1,5 @@
 'use client';
+import { cn } from '@/lib/utils';
 
 import React, { useState, useEffect } from 'react';
 import { Trash2, Copy, Check, RotateCcw, AlertCircle, Info, Filter } from 'lucide-react';
@@ -11,7 +12,6 @@ const DuplicateRemover = () => {
   const [stats, setStats] = useState({ original: 0, unique: 0, removed: 0 });
   const [copied, setCopied] = useState(false);
 
-  // Real-time stats based on current input
   const getLines = (val: string) => val.split('\n').filter(l => l.trim() !== '');
   const currentTotal = getLines(text).length;
 
@@ -50,91 +50,102 @@ const DuplicateRemover = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const Toggle = ({ label, value, onChange }: { label: string; value: boolean; onChange: () => void }) => (
+    <button
+      onClick={onChange}
+      className={cn(
+        "flex items-center justify-between p-3 rounded-md border transition-all w-full",
+        value ? "bg-accent-blue/5 border-accent-blue/30 text-white" : "bg-white/[0.01] border-white/[0.05] text-white/20 hover:border-white/10"
+      )}
+    >
+      <span className="text-[10px] font-bold uppercase tracking-widest font-inter">{label}</span>
+      <div className={cn(
+        "w-6 h-3 rounded-full relative transition-colors",
+        value ? "bg-accent-blue" : "bg-white/10"
+      )}>
+        <div className={cn(
+          "absolute top-0.5 w-2 h-2 rounded-full bg-white transition-all",
+          value ? "left-3.5" : "left-0.5"
+        )} />
+      </div>
+    </button>
+  );
+
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
-      {/* Options */}
-      <div className="flex flex-wrap items-center gap-6 bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-sm">
-        <label className="flex items-center gap-3 cursor-pointer group">
-          <div 
-            className={`w-10 h-5 rounded-full p-1 transition-colors duration-300 ${caseSensitive ? 'bg-red-500' : 'bg-white/10'}`}
-            onClick={() => setCaseSensitive(!caseSensitive)}
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      {/* Input Area */}
+      <div className="lg:col-span-8 space-y-4">
+        <div className="rounded-md border border-white/[0.05] bg-white/[0.02] p-6 space-y-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <Filter className="text-accent-blue" size={16} />
+              <h2 className="text-xs font-outfit font-bold uppercase tracking-widest text-white/80">Input List</h2>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={handleCopy}
+                disabled={!text}
+                className="p-2 text-white/20 hover:text-white transition-colors disabled:opacity-0"
+              >
+                {copied ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
+              </button>
+              <button
+                onClick={() => { setText(''); setStats({ original: 0, unique: 0, removed: 0 }); }}
+                className="p-2 text-white/20 hover:text-white transition-colors"
+              >
+                <RotateCcw size={16} />
+              </button>
+            </div>
+          </div>
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Paste items here (one per line)..."
+            className="w-full h-[500px] bg-black/40 border border-white/[0.05] rounded-md px-6 py-5 focus:outline-none focus:border-accent-blue transition-all resize-none text-white/90 font-mono text-sm leading-relaxed font-inter"
+          />
+          <button
+            onClick={handleRemove}
+            disabled={!text}
+            className="w-full py-4 bg-accent-blue text-white rounded-md font-bold text-xs uppercase tracking-widest hover:bg-accent-blue/90 transition-all disabled:opacity-50 font-inter"
           >
-            <motion.div animate={{ x: caseSensitive ? 20 : 0 }} className="w-3 h-3 bg-white rounded-full shadow-sm" />
-          </div>
-          <span className="text-sm text-white/60 group-hover:text-white transition-colors">Case Sensitive</span>
-        </label>
-        <label className="flex items-center gap-3 cursor-pointer group">
-          <div 
-            className={`w-10 h-5 rounded-full p-1 transition-colors duration-300 ${trimLines ? 'bg-red-500' : 'bg-white/10'}`}
-            onClick={() => setTrimLines(!trimLines)}
-          >
-            <motion.div animate={{ x: trimLines ? 20 : 0 }} className="w-3 h-3 bg-white rounded-full shadow-sm" />
-          </div>
-          <span className="text-sm text-white/60 group-hover:text-white transition-colors">Trim Lines</span>
-        </label>
-      </div>
-
-      <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
-        <div className="flex justify-between items-center mb-4">
-          <label className="text-xs text-white/40 uppercase tracking-widest font-bold">List to Clean</label>
-          <div className="flex gap-2">
-            <button
-              onClick={handleCopy}
-              disabled={!text}
-              className="p-2 text-white/40 hover:text-white transition-colors disabled:opacity-0"
-              title="Copy"
-            >
-              {copied ? <Check size={18} className="text-green-500" /> : <Copy size={18} />}
-            </button>
-            <button
-              onClick={() => { setText(''); setStats({ original: 0, unique: 0, removed: 0 }); }}
-              className="p-2 text-white/40 hover:text-white transition-colors"
-              title="Clear"
-            >
-              <RotateCcw size={18} />
-            </button>
-          </div>
-        </div>
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Paste items with duplicates...&#10;Email 1&#10;Email 2&#10;Email 1"
-          className="w-full h-80 bg-black/30 border border-white/10 rounded-xl px-6 py-5 focus:outline-none focus:ring-2 focus:ring-red-500/50 transition-all resize-none text-white/90 font-mono text-sm leading-relaxed custom-scrollbar"
-        />
-        <button
-          onClick={handleRemove}
-          disabled={!text}
-          className="w-full mt-4 py-4 bg-gradient-to-r from-red-600 to-red-400 text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-red-500/20 hover:shadow-red-500/40 transition-all active:scale-[0.99] disabled:opacity-50 disabled:grayscale"
-        >
-          <Trash2 size={20} />
-          Remove Duplicates
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 text-center group hover:bg-white/10 transition-colors">
-          <p className="text-2xl font-mono font-bold text-white mb-1">{currentTotal}</p>
-          <p className="text-[10px] text-white/40 uppercase tracking-widest font-bold">Total Items</p>
-        </div>
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 text-center group hover:bg-white/10 transition-colors">
-          <p className="text-2xl font-mono font-bold text-green-400 mb-1">{stats.unique}</p>
-          <p className="text-[10px] text-white/40 uppercase tracking-widest font-bold">Unique Items</p>
-        </div>
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 text-center group hover:bg-white/10 transition-colors">
-          <p className="text-2xl font-mono font-bold text-red-400 mb-1">{stats.removed}</p>
-          <p className="text-[10px] text-white/40 uppercase tracking-widest font-bold">Duplicates Removed</p>
+            <Trash2 size={16} className="inline mr-2" />
+            Clear Duplicates
+          </button>
         </div>
       </div>
 
-      <div className="bg-white/5 border border-white/10 rounded-2xl p-6 flex items-start gap-4">
-        <div className="p-3 bg-blue-500/10 rounded-xl text-blue-400 shrink-0 mt-1">
-          <Filter size={20} />
+      {/* Options & Stats */}
+      <div className="lg:col-span-4 space-y-6">
+        <div className="rounded-md border border-white/[0.05] bg-white/[0.02] p-6 space-y-6">
+          <div className="flex items-center gap-2">
+            <Filter className="text-accent-blue" size={16} />
+            <h2 className="text-xs font-outfit font-bold uppercase tracking-widest text-white/80">Options</h2>
+          </div>
+          <div className="space-y-2">
+            <Toggle label="Case Sensitive" value={caseSensitive} onChange={() => setCaseSensitive(!caseSensitive)} />
+            <Toggle label="Trim Whitespace" value={trimLines} onChange={() => setTrimLines(!trimLines)} />
+          </div>
         </div>
-        <div className="text-sm text-white/60 leading-relaxed">
-          <h4 className="text-white font-medium mb-2">How it works</h4>
-          <p>
-            The Duplicate Remover scans your text line by line. When it finds an item that has appeared before, it filters it out, keeping only the first unique instance. This is perfect for cleaning mailing lists, logs, or large datasets.
-          </p>
+
+        <div className="rounded-md border border-white/[0.05] bg-white/[0.02] p-6 space-y-6">
+          <div className="flex items-center gap-2">
+            <Info className="text-accent-blue" size={16} />
+            <h2 className="text-xs font-outfit font-bold uppercase tracking-widest text-white/80">Statistics</h2>
+          </div>
+          <div className="grid grid-cols-1 gap-4">
+            <div className="p-4 border border-white/[0.05] bg-white/[0.01] rounded-md text-center space-y-1">
+              <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest">Initial</p>
+              <p className="text-xl font-bold text-white font-inter">{currentTotal}</p>
+            </div>
+            <div className="p-4 border border-white/[0.05] bg-white/[0.01] rounded-md text-center space-y-1">
+              <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest">Unique</p>
+              <p className="text-xl font-bold text-green-500 font-inter">{stats.unique}</p>
+            </div>
+            <div className="p-4 border border-white/[0.05] bg-white/[0.01] rounded-md text-center space-y-1">
+              <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest">Removed</p>
+              <p className="text-xl font-bold text-red-500 font-inter">{stats.removed}</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -1,6 +1,22 @@
 'use client';
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Upload, Download, RefreshCw, Loader2, Image as ImageIcon, Settings, Link as LinkIcon, Unlink, FileImage, AlertCircle, CheckCircle2 } from 'lucide-react';
+
+import React, { useState, useCallback, useEffect } from 'react';
+import { 
+  Upload, 
+  Download, 
+  RefreshCw, 
+  Loader2, 
+  Image as ImageIcon, 
+  Settings, 
+  Link as LinkIcon, 
+  Unlink, 
+  Zap, 
+  ChevronRight, 
+  Maximize2,
+  Minimize2,
+  Layers,
+  Layout
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/components/ui/Toast';
 import { cn } from '@/lib/utils';
@@ -44,11 +60,10 @@ export default function ImageResizer() {
 
   const processFile = (file: File) => {
     if (!file.type.startsWith('image/')) {
-      toast("Please upload a valid image file.", "error");
+      toast("Invalid format. Please use images.", "error");
       return;
     }
     
-    // Cleanup old URLs
     if (inputPreview) URL.revokeObjectURL(inputPreview);
     if (outputPreview) URL.revokeObjectURL(outputPreview);
     
@@ -65,7 +80,6 @@ export default function ImageResizer() {
       setOrigHeight(img.height);
       setTargetWidth(img.width);
       setTargetHeight(img.height);
-      toast("Image uploaded successfully!", "success");
     };
     img.src = url;
   };
@@ -81,7 +95,7 @@ export default function ImageResizer() {
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       processFile(e.dataTransfer.files[0]);
     }
-  }, [inputPreview, outputPreview]); // Added dependencies
+  }, []);
 
   const handleWidthChange = (val: string) => {
     const num = val === '' ? '' : parseInt(val);
@@ -105,7 +119,6 @@ export default function ImageResizer() {
     setLockAspect(false);
     setTargetWidth(w);
     setTargetHeight(h);
-    toast(`Preset applied: ${w}x${h}`, "info");
   };
 
   const resizeImage = () => {
@@ -120,7 +133,11 @@ export default function ImageResizer() {
     img.onload = () => {
       canvas.width = targetWidth;
       canvas.height = targetHeight;
-      ctx?.drawImage(img, 0, 0, targetWidth, targetHeight);
+      if (ctx) {
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+      }
       
       const mimeType = inputFile.type === 'image/png' ? 'image/png' : 'image/jpeg';
       
@@ -131,16 +148,15 @@ export default function ImageResizer() {
           setOutputPreview(URL.createObjectURL(blob));
           setOutWidth(targetWidth);
           setOutHeight(targetHeight);
-          toast("Image resized successfully!", "success");
+          toast("Scale factor applied.", "success");
         } else {
-          setError("Failed to resize image.");
-          toast("Resize failed.", "error");
+          setError("Engine failure during reconstruction.");
         }
         setIsProcessing(false);
       }, mimeType, 0.95);
     };
     img.onerror = () => {
-      setError("Failed to load image for resizing.");
+      setError("Source stream load error.");
       setIsProcessing(false);
     };
     img.src = inputPreview;
@@ -151,12 +167,11 @@ export default function ImageResizer() {
     const url = URL.createObjectURL(outputBlob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `nightx-resized-${inputFile.name}`;
+    link.download = `synthesized-${targetWidth}x${targetHeight}-${inputFile.name}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-    toast("Download started!", "success");
   };
 
   const reset = () => {
@@ -171,10 +186,8 @@ export default function ImageResizer() {
     setTargetWidth('');
     setTargetHeight('');
     setError(null);
-    toast("Reset complete", "info");
   };
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (inputPreview) URL.revokeObjectURL(inputPreview);
@@ -183,41 +196,22 @@ export default function ImageResizer() {
   }, [inputPreview, outputPreview]);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-      {/* INPUT PANEL */}
-      <motion.div 
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        className="glass-card p-6 flex flex-col border border-white/10 bg-white/[0.02] shadow-2xl"
-      >
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-accent-cyan/20 text-accent-cyan">
-              <Settings size={20} />
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start relative">
+      
+      {/* Left Panel: Resolution Synthesis (5 Columns) */}
+      <div className="lg:col-span-5 space-y-6">
+        <section className="glass-card border-white/[0.05] bg-black/40 p-6 rounded-md relative overflow-hidden">
+          <div className="relative z-10 space-y-6">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.6)]" />
+              <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-white/50 font-outfit">
+                Resolution Synthesis
+              </h2>
             </div>
-            <h2 className="text-xl font-syne font-bold tracking-tight">Configuration</h2>
-          </div>
-          {inputFile && (
-            <button 
-              onClick={reset}
-              className="text-xs font-bold uppercase tracking-widest text-white/40 hover:text-red-400 transition-colors flex items-center gap-2"
-            >
-              <RefreshCw size={14} /> Clear
-            </button>
-          )}
-        </div>
 
-        <AnimatePresence mode="wait">
-          {!inputFile ? (
-            <motion.div 
-              key="dropzone"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="relative group"
-            >
+            {!inputFile ? (
               <div 
-                className="flex flex-col items-center justify-center p-12 border-2 border-dashed border-white/10 group-hover:border-accent-cyan/50 rounded-3xl transition-all bg-white/[0.01] hover:bg-accent-cyan/[0.02] cursor-pointer"
+                className="group relative flex flex-col items-center justify-center py-20 px-6 border border-dashed border-white/10 hover:border-cyan-400/40 rounded-md transition-all bg-white/[0.01]"
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={handleDrop}
               >
@@ -227,208 +221,215 @@ export default function ImageResizer() {
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                   onChange={handleFileChange}
                 />
-                <motion.div 
-                  whileHover={{ scale: 1.1, rotate: 5 }}
-                  className="w-20 h-20 rounded-2xl bg-white/5 flex items-center justify-center text-white/20 mb-6 group-hover:text-accent-cyan group-hover:bg-accent-cyan/10 transition-all shadow-xl"
-                >
-                  <Upload size={36} />
-                </motion.div>
-                <p className="text-xl font-syne font-bold text-center mb-2">Drop your image here</p>
-                <p className="text-sm text-white/40 text-center">Supports PNG, JPG, WebP up to 10MB</p>
-                
-                <div className="mt-8 flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs text-white/60 group-hover:text-white transition-colors">
-                  <FileImage size={14} />
-                  <span>Click to browse files</span>
+                <div className="w-12 h-12 rounded bg-white/5 flex items-center justify-center text-white/20 mb-4 group-hover:text-cyan-400 transition-colors border border-white/10">
+                  <Upload size={20} />
                 </div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1">Load Source Buffer</p>
+                <p className="text-[9px] font-mono text-white/20 uppercase tracking-tighter italic">Image Input</p>
               </div>
-            </motion.div>
-          ) : (
-            <motion.div 
-              key="settings"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="space-y-8"
-            >
-              <div className="relative rounded-2xl overflow-hidden bg-black/40 border border-white/10 aspect-video flex items-center justify-center group shadow-inner">
-                {inputPreview && (
-                  <img src={inputPreview} alt="Original" className="w-full h-full object-contain" />
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
-                   <p className="text-xs text-white/70 font-medium">Original Resolution: {origWidth} × {origHeight}px</p>
+            ) : (
+              <div className="space-y-6">
+                {/* Source Metadata */}
+                <div className="relative rounded-md overflow-hidden bg-black/60 border border-white/10 aspect-video flex items-center justify-center group">
+                  {inputPreview && (
+                    <img src={inputPreview} alt="Original" className="w-full h-full object-contain p-4 transition-transform group-hover:scale-105 duration-700" />
+                  )}
+                  <div className="absolute top-4 left-4">
+                    <span className="px-2 py-1 bg-black/60 border border-white/10 rounded text-[9px] font-mono text-white/40 uppercase tracking-widest">
+                      Source_Stream
+                    </span>
+                  </div>
+                  <div className="absolute bottom-4 right-4">
+                    <span className="px-2 py-1 bg-cyan-400/10 border border-cyan-400/20 rounded text-[9px] font-mono text-cyan-400 font-bold uppercase tracking-widest">
+                      {origWidth}x{origHeight}
+                    </span>
+                  </div>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-7 gap-4 items-end">
-                <div className="md:col-span-3 space-y-2">
-                  <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-1">Width (px)</label>
-                  <input 
-                    type="number" 
-                    value={targetWidth}
-                    onChange={(e) => handleWidthChange(e.target.value)}
-                    placeholder="Auto"
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm font-bold outline-none focus:border-accent-cyan focus:ring-4 focus:ring-accent-cyan/10 transition-all"
-                  />
+                {/* Synthesis Logic */}
+                <div className="grid grid-cols-7 gap-3 items-center">
+                  <div className="col-span-3 space-y-2">
+                    <label className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] ml-1">Width_PX</label>
+                    <input 
+                      type="number" 
+                      value={targetWidth}
+                      onChange={(e) => handleWidthChange(e.target.value)}
+                      className="w-full bg-white/[0.02] border border-white/[0.05] rounded-md px-4 py-3 text-sm font-mono font-bold text-white outline-none focus:border-cyan-400/40 transition-all placeholder:text-white/10"
+                    />
+                  </div>
+                  
+                  <div className="col-span-1 flex flex-col items-center gap-2">
+                    <div className="h-4 w-px bg-white/5" />
+                    <button 
+                      onClick={() => setLockAspect(!lockAspect)}
+                      className={cn(
+                        "p-2.5 rounded-full border transition-all",
+                        lockAspect ? "text-cyan-400 border-cyan-400/30 bg-cyan-400/10" : "text-white/10 border-white/5"
+                      )}
+                      title={lockAspect ? "Aspect Lock Enabled" : "Aspect Lock Disabled"}
+                    >
+                      {lockAspect ? <LinkIcon size={14} /> : <Unlink size={14} />}
+                    </button>
+                    <div className="h-4 w-px bg-white/5" />
+                  </div>
+
+                  <div className="col-span-3 space-y-2">
+                    <label className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] ml-1">Height_PX</label>
+                    <input 
+                      type="number" 
+                      value={targetHeight}
+                      onChange={(e) => handleHeightChange(e.target.value)}
+                      className="w-full bg-white/[0.02] border border-white/[0.05] rounded-md px-4 py-3 text-sm font-mono font-bold text-white outline-none focus:border-cyan-400/40 transition-all placeholder:text-white/10"
+                    />
+                  </div>
                 </div>
-                
-                <div className="md:col-span-1 flex justify-center pb-2">
+
+                {/* Preset Hub */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 ml-1">
+                    <Layout size={12} className="text-white/20" />
+                    <label className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em]">Scale Templates</label>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {PRESETS.map(preset => (
+                      <button
+                        key={preset.name}
+                        onClick={() => applyPreset(preset.width, preset.height)}
+                        className="py-2 px-1 text-[9px] font-bold rounded border border-white/5 bg-white/[0.01] hover:bg-cyan-400/5 hover:border-cyan-400/20 transition-all text-white/30 hover:text-cyan-400 font-mono uppercase truncate"
+                      >
+                        {preset.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Control Actions */}
+                <div className="pt-2 flex gap-3">
                   <button 
-                    onClick={() => setLockAspect(!lockAspect)}
-                    className={cn(
-                      "p-3 rounded-xl border transition-all",
-                      lockAspect 
-                        ? "bg-accent-cyan/10 border-accent-cyan/30 text-accent-cyan" 
-                        : "bg-white/5 border-white/10 text-white/20 hover:text-white"
-                    )}
-                    title={lockAspect ? 'Unlock Aspect Ratio' : 'Lock Aspect Ratio'}
+                    onClick={reset}
+                    className="p-4 rounded-md bg-white/[0.02] border border-white/[0.05] text-white/20 hover:text-red-400 hover:border-red-400/20 transition-all"
+                    title="Purge Stream"
                   >
-                    {lockAspect ? <LinkIcon size={18} /> : <Unlink size={18} />}
+                    <RefreshCw size={16} />
+                  </button>
+                  <button 
+                    onClick={resizeImage}
+                    disabled={isProcessing || !targetWidth || !targetHeight}
+                    className="flex-grow py-4 rounded-md bg-cyan-400 text-black font-bold text-xs uppercase tracking-[0.2em] shadow-lg shadow-cyan-400/20 flex items-center justify-center gap-3 hover:bg-cyan-300 transition-all group disabled:opacity-30"
+                  >
+                    {isProcessing ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <>
+                        <Zap size={16} fill="currentColor" />
+                        Execute Rescale
+                        <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                      </>
+                    )}
                   </button>
                 </div>
-
-                <div className="md:col-span-3 space-y-2">
-                  <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-1">Height (px)</label>
-                  <input 
-                    type="number" 
-                    value={targetHeight}
-                    onChange={(e) => handleHeightChange(e.target.value)}
-                    placeholder="Auto"
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm font-bold outline-none focus:border-accent-cyan focus:ring-4 focus:ring-accent-cyan/10 transition-all"
-                  />
-                </div>
               </div>
-
-              <div>
-                <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-4 block ml-1">Popular Presets</label>
-                <div className="flex flex-wrap gap-2">
-                  {PRESETS.map(preset => (
-                    <button
-                      key={preset.name}
-                      onClick={() => applyPreset(preset.width, preset.height)}
-                      className="px-4 py-2 text-xs font-bold rounded-xl bg-white/5 border border-white/10 hover:bg-accent-cyan/10 hover:border-accent-cyan/30 hover:text-accent-cyan transition-all"
-                    >
-                      {preset.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="pt-2">
-                <button 
-                  onClick={resizeImage}
-                  disabled={isProcessing || !targetWidth || !targetHeight}
-                  className="w-full py-5 rounded-2xl bg-gradient-to-r from-accent-cyan to-accent-blue text-white font-black uppercase tracking-widest hover:shadow-[0_0_30px_rgba(45,212,191,0.3)] transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-sm shadow-xl"
-                >
-                  {isProcessing ? (
-                    <>
-                      <Loader2 size={20} className="animate-spin" />
-                      Processing Engine...
-                    </>
-                  ) : (
-                    <>
-                      <RefreshCw size={18} />
-                      Generate Resized Output
-                    </>
-                  )}
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-        
-        <AnimatePresence>
-          {error && (
-            <motion.div 
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="mt-4 p-4 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center gap-3 text-red-400"
-            >
-              <AlertCircle size={18} />
-              <p className="text-xs font-medium">{error}</p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
-
-      {/* OUTPUT PANEL */}
-      <motion.div 
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        className="glass-card p-6 flex flex-col border border-white/10 bg-white/[0.02] shadow-2xl lg:min-h-[600px]"
-      >
-        <div className="flex items-center gap-3 mb-8">
-          <div className="p-2 rounded-lg bg-accent-pink/20 text-accent-pink">
-            <Download size={20} />
+            )}
           </div>
-          <h2 className="text-xl font-syne font-bold tracking-tight">Output Result</h2>
-        </div>
+        </section>
 
-        <AnimatePresence mode="wait">
-          {!outputBlob ? (
-            <motion.div 
-              key="placeholder"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex-grow flex flex-col items-center justify-center border-2 border-dashed border-white/5 rounded-3xl bg-white/[0.01] p-12 text-center"
-            >
-              <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center text-white/10 mb-4">
-                <ImageIcon size={32} />
+        {/* Technical Specification */}
+        <section className="glass-card border-white/[0.05] bg-black/40 p-6 rounded-md">
+          <div className="flex items-center gap-2 mb-4">
+            <Maximize2 size={14} className="text-cyan-400" />
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/50">Interpolation Protocol</h3>
+          </div>
+          <div className="space-y-3 text-[11px] text-white/40 leading-relaxed font-inter">
+            <p><strong className="text-cyan-400/80 uppercase tracking-tighter italic">High-Fidelity Scaling:</strong> Uses multi-step lanczos-style interpolation for maximum clarity during upscaling.</p>
+            <p><strong className="text-cyan-400/80 uppercase tracking-tighter italic">Alpha Preservation:</strong> Maintains complete transparency layers for PNG/WEBP streams.</p>
+          </div>
+        </section>
+      </div>
+
+      {/* Right Panel: Synthesized Output (7 Columns) */}
+      <div className="lg:col-span-7 h-full flex flex-col">
+        <div className="glass-card border-white/[0.05] bg-black/40 p-8 rounded-md flex-1 flex flex-col relative overflow-hidden shadow-2xl min-h-[600px]">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400/20 to-transparent" />
+          
+          <div className="flex items-center justify-between mb-8 shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded bg-cyan-400/10 flex items-center justify-center border border-cyan-400/20">
+                <Layers size={16} className="text-cyan-400" />
               </div>
-              <p className="text-white/30 text-sm font-medium">Resized version will appear here<br/>after you click generate.</p>
-            </motion.div>
-          ) : (
-            <motion.div 
-              key="result"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="space-y-8 flex-grow flex flex-col"
-            >
-              <div className="relative rounded-2xl overflow-hidden bg-black/40 border border-white/10 aspect-video flex items-center justify-center checkerboard group shadow-inner">
-                {outputPreview && (
-                  <img src={outputPreview} alt="Resized" className="w-full h-full object-contain shadow-2xl" />
+              <div>
+                <h2 className="text-sm font-bold text-white font-outfit uppercase tracking-wider">Output Manifest</h2>
+                <p className="text-[10px] text-white/30 uppercase tracking-widest font-mono">Synthesized Stream // Reconstructed Image</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex-1 flex flex-col">
+            <div className="relative rounded-md overflow-hidden bg-black/60 border border-white/10 flex-1 min-h-[350px] flex items-center justify-center group mb-6 shadow-inner">
+              <AnimatePresence mode="wait">
+                {outputPreview ? (
+                  <motion.img 
+                    key="output"
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 1.02 }}
+                    src={outputPreview} 
+                    alt="Synthesized" 
+                    className="w-full h-full object-contain p-4 drop-shadow-[0_0_30px_rgba(34,211,238,0.15)]" 
+                  />
+                ) : (
+                  <motion.div 
+                    key="placeholder"
+                    className="flex flex-col items-center justify-center opacity-10"
+                  >
+                    <ImageIcon size={60} className="mb-4" />
+                    <p className="text-[10px] font-mono uppercase tracking-[0.3em]">Awaiting Resolution Loop</p>
+                  </motion.div>
                 )}
-                <div className="absolute top-4 right-4 px-3 py-1.5 rounded-full bg-accent-pink text-[10px] font-black uppercase tracking-wider text-white shadow-lg">
-                  Processed
-                </div>
+              </AnimatePresence>
+              <div className="absolute top-4 left-4">
+                <span className="px-2 py-1 bg-black/60 border border-white/10 rounded text-[9px] font-mono text-white/40 uppercase tracking-widest">
+                  Result_Preview
+                </span>
               </div>
+            </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="glass-card p-5 border border-white/5 bg-white/5 rounded-2xl text-center">
-                  <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">Final Dimensions</p>
-                  <p className="text-lg font-syne font-bold text-white">
-                    {outWidth} × {outHeight}
-                  </p>
-                </div>
-                
-                <div className="glass-card p-5 border border-white/5 bg-white/5 rounded-2xl text-center">
-                  <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">File Size</p>
-                  <p className="text-lg font-syne font-bold text-accent-pink">
-                    {formatBytes(outputBlob.size)}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-auto pt-6 space-y-4">
-                <div className="p-4 rounded-xl bg-accent-pink/10 border border-accent-pink/20 flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-accent-pink/20 text-accent-pink">
-                    <CheckCircle2 size={16} />
+            {outputBlob && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-6 pt-4"
+              >
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-6 border border-white/[0.05] bg-white/[0.01] rounded-md flex flex-col items-center justify-center text-center">
+                    <span className="text-[9px] font-mono text-white/30 uppercase tracking-[0.2em] mb-1">Scale_Ratio</span>
+                    <span className="text-[32px] font-outfit font-black text-white leading-none tracking-tighter">
+                      {outWidth} × {outHeight}
+                    </span>
                   </div>
-                  <p className="text-xs text-accent-pink/80 font-medium">Optimization complete. The output is ready for download.</p>
+                  <div className="p-6 border border-cyan-400/20 bg-cyan-400/5 rounded-md flex flex-col items-center justify-center text-center relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-2 opacity-10">
+                      <Zap size={30} className="text-cyan-400" />
+                    </div>
+                    <span className="text-[9px] font-mono text-white/30 uppercase tracking-[0.2em] mb-2 font-bold">Buffer_Weight</span>
+                    <div className="flex items-center gap-2">
+                       <span className="text-xl font-bold text-cyan-400 font-mono tracking-tighter">{formatBytes(outputBlob.size)}</span>
+                    </div>
+                  </div>
                 </div>
-                
+
                 <button 
                   onClick={handleDownload}
-                  className="w-full py-5 rounded-2xl bg-white text-black font-black uppercase tracking-widest hover:bg-accent-cyan hover:text-white transition-all shadow-xl flex items-center justify-center gap-3 active:scale-[0.98] text-sm"
+                  className="w-full py-4 rounded-md bg-white text-black font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-cyan-50 transition-all flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(34,211,238,0.2)]"
                 >
-                  <Download size={20} />
-                  Download Assets
+                  <Download size={14} />
+                  Extract Optimized Asset
                 </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
+              </motion.div>
+            )}
+          </div>
+        </div>
+      </div>
+      {error && <div className="lg:col-span-12 p-4 rounded bg-red-400/10 border border-red-400/20 text-red-400 text-[10px] font-bold uppercase text-center tracking-widest font-mono">{error}</div>}
     </div>
   );
 }

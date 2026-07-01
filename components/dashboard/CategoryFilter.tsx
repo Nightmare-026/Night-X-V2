@@ -29,11 +29,10 @@ const CategoryFilter = React.memo(function CategoryFilter({
   };
 
   return (
-    <div className="w-full mb-8 relative">
+    <div className="w-full relative">
       <div 
         ref={scrollRef}
-        className="flex items-center gap-3 overflow-x-auto pb-2 no-scrollbar select-none flex-nowrap"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
+        className="flex items-center gap-2 overflow-x-auto pb-4 no-scrollbar select-none"
       >
         {CATEGORIES.map((category) => {
           const isActive = activeCategory === category.id;
@@ -44,34 +43,19 @@ const CategoryFilter = React.memo(function CategoryFilter({
               key={category.id}
               onClick={() => handleCategoryClick(category.id)}
               className={cn(
-                "relative flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold whitespace-nowrap transition-all duration-300 shrink-0",
-                "border border-white/10 glass-card",
+                "relative flex items-center gap-2.5 px-4 py-2 rounded-md text-xs font-bold transition-all shrink-0 border",
+                "font-outfit uppercase tracking-wider",
                 isActive 
-                  ? "text-white border-transparent shadow-xl" 
-                  : "text-white/40 hover:text-white hover:border-white/20"
+                  ? "bg-white/[0.05] text-white border-accent-blue/50" 
+                  : "bg-white/[0.02] text-white/30 border-white/[0.05] hover:text-white hover:border-white/20"
               )}
             >
-              {isActive && (
-                <motion.div
-                  layoutId="active-category"
-                  className="absolute inset-0 rounded-full z-0"
-                  style={{ 
-                    background: `linear-gradient(135deg, rgb(var(--accent-purple)), rgb(var(--accent-cyan)))`,
-                    boxShadow: '0 4px 15px rgba(var(--accent-purple), 0.4)',
-                    opacity: 1
-                  }}
-                  initial={false}
-                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                />
-              )}
-              
-              <span className="relative z-10 text-lg">{category.icon}</span>
-              <span className="relative z-10">{category.label}</span>
+              <span className="text-sm">{category.icon}</span>
+              <span>{category.label}</span>
               
               {count > 0 && (
                 <span className={cn(
-                  "relative z-10 ml-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold",
-                  isActive ? "bg-white/20 text-white" : "bg-white/10 text-white/40"
+                  "ml-1 text-[10px] opacity-40 font-normal",
                 )}>
                   {count}
                 </span>
@@ -80,9 +64,6 @@ const CategoryFilter = React.memo(function CategoryFilter({
           );
         })}
       </div>
-      
-      {/* Scroll Indicators for mobile */}
-      <div className="absolute right-0 top-0 bottom-4 w-12 bg-gradient-to-l from-[#06080F] to-transparent pointer-events-none md:hidden" />
     </div>
   );
 });

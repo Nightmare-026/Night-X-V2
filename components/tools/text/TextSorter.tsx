@@ -18,12 +18,12 @@ const TextSorter = () => {
 
   const sorts = [
     { 
-      name: 'Sort A-Z', 
+      name: 'Sort Alphabetical (A-Z)', 
       icon: <SortAsc size={16} />,
       fn: (s: string) => getLines(s).sort((a, b) => a.localeCompare(b)).join('\n') 
     },
     { 
-      name: 'Sort Z-A', 
+      name: 'Sort Alphabetical (Z-A)', 
       icon: <SortDesc size={16} />,
       fn: (s: string) => getLines(s).sort((a, b) => b.localeCompare(a)).join('\n') 
     },
@@ -42,12 +42,12 @@ const TextSorter = () => {
       fn: (s: string) => getLines(s).sort((a, b) => a.length - b.length).join('\n') 
     },
     { 
-      name: 'Reverse List', 
+      name: 'Reverse Current List', 
       icon: <RotateCcw size={16} />,
       fn: (s: string) => getLines(s).reverse().join('\n') 
     },
     { 
-      name: 'Shuffle (Random)', 
+      name: 'Shuffle (Randomize)', 
       icon: <Shuffle size={16} />,
       fn: (s: string) => {
         const lines = getLines(s);
@@ -65,57 +65,81 @@ const TextSorter = () => {
     setText(fn(text));
   };
 
+  const lineCount = getLines(text).length;
+
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
-      <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
-        <div className="flex justify-between items-center mb-4">
-          <label className="text-xs text-white/40 uppercase tracking-widest font-bold">List to Sort (one item per line)</label>
-          <div className="flex gap-2">
-            <button
-              onClick={handleCopy}
-              disabled={!text}
-              className="p-2 text-white/40 hover:text-white transition-colors disabled:opacity-0"
-              title="Copy"
-            >
-              {copied ? <Check size={18} className="text-green-500" /> : <Copy size={18} />}
-            </button>
-            <button
-              onClick={() => setText('')}
-              className="p-2 text-white/40 hover:text-white transition-colors"
-              title="Clear"
-            >
-              <RotateCcw size={18} />
-            </button>
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      {/* Editor Area */}
+      <div className="lg:col-span-8 space-y-4">
+        <div className="rounded-md border border-white/[0.05] bg-white/[0.02] p-6 space-y-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <ListOrdered className="text-accent-blue" size={16} />
+              <h2 className="text-xs font-outfit font-bold uppercase tracking-widest text-white/80">Input List</h2>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={handleCopy}
+                disabled={!text}
+                className="p-2 text-white/20 hover:text-white transition-colors disabled:opacity-0"
+              >
+                {copied ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
+              </button>
+              <button
+                onClick={() => setText('')}
+                className="p-2 text-white/20 hover:text-white transition-colors"
+              >
+                <RotateCcw size={16} />
+              </button>
+            </div>
+          </div>
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Enter items line by line...&#10;Apple&#10;Orange&#10;Banana"
+            className="w-full h-[500px] bg-black/40 border border-white/[0.05] rounded-md px-6 py-5 focus:outline-none focus:border-accent-blue transition-all resize-none text-white/90 font-mono text-sm leading-relaxed custom-scrollbar"
+          />
+        </div>
+      </div>
+
+      {/* Actions Sidebar */}
+      <div className="lg:col-span-4 space-y-6">
+        <div className="rounded-md border border-white/[0.05] bg-white/[0.02] p-6 space-y-6">
+          <div className="flex items-center gap-2">
+            <ArrowUpDown className="text-accent-blue" size={16} />
+            <h2 className="text-xs font-outfit font-bold uppercase tracking-widest text-white/80">Sort Options</h2>
+          </div>
+          <div className="flex flex-col gap-2">
+            {sorts.map((s) => (
+              <button
+                key={s.name}
+                onClick={() => applySort(s.fn)}
+                className="flex items-center justify-between p-4 bg-white/[0.02] border border-white/[0.05] rounded-md text-[10px] font-bold uppercase tracking-widest text-white/40 hover:bg-accent-blue/5 hover:border-accent-blue/30 hover:text-white transition-all text-left font-inter group"
+              >
+                {s.name}
+                <div className="text-accent-blue/40 group-hover:text-accent-blue transition-colors">
+                  {s.icon}
+                </div>
+              </button>
+            ))}
           </div>
         </div>
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Enter items line by line...&#10;Apple&#10;Orange&#10;Banana"
-          className="w-full h-80 bg-black/30 border border-white/10 rounded-xl px-6 py-5 focus:outline-none focus:ring-2 focus:ring-red-500/50 transition-all resize-none text-white/90 font-mono text-sm leading-relaxed custom-scrollbar"
-        />
-      </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-        {sorts.map((s) => (
-          <button
-            key={s.name}
-            onClick={() => applySort(s.fn)}
-            className="flex items-center gap-3 px-5 py-4 bg-white/5 border border-white/10 rounded-xl text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-all active:scale-[0.98]"
-          >
-            <span className="text-red-400">{s.icon}</span>
-            {s.name}
-          </button>
-        ))}
-      </div>
-
-      <div className="bg-white/5 border border-white/10 rounded-2xl p-6 flex items-center gap-4">
-        <div className="p-3 bg-red-500/10 rounded-xl text-red-400 shrink-0">
-          <ListOrdered size={24} />
-        </div>
-        <div>
-          <h4 className="text-white font-medium mb-1">Items Detected: {getLines(text).length}</h4>
-          <p className="text-sm text-white/40">Enter each item on a new line for the best results.</p>
+        {/* Stats Card */}
+        <div className="rounded-md border border-white/[0.05] bg-white/[0.02] p-6 space-y-4">
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-accent-blue" />
+            <h2 className="text-xs font-outfit font-bold uppercase tracking-widest text-white/80">List Metrics</h2>
+          </div>
+          <div className="grid grid-cols-1 gap-4">
+            <div className="bg-white/[0.02] p-4 rounded-md border border-white/[0.05]">
+              <span className="text-[10px] text-white/20 uppercase tracking-widest font-bold block mb-1">Total Items</span>
+              <span className="text-2xl font-outfit font-bold text-white">{lineCount}</span>
+            </div>
+          </div>
+          <p className="text-[10px] text-white/30 font-inter uppercase tracking-wide leading-relaxed">
+            Items are detected based on line breaks. Ensure each entry is on its own line.
+          </p>
         </div>
       </div>
     </div>

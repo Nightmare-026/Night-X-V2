@@ -1,7 +1,8 @@
 'use client';
+import { cn } from '@/lib/utils';
 
 import React, { useState, useEffect } from 'react';
-import { Type, ArrowLeftRight, Copy, Check, RotateCcw, AlertCircle, FileText, Download } from 'lucide-react';
+import { Type, ArrowLeftRight, Copy, Check, RotateCcw, AlertCircle, FileText, Download , Zap} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Base64Codec = () => {
@@ -27,7 +28,7 @@ const Base64Codec = () => {
         setOutput(decodeURIComponent(escape(atob(val))));
       }
     } catch (err) {
-      setError('Invalid Base64 string for decoding.');
+      setError('Invalid character sequence for decryption.');
       setOutput('');
     }
   };
@@ -41,7 +42,6 @@ const Base64Codec = () => {
   const handleModeToggle = () => {
     const newMode = mode === 'encode' ? 'decode' : 'encode';
     setMode(newMode);
-    // Swap input and output if there's content
     if (output && !error) {
       setInput(output);
     }
@@ -66,136 +66,164 @@ const Base64Codec = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
-      {/* Header Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-white/5 border border-white/10 p-4 rounded-2xl backdrop-blur-sm">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setMode('encode')}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-              mode === 'encode' ? 'bg-red-500 text-white' : 'text-white/60 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            Encode
-          </button>
-          <button
-            onClick={handleModeToggle}
-            className="p-2 text-white/40 hover:text-white transition-colors"
-            title="Swap Mode"
-          >
-            <ArrowLeftRight size={18} />
-          </button>
-          <button
-            onClick={() => setMode('decode')}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-              mode === 'decode' ? 'bg-red-500 text-white' : 'text-white/60 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            Decode
-          </button>
-        </div>
+    <div className="space-y-8 font-sans">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        {/* Main Interface */}
+        <div className="lg:col-span-8 space-y-6">
+          <div className="bg-white/[0.02] border border-white/[0.05] rounded-md overflow-hidden">
+            <div className="p-8 space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-md bg-emerald-400/10 text-emerald-400">
+                    <Type size={16} />
+                  </div>
+                  <h3 className="text-xs font-outfit font-bold uppercase tracking-widest text-white/80">Input Stream</h3>
+                </div>
+                <div className="flex bg-black/40 p-1 rounded-md border border-white/[0.05]">
+                  <button
+                    onClick={() => setMode('encode')}
+                    className={cn(
+                      "px-4 py-1.5 rounded-sm text-[10px] font-bold uppercase tracking-widest transition-all",
+                      mode === 'encode' ? "bg-emerald-400 text-black shadow-lg" : "text-white/20 hover:text-white/40"
+                    )}
+                  >
+                    Encrypt
+                  </button>
+                  <button
+                    onClick={() => setMode('decode')}
+                    className={cn(
+                      "px-4 py-1.5 rounded-sm text-[10px] font-bold uppercase tracking-widest transition-all",
+                      mode === 'decode' ? "bg-emerald-400 text-black shadow-lg" : "text-white/20 hover:text-white/40"
+                    )}
+                  >
+                    Decrypt
+                  </button>
+                </div>
+              </div>
 
-        <div className="flex items-center gap-6">
-          <label className="flex items-center gap-2 cursor-pointer group">
-            <div 
-              className={`w-10 h-5 rounded-full p-1 transition-colors duration-300 ${realtime ? 'bg-red-500' : 'bg-white/10'}`}
-              onClick={() => setRealtime(!realtime)}
-            >
-              <motion.div 
-                animate={{ x: realtime ? 20 : 0 }}
-                className="w-3 h-3 bg-white rounded-full shadow-sm"
+              <textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder={mode === 'encode' ? 'Paste plaintext payload...' : 'Paste Base64 ciphertext...'}
+                className="w-full h-48 bg-black/20 border border-white/[0.05] rounded-md p-6 focus:outline-none focus:border-emerald-400/50 transition-all resize-none font-mono text-sm leading-relaxed text-white/80"
               />
             </div>
-            <span className="text-xs text-white/40 group-hover:text-white/60 transition-colors">Real-time</span>
-          </label>
-          <button
-            onClick={() => { setInput(''); setOutput(''); setError(''); }}
-            className="flex items-center gap-2 text-xs text-white/40 hover:text-white transition-colors"
-          >
-            <RotateCcw size={14} />
-            Reset
-          </button>
-        </div>
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Input Pane */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between px-2">
-            <span className="text-xs text-white/40 uppercase tracking-widest font-bold flex items-center gap-2">
-              <Type size={14} />
-              Input
-            </span>
-          </div>
-          <div className="relative group">
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder={mode === 'encode' ? 'Type or paste text to encode...' : 'Paste Base64 string to decode...'}
-              className="w-full h-[300px] bg-black/20 border border-white/10 rounded-2xl p-6 focus:outline-none focus:ring-2 focus:ring-red-500/50 transition-all resize-none font-mono text-sm leading-relaxed text-white/80"
-            />
+            <div className="h-px bg-white/[0.05]" />
+
+            <div className="p-8 space-y-6 bg-black/20">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-md bg-emerald-400/10 text-emerald-400">
+                    <FileText size={16} />
+                  </div>
+                  <h3 className="text-xs font-outfit font-bold uppercase tracking-widest text-white/80">Compiled Output</h3>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleDownload}
+                    disabled={!output || !!error}
+                    className="p-2.5 bg-white/[0.02] border border-white/[0.05] text-white/20 hover:text-emerald-400 rounded-md transition-all disabled:opacity-0"
+                  >
+                    <Download size={16} />
+                  </button>
+                  <button
+                    onClick={handleCopy}
+                    disabled={!output || !!error}
+                    className="flex items-center gap-2 px-4 py-2 bg-emerald-400 text-black rounded-md text-[10px] font-bold uppercase tracking-widest hover:bg-emerald-300 transition-all disabled:opacity-0"
+                  >
+                    {copied ? <Check size={14} /> : <Copy size={14} />}
+                    {copied ? 'Copied' : 'Execute Copy'}
+                  </button>
+                </div>
+              </div>
+
+              <div className="relative min-h-[200px]">
+                <AnimatePresence mode="wait">
+                  {error ? (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="absolute inset-0 bg-red-500/5 border border-red-500/10 rounded-md p-8 flex flex-col items-center justify-center text-center gap-3"
+                    >
+                      <AlertCircle size={24} className="text-red-400" />
+                      <p className="text-red-400 text-[10px] font-bold uppercase tracking-widest">{error}</p>
+                    </motion.div>
+                  ) : (
+                    <div className="w-full h-full min-h-[200px] bg-[#080808] border border-white/[0.05] rounded-md p-6 font-mono text-sm leading-relaxed text-white break-all overflow-y-auto custom-scrollbar">
+                      {output || (
+                        <span className="text-white/5 lowercase tracking-normal italic">
+                          awaiting stream input...
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Output Pane */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between px-2">
-            <span className="text-xs text-white/40 uppercase tracking-widest font-bold flex items-center gap-2">
-              <FileText size={14} />
-              Output
-            </span>
-            <div className="flex gap-2">
+        {/* Sidebar */}
+        <div className="lg:col-span-4 space-y-6">
+          <div className="bg-white/[0.02] border border-white/[0.05] rounded-md p-8 space-y-8">
+            <div className="flex items-center gap-3">
+              <RotateCcw className="text-emerald-400" size={16} />
+              <h3 className="text-xs font-outfit font-bold uppercase tracking-widest text-white/80">Protocol Engine</h3>
+            </div>
+
+            <div className="space-y-4">
               <button
-                onClick={handleDownload}
-                disabled={!output || !!error}
-                className="p-1.5 text-white/40 hover:text-white transition-colors disabled:opacity-0"
-                title="Download"
+                onClick={() => setRealtime(!realtime)}
+                className={cn(
+                  "flex items-center justify-between p-4 rounded-md border transition-all w-full",
+                  realtime 
+                    ? "bg-emerald-400/10 border-emerald-400/30 text-emerald-400" 
+                    : "bg-white/[0.01] border-white/[0.05] text-white/20 hover:text-white/40 hover:border-white/10"
+                )}
               >
-                <Download size={16} />
+                <div className="flex items-center gap-3">
+                  <RotateCcw size={14} className={realtime ? "text-emerald-400" : "text-white/10"} />
+                  <span className="text-[10px] font-bold uppercase tracking-widest">Real-time Sync</span>
+                </div>
+                <div className={cn(
+                  "w-6 h-3 rounded-full relative transition-colors",
+                  realtime ? "bg-emerald-400" : "bg-white/10"
+                )}>
+                  <div className={cn(
+                    "absolute top-0.5 w-2 h-2 rounded-full bg-white transition-all",
+                    realtime ? "left-3.5" : "left-0.5"
+                  )} />
+                </div>
               </button>
+
               <button
-                onClick={handleCopy}
-                disabled={!output || !!error}
-                className="p-1.5 text-white/40 hover:text-white transition-colors disabled:opacity-0"
-                title="Copy"
+                onClick={() => { setInput(''); setOutput(''); setError(''); }}
+                className="w-full flex items-center justify-center gap-3 py-4 bg-white/[0.02] border border-white/[0.05] text-white/40 hover:text-white rounded-md font-bold text-[10px] uppercase tracking-widest transition-all"
               >
-                {copied ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
+                <RotateCcw size={14} />
+                Flush Registry
               </button>
             </div>
           </div>
-          <div className="relative group h-[300px]">
-            <AnimatePresence mode="wait">
-              {error ? (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="absolute inset-0 bg-red-500/5 border border-red-500/20 rounded-2xl p-6 flex flex-col items-center justify-center text-center gap-3"
-                >
-                  <AlertCircle size={32} className="text-red-500" />
-                  <p className="text-red-400 text-sm font-medium">{error}</p>
-                </motion.div>
-              ) : (
-                <div className="w-full h-full bg-white/5 border border-white/10 rounded-2xl p-6 font-mono text-sm leading-relaxed text-white break-all overflow-y-auto custom-scrollbar">
-                  {output || (
-                    <span className="text-white/20 italic">
-                      Waiting for input...
-                    </span>
-                  )}
-                </div>
-              )}
-            </AnimatePresence>
+
+          <div className="bg-emerald-400/5 border border-emerald-400/10 rounded-md p-6 space-y-4">
+            <div className="flex items-center gap-3 text-emerald-400">
+              <Zap size={14} />
+              <span className="text-[10px] font-bold uppercase tracking-widest">Codec Intelligence</span>
+            </div>
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <p className="text-[8px] font-bold text-white/20 uppercase tracking-[0.2em]">Standard</p>
+                <p className="text-[10px] text-white/60 font-bold uppercase tracking-widest">UTF-8 Compliant</p>
+              </div>
+              <p className="text-[10px] text-white/40 leading-relaxed font-inter uppercase tracking-widest">
+                Our synthesis engine handles complex Unicode sequences and emojis with zero data loss.
+              </p>
+            </div>
           </div>
         </div>
-      </div>
-
-      <div className="bg-red-500/5 border border-red-500/10 rounded-2xl p-6">
-        <h4 className="text-white/80 font-medium mb-3 flex items-center gap-2">
-          <AlertCircle size={18} className="text-red-400" />
-          Pro Tip: UTF-8 Support
-        </h4>
-        <p className="text-sm text-white/60 leading-relaxed">
-          This encoder uses a robust method to handle <strong>Unicode (UTF-8)</strong> characters. Unlike many basic encoders that crash with emojis or special symbols, Night X ensures your data is encoded and decoded accurately across different platforms.
-        </p>
       </div>
     </div>
   );

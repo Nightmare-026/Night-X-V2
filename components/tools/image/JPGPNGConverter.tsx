@@ -1,8 +1,21 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
-import { Upload, Download, RefreshCw, Loader2, Image as ImageIcon, Settings, FileType } from 'lucide-react';
+import React, { useState, useCallback, useEffect } from 'react';
+import { 
+  Upload, 
+  Download, 
+  RefreshCw, 
+  Loader2, 
+  Image as ImageIcon, 
+  Settings, 
+  Zap, 
+  ChevronRight, 
+  Layers,
+  ArrowRightLeft,
+  Info
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 export default function JPGPNGConverter() {
   const [inputFile, setInputFile] = useState<File | null>(null);
@@ -45,7 +58,7 @@ export default function JPGPNGConverter() {
       if (file.type.startsWith('image/')) {
         processFile(file);
       } else {
-        setError("Please drop a valid image file.");
+        setError("Invalid format. Please use images.");
       }
     }
   }, []);
@@ -61,7 +74,6 @@ export default function JPGPNGConverter() {
     setOutputPreview(null);
     setError(null);
     
-    // Auto-detect a good target format
     if (file.type === 'image/jpeg') setTargetFormat('image/png');
     else if (file.type === 'image/png') setTargetFormat('image/jpeg');
     else setTargetFormat('image/jpeg');
@@ -80,10 +92,9 @@ export default function JPGPNGConverter() {
       canvas.width = img.width;
       canvas.height = img.height;
       
-      // If converting to JPEG, draw white background first (PNG/WEBP might have transparency)
-      if (targetFormat === 'image/jpeg') {
-        ctx!.fillStyle = '#FFFFFF';
-        ctx!.fillRect(0, 0, canvas.width, canvas.height);
+      if (targetFormat === 'image/jpeg' && ctx) {
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
       
       ctx?.drawImage(img, 0, 0);
@@ -96,13 +107,13 @@ export default function JPGPNGConverter() {
           setOutputBlob(blob);
           setOutputPreview(URL.createObjectURL(blob));
         } else {
-          setError("Failed to convert image format.");
+          setError("Engine error during transcoding.");
         }
         setIsProcessing(false);
       }, targetFormat, outputQuality);
     };
     img.onerror = () => {
-      setError("Failed to load image for conversion.");
+      setError("Source stream load failure.");
       setIsProcessing(false);
     };
     img.src = inputPreview;
@@ -115,7 +126,7 @@ export default function JPGPNGConverter() {
     link.href = url;
     
     const ext = targetFormat === 'image/jpeg' ? 'jpg' : targetFormat === 'image/png' ? 'png' : 'webp';
-    link.download = `${inputFile.name.split('.')[0]}-converted.${ext}`;
+    link.download = `${inputFile.name.split('.')[0]}-transmuted.${ext}`;
     
     document.body.appendChild(link);
     link.click();
@@ -133,8 +144,7 @@ export default function JPGPNGConverter() {
     setError(null);
   };
 
-  // Cleanup on unmount
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
       if (inputPreview) URL.revokeObjectURL(inputPreview);
       if (outputPreview) URL.revokeObjectURL(outputPreview);
@@ -142,180 +152,237 @@ export default function JPGPNGConverter() {
   }, [inputPreview, outputPreview]);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      {/* INPUT PANEL */}
-      <div className="glass-card p-6 flex flex-col h-full border border-white/10 bg-white/[0.02]">
-        <div className="flex items-center gap-2 mb-6">
-          <Settings className="text-accent-cyan" size={20} />
-          <h2 className="text-xl font-syne font-bold">Input & Format</h2>
-        </div>
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start relative">
+      
+      {/* Left Panel: Format Transmutation (5 Columns) */}
+      <div className="lg:col-span-5 space-y-6">
+        <section className="glass-card border-white/[0.05] bg-black/40 p-6 rounded-md relative overflow-hidden">
+          <div className="relative z-10 space-y-6">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.6)]" />
+              <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-white/50 font-outfit">
+                Format Transmutation
+              </h2>
+            </div>
 
-        {!inputFile ? (
-          <div 
-            className="flex-grow flex flex-col items-center justify-center p-8 border-2 border-dashed border-white/10 hover:border-accent-cyan/50 rounded-2xl transition-all group bg-white/[0.01]"
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={handleDrop}
-          >
-            <input 
-              type="file" 
-              accept="image/*" 
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-              onChange={handleFileChange}
-              title=""
-            />
-            <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center text-white/40 mb-4 group-hover:scale-110 group-hover:text-accent-cyan transition-all">
-              <Upload size={32} />
-            </div>
-            <p className="text-lg font-medium text-center">Drag & drop your image here</p>
-            <p className="text-sm text-white/40 mt-2">or click to browse</p>
-          </div>
-        ) : (
-          <div className="space-y-6 flex-grow flex flex-col">
-            <div className="relative rounded-2xl overflow-hidden bg-black/40 border border-white/10 aspect-video flex-shrink-0 flex items-center justify-center">
-              {inputPreview && (
-                <img src={inputPreview} alt="Original" className="w-full h-full object-contain" />
-              )}
-            </div>
-            
-            <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5">
-              <div className="flex items-center gap-3 overflow-hidden">
-                <ImageIcon className="text-white/40 flex-shrink-0" size={20} />
-                <div className="min-w-0">
-                  <p className="text-sm font-medium truncate">{inputFile.name}</p>
-                  <p className="text-xs text-white/50">{getFormatLabel(inputFile.type)} • {formatBytes(inputFile.size)}</p>
+            {!inputFile ? (
+              <div 
+                className="group relative flex flex-col items-center justify-center py-20 px-6 border border-dashed border-white/10 hover:border-cyan-400/40 rounded-md transition-all bg-white/[0.01]"
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={handleDrop}
+              >
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  onChange={handleFileChange}
+                />
+                <div className="w-12 h-12 rounded bg-white/5 flex items-center justify-center text-white/20 mb-4 group-hover:text-cyan-400 transition-colors border border-white/10">
+                  <Upload size={20} />
                 </div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1">Load Source Buffer</p>
+                <p className="text-[9px] font-mono text-white/20 uppercase tracking-tighter italic">Image Input</p>
               </div>
-            </div>
+            ) : (
+              <div className="space-y-6">
+                {/* Format Selector Hub */}
+                <div className="space-y-4">
+                  <label className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] ml-1">Target Protocol</label>
+                  <div className="grid grid-cols-3 gap-2 p-1 bg-white/5 rounded border border-white/5">
+                    {(['image/png', 'image/jpeg', 'image/webp'] as const).map(fmt => (
+                      <button 
+                        key={fmt}
+                        onClick={() => setTargetFormat(fmt)}
+                        className={cn(
+                          "py-2.5 rounded text-[10px] font-bold transition-all font-mono uppercase",
+                          targetFormat === fmt 
+                            ? "bg-cyan-400 text-black shadow-lg shadow-cyan-400/20" 
+                            : "text-white/30 hover:text-white hover:bg-white/5"
+                        )}
+                      >
+                        {getFormatLabel(fmt)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-            <div className="space-y-6 flex-grow">
-              <div className="space-y-3">
-                <label className="text-xs font-medium text-white/70 uppercase tracking-wider block">Target Format</label>
-                <div className="flex bg-white/5 p-1 rounded-xl border border-white/10">
-                  {(['image/png', 'image/jpeg', 'image/webp'] as const).map(fmt => (
-                    <button 
-                      key={fmt}
-                      onClick={() => setTargetFormat(fmt)}
-                      className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${
-                        targetFormat === fmt ? 'bg-white text-black shadow-lg' : 'text-white/40 hover:text-white'
-                      }`}
+                {/* Engine Parameters */}
+                <AnimatePresence mode="wait">
+                  {targetFormat !== 'image/png' && (
+                    <motion.div 
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="space-y-4 overflow-hidden"
                     >
-                      {getFormatLabel(fmt)}
-                    </button>
-                  ))}
-                </div>
-              </div>
+                      <div className="flex justify-between items-center">
+                        <label className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] ml-1">Encoder Quality</label>
+                        <span className="text-[10px] font-mono text-cyan-400">{Math.round(quality * 100)}%</span>
+                      </div>
+                      <input 
+                        type="range" 
+                        min="0.1" 
+                        max="1.0" 
+                        step="0.05" 
+                        value={quality}
+                        onChange={(e) => setQuality(parseFloat(e.target.value))}
+                        className="w-full h-1 bg-white/5 rounded-full appearance-none accent-cyan-400 cursor-pointer"
+                      />
+                    </motion.div>
+                  )}
+                  
+                  {targetFormat === 'image/png' && (
+                    <motion.div 
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="p-4 rounded bg-cyan-400/5 border border-cyan-400/10 flex items-start gap-3"
+                    >
+                      <Info size={14} className="text-cyan-400 shrink-0 mt-0.5" />
+                      <p className="text-[10px] leading-relaxed text-cyan-400/60 font-inter italic">
+                        PNG encoding preserves alpha transparency. Lossless mode engaged. Output files may be larger.
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
-              <AnimatePresence>
-                {targetFormat !== 'image/png' && (
-                  <motion.div 
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="space-y-3 overflow-hidden"
-                  >
-                    <div className="flex justify-between items-center mt-2">
-                      <label className="text-xs font-medium text-white/70 uppercase tracking-wider">Quality: {Math.round(quality * 100)}%</label>
+                {/* Source Metadata Card */}
+                <div className="flex items-center justify-between p-4 rounded-md bg-white/[0.02] border border-white/[0.05]">
+                  <div className="flex items-center gap-3">
+                    <ImageIcon className="text-cyan-400" size={16} />
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-bold text-white/80 truncate uppercase tracking-widest">{inputFile.name}</p>
+                      <p className="text-[9px] font-mono text-white/30">{getFormatLabel(inputFile.type)} // {formatBytes(inputFile.size)}</p>
                     </div>
-                    <input 
-                      type="range" 
-                      min="0.1" 
-                      max="1.0" 
-                      step="0.05" 
-                      value={quality}
-                      onChange={(e) => setQuality(parseFloat(e.target.value))}
-                      className="w-full accent-accent-cyan"
-                    />
-                  </motion.div>
-                )}
-                
-                {targetFormat === 'image/png' && (
-                  <motion.div 
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="p-3 rounded-lg bg-accent-cyan/10 border border-accent-cyan/20 text-xs text-accent-cyan flex items-start gap-2 mt-2"
+                  </div>
+                  <button 
+                    onClick={reset}
+                    className="p-2 rounded bg-white/5 border border-white/10 text-white/40 hover:text-red-400 hover:border-red-400/20 transition-all"
                   >
-                    <FileType size={14} className="mt-0.5 flex-shrink-0" />
-                    <p>PNG format preserves transparency but usually results in larger file sizes. Quality is always 100%.</p>
+                    <RefreshCw size={14} />
+                  </button>
+                </div>
+
+                {/* Execution Trigger */}
+                <button 
+                  onClick={convertImage}
+                  disabled={isProcessing}
+                  className="w-full py-4 rounded-md bg-cyan-400 text-black font-bold text-xs uppercase tracking-[0.2em] shadow-lg shadow-cyan-400/20 flex items-center justify-center gap-3 hover:bg-cyan-300 transition-all group disabled:opacity-30"
+                >
+                  {isProcessing ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <>
+                      <Zap size={16} fill="currentColor" />
+                      Execute Transmutation
+                      <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Technical Specification */}
+        <section className="glass-card border-white/[0.05] bg-black/40 p-6 rounded-md">
+          <div className="flex items-center gap-2 mb-4">
+            <ArrowRightLeft size={14} className="text-cyan-400" />
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/50">Encoder Manifest</h3>
+          </div>
+          <div className="space-y-3 text-[11px] text-white/40 leading-relaxed font-inter italic">
+            <p><strong className="text-cyan-400/80 uppercase tracking-tighter not-italic">Universal Transcoding:</strong> Seamless switching between raster protocols while maintaining color space integrity.</p>
+            <p><strong className="text-cyan-400/80 uppercase tracking-tighter not-italic">Buffer Integrity:</strong> All transformations occur within the browser sandbox. No server-side storage persistent.</p>
+          </div>
+        </section>
+      </div>
+
+      {/* Right Panel: Transmuted Stream (7 Columns) */}
+      <div className="lg:col-span-7 h-full flex flex-col">
+        <div className="glass-card border-white/[0.05] bg-black/40 p-8 rounded-md flex-1 flex flex-col relative overflow-hidden shadow-2xl min-h-[600px]">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400/20 to-transparent" />
+          
+          <div className="flex items-center justify-between mb-8 shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded bg-cyan-400/10 flex items-center justify-center border border-cyan-400/20">
+                <Layers size={16} className="text-cyan-400" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-white font-outfit uppercase tracking-wider">Transmuted Output</h2>
+                <p className="text-[10px] text-white/30 uppercase tracking-widest font-mono">Encoded Buffer // Visual Result</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex-1 flex flex-col">
+            <div className="relative rounded-md overflow-hidden bg-black/60 border border-white/10 flex-1 min-h-[350px] flex items-center justify-center group mb-6 shadow-inner checkerboard">
+              <AnimatePresence mode="wait">
+                {outputPreview ? (
+                  <motion.img 
+                    key="output"
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 1.02 }}
+                    src={outputPreview} 
+                    alt="Transmuted" 
+                    className="w-full h-full object-contain p-4 drop-shadow-[0_0_30px_rgba(34,211,238,0.15)]" 
+                  />
+                ) : (
+                  <motion.div 
+                    key="placeholder"
+                    className="flex flex-col items-center justify-center opacity-10"
+                  >
+                    <ImageIcon size={60} className="mb-4" />
+                    <p className="text-[10px] font-mono uppercase tracking-[0.3em]">Awaiting Transmutation Loop</p>
                   </motion.div>
                 )}
               </AnimatePresence>
+              <div className="absolute top-4 left-4">
+                <span className="px-2 py-1 bg-black/60 border border-white/10 rounded text-[9px] font-mono text-white/40 uppercase tracking-widest">
+                  Result_Preview
+                </span>
+              </div>
             </div>
 
-            <div className="pt-4 flex gap-4">
-              <button 
-                onClick={reset}
-                className="p-3 rounded-xl bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-all flex-shrink-0"
-                title="Reset"
+            {outputBlob && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-6 pt-4"
               >
-                <RefreshCw size={20} />
-              </button>
-              <button 
-                onClick={convertImage}
-                disabled={isProcessing}
-                className="flex-grow py-3 rounded-xl bg-gradient-to-r from-accent-cyan to-accent-blue text-white font-bold hover:shadow-[0_0_20px_rgba(45,212,191,0.4)] transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {isProcessing ? (
-                  <>
-                    <Loader2 size={18} className="animate-spin" />
-                    Converting...
-                  </>
-                ) : (
-                  <>Convert to {getFormatLabel(targetFormat)}</>
-                )}
-              </button>
-            </div>
-            {error && <p className="text-red-400 text-sm text-center">{error}</p>}
-          </div>
-        )}
-      </div>
-
-      {/* OUTPUT PANEL */}
-      <div className="glass-card p-6 flex flex-col h-full border border-white/10 bg-white/[0.02]">
-        <div className="flex items-center gap-2 mb-6">
-          <ImageIcon className="text-accent-pink" size={20} />
-          <h2 className="text-xl font-syne font-bold">Output</h2>
-        </div>
-
-        {!outputBlob ? (
-          <div className="flex-grow flex flex-col items-center justify-center border-2 border-dashed border-white/5 rounded-2xl bg-white/[0.01]">
-            <p className="text-white/30 text-sm">Your converted image will appear here</p>
-          </div>
-        ) : (
-          <div className="space-y-6 flex-grow flex flex-col">
-            <div className="relative rounded-2xl overflow-hidden bg-black/40 border border-white/10 aspect-video flex-shrink-0 flex items-center justify-center bg-[url('/checkered.png')] bg-repeat">
-              {outputPreview && (
-                <img src={outputPreview} alt="Converted" className="w-full h-full object-contain bg-white/5" />
-              )}
-            </div>
-
-            <div className="glass-card p-6 border border-accent-pink/20 bg-accent-pink/5 rounded-2xl flex-grow flex flex-col items-center justify-center space-y-4">
-              <div className="text-center">
-                <p className="text-sm text-white/50 uppercase tracking-widest mb-2">Conversion Result</p>
-                <div className="flex items-center justify-center gap-4 text-xl font-bold font-syne">
-                  <span className="text-white/60">{getFormatLabel(inputFile!.type)}</span>
-                  <span className="text-accent-pink">→</span>
-                  <span className="text-white">{getFormatLabel(targetFormat)}</span>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-6 border border-white/[0.05] bg-white/[0.01] rounded-md flex flex-col items-center justify-center text-center">
+                    <span className="text-[9px] font-mono text-white/30 uppercase tracking-[0.2em] mb-2">Protocol Shift</span>
+                    <div className="flex items-center gap-3 font-outfit font-black text-white text-xl uppercase tracking-tighter">
+                      <span className="text-white/40">{getFormatLabel(inputFile!.type)}</span>
+                      <ChevronRight size={16} className="text-cyan-400" />
+                      <span>{getFormatLabel(targetFormat)}</span>
+                    </div>
+                  </div>
+                  <div className="p-6 border border-cyan-400/20 bg-cyan-400/5 rounded-md flex flex-col items-center justify-center text-center relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-2 opacity-10">
+                      <Zap size={30} className="text-cyan-400" />
+                    </div>
+                    <span className="text-[9px] font-mono text-white/30 uppercase tracking-[0.2em] mb-2 font-bold">New Payload</span>
+                    <div className="flex items-center gap-2">
+                       <span className="text-xl font-bold text-cyan-400 font-mono tracking-tighter">{formatBytes(outputBlob.size)}</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              
-              <div className="text-center mt-2 flex items-center gap-4 text-sm text-white/60">
-                <span>Original: {formatBytes(inputFile!.size)}</span>
-                <span>•</span>
-                <span className="text-white font-medium">New: {formatBytes(outputBlob.size)}</span>
-              </div>
-            </div>
 
-            <button 
-              onClick={handleDownload}
-              className="w-full py-4 rounded-xl bg-white text-black font-bold hover:bg-white/90 transition-all flex items-center justify-center gap-2 text-lg mt-auto"
-            >
-              <Download size={20} />
-              Download {getFormatLabel(targetFormat)} Image
-            </button>
+                <button 
+                  onClick={handleDownload}
+                  className="w-full py-4 rounded-md bg-white text-black font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-cyan-50 transition-all flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(34,211,238,0.2)]"
+                >
+                  <Download size={14} />
+                  Extract Transmuted Stream
+                </button>
+              </motion.div>
+            )}
           </div>
-        )}
+        </div>
       </div>
+      {error && <div className="lg:col-span-12 p-4 rounded bg-red-400/10 border border-red-400/20 text-red-400 text-[10px] font-bold uppercase text-center tracking-widest font-mono">{error}</div>}
     </div>
   );
 }
