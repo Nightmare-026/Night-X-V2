@@ -1,5 +1,5 @@
-import { AnimatePresence , motion} from 'framer-motion';
 'use client';
+import { AnimatePresence , motion} from 'framer-motion';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
 import { cn } from '@/lib/utils';

@@ -1,3 +1,4 @@
+'use client';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { cn, copyToClipboard } from '@/lib/utils';
 import { 
