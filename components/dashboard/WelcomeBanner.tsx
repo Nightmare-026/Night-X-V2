@@ -12,7 +12,6 @@ export default function WelcomeBanner() {
   useEffect(() => {
     if (searchParams.get('welcome') === 'true') {
       setIsVisible(true);
-      // Clean up URL after 1 second without removing other params
       const timeout = setTimeout(() => {
         const url = new URL(window.location.href);
         url.searchParams.delete('welcome');
@@ -26,28 +25,29 @@ export default function WelcomeBanner() {
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: -15 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="mb-8 relative overflow-hidden rounded-[32px] bg-gradient-to-r from-accent-purple to-accent-cyan p-1"
+          className="mb-8 rounded-3xl border border-primary/30 bg-gradient-to-r from-surface-elevated to-surface-card p-6 shadow-[var(--shadow-raised-md)]"
         >
-          <div className="relative flex items-center justify-between gap-6 rounded-[31px] bg-[#06080F]/90 p-6 md:p-8 backdrop-blur-xl">
-            <div className="flex items-center gap-6">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-purple/20 text-accent-purple">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/15 border border-primary/30 text-primary-400 shrink-0">
                 <Sparkles className="h-6 w-6" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white font-syne">Welcome to Night X!</h2>
-                <p className="text-white/60 font-dm-sans">
-                  You now have access to premium AI tools. Start by exploring the dashboard.
+                <h2 className="text-lg font-bold text-white">Welcome to Night X Workspace!</h2>
+                <p className="text-xs text-text-secondary">
+                  Your private suite of 42+ developer, security, image, and AI utilities is ready.
                 </p>
               </div>
             </div>
             <button
               onClick={() => setIsVisible(false)}
-              className="rounded-full bg-white/5 p-2 text-white/40 transition-all hover:bg-white/10 hover:text-white"
+              className="rounded-xl bg-white/[0.04] p-2 text-text-muted hover:bg-white/10 hover:text-white transition-colors"
+              aria-label="Dismiss banner"
             >
-              <X className="h-5 w-5" />
+              <X className="h-4 w-4" />
             </button>
           </div>
         </motion.div>

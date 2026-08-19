@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Mail, ShieldAlert, Zap, ArrowRight, Shield } from 'lucide-react';
+import BrandWordmark from '@/components/ui/BrandWordmark';
 
 export default function ForgotPasswordPage() {
   return (
@@ -20,14 +21,8 @@ export default function ForgotPasswordPage() {
       >
         {/* Branding Hub */}
         <div className="flex flex-col items-center mb-10">
-          <Link href="/" className="group flex flex-col items-center gap-4">
-            <div className="w-14 h-14 bg-black border border-white/10 rounded-md flex items-center justify-center shadow-[0_0_30px_rgba(139,92,246,0.2)]">
-              <Zap className="text-violet-500 fill-violet-500" size={24} />
-            </div>
-            <div className="text-center">
-              <h1 className="text-2xl font-black tracking-tighter text-white uppercase">Access<span className="text-violet-500">_Recovery</span></h1>
-              <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-white/20 mt-1">Protocol Initialization</p>
-            </div>
+          <Link href="/" className="inline-block outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl">
+            <BrandWordmark size="lg" />
           </Link>
         </div>
 

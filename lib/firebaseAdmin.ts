@@ -50,3 +50,22 @@ export async function incrementAIUsage(userId: string, tool: string) {
     console.error('Error incrementing AI usage:', error);
   }
 }
+
+/** Atomically reserves one daily AI request before provider work begins. */
+export async function reserveAIUsage(userId: string, tool: string, limit = 30): Promise<boolean> {
+  if (!adminDb) return false;
+  const today = new Date().toISOString().split('T')[0];
+  const usageRef = adminDb.collection('ai_usage').doc(`${userId}_${tool}_${today}`);
+  try {
+    return await adminDb.runTransaction(async (transaction) => {
+      const snapshot = await transaction.get(usageRef);
+      const current = snapshot.exists ? Number(snapshot.data()?.count || 0) : 0;
+      if (current >= limit) return false;
+      transaction.set(usageRef, { user_id: userId, tool, usage_date: today, count: current + 1, last_used: new Date().toISOString() }, { merge: true });
+      return true;
+    });
+  } catch (error) {
+    console.error('Error reserving AI usage:', error);
+    return false;
+  }
+}

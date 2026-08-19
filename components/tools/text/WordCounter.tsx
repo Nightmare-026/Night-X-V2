@@ -38,7 +38,7 @@ export default function WordCounter() {
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
       {/* Left Column: Input */}
       <div className="lg:col-span-8 space-y-4">
-        <div className="rounded-md border border-white/[0.05] bg-white/[0.02] overflow-hidden focus-within:border-accent-blue/30 transition-colors">
+        <div className="rounded-md border border-white/[0.05] bg-white/[0.02] overflow-hidden focus-within:border-primary/30 transition-colors">
           <div className="flex items-center justify-between px-4 py-2 border-b border-white/[0.05] bg-white/[0.01]">
             <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Input Text</span>
             <div className="flex gap-2">
@@ -51,7 +51,7 @@ export default function WordCounter() {
               </button>
               <button
                 onClick={handleCopy}
-                className="p-1.5 text-white/20 hover:text-accent-blue transition-colors"
+                className="p-1.5 text-white/20 hover:text-primary transition-colors"
                 title="Copy"
               >
                 <Copy size={14} />
@@ -81,8 +81,8 @@ export default function WordCounter() {
           </div>
         </div>
 
-        <div className="rounded-md border border-white/[0.05] bg-accent-blue/5 p-6">
-          <div className="flex items-center gap-3 mb-2 text-accent-blue">
+        <div className="rounded-md border border-white/[0.05] bg-primary/5 p-6">
+          <div className="flex items-center gap-3 mb-2 text-primary">
             <Clock size={16} />
             <span className="text-xs font-bold uppercase tracking-widest">Efficiency</span>
           </div>

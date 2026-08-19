@@ -1,19 +1,16 @@
 'use client';
-// @ts-nocheck
+
+import React, { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { 
   Search, 
   Settings, 
-  Info, 
   AlertCircle,
   Hash,
-  Type,
   Flag,
-  Lightbulb,
   Copy,
   Check,
   Terminal,
-  Cpu,
   ShieldCheck,
   Zap,
   Code2
@@ -60,10 +57,12 @@ export default function RegexTester() {
     try {
       const re = new RegExp(regexStr, flags);
       const newMatches: RegexMatch[] = [];
-      let match;
+      let match: RegExpExecArray | null;
 
       if (flags.includes('g')) {
-        while ((match = re.exec(testText)) !== null) {
+        let loopCount = 0;
+        while ((match = re.exec(testText)) !== null && loopCount < 1000) {
+          loopCount++;
           if (match.index === re.lastIndex) re.lastIndex++;
           newMatches.push({
             index: match.index,
@@ -86,8 +85,9 @@ export default function RegexTester() {
 
       setMatches(newMatches);
       setError(null);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Invalid Regular Expression';
+      setError(message);
       setMatches([]);
     }
   }, [regexStr, flags, testText]);
@@ -105,79 +105,83 @@ export default function RegexTester() {
   const highlightedText = useMemo(() => {
     if (matches.length === 0) return testText;
 
-    const result = [];
+    const result: React.ReactNode[] = [];
     let lastIndex = 0;
 
     matches.forEach((match, i) => {
-      result.push(testText.slice(lastIndex, match.index));
+      if (match.index > lastIndex) {
+        result.push(testText.slice(lastIndex, match.index));
+      }
       result.push(
-        <span 
+        <mark 
           key={i} 
-          className="bg-cyan-400/20 border-b border-cyan-400/50 text-white relative group inline-block rounded-sm"
+          className="bg-primary/30 text-white border-b-2 border-primary rounded-sm px-0.5"
         >
           {match.text}
-        </span>
+        </mark>
       );
       lastIndex = match.index + match.length;
     });
 
-    result.push(testText.slice(lastIndex));
+    if (lastIndex < testText.length) {
+      result.push(testText.slice(lastIndex));
+    }
     return result;
   }, [testText, matches]);
 
   return (
-    <div className="space-y-8">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
-        {/* Left Panel: Expression Logic */}
-        <div className="lg:col-span-5 space-y-6">
-          <div className="bg-white/[0.02] border border-white/[0.05] rounded-md p-8 space-y-8">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Terminal className="text-cyan-400" size={16} />
-                <h3 className="text-xs font-outfit font-bold uppercase tracking-widest text-white/80">Expression Logic</h3>
+        {/* Expression Configuration */}
+        <div className="lg:col-span-5 space-y-4">
+          <div className="glass-card bg-[#0E101B]/80 border-white/[0.08] rounded-2xl p-6 space-y-6 shadow-xl">
+            <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
+              <div className="flex items-center gap-2.5">
+                <Terminal className="text-primary-400" size={16} />
+                <h3 className="text-xs font-bold uppercase tracking-wider text-white">Regular Expression</h3>
               </div>
               <button 
                 onClick={handleCopy}
-                className="text-[10px] font-bold text-white/20 hover:text-cyan-400 uppercase tracking-widest transition-colors flex items-center gap-2"
+                className="text-xs font-semibold text-text-tertiary hover:text-white transition-colors flex items-center gap-1.5"
               >
-                {copied ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />} {copied ? 'Copied' : 'Copy'}
+                {copied ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} />}
+                <span>{copied ? 'Copied' : 'Copy'}</span>
               </button>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-5">
               {/* Regex Input Box */}
-              <div className="space-y-3">
-                <label className="text-[10px] font-bold text-white/20 uppercase tracking-widest px-1 flex items-center gap-2">
-                  <Search size={10} /> Pattern
-                </label>
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-text-secondary block">Pattern</label>
                 <div className="relative group">
-                  <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-white/10 font-mono text-xl group-focus-within:text-cyan-400 transition-colors">/</div>
+                  <div className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none text-text-muted font-mono text-base group-focus-within:text-primary-400 transition-colors">/</div>
                   <input
                     type="text"
                     value={regexStr}
                     onChange={(e) => setRegexStr(e.target.value)}
-                    className="w-full bg-black/40 border border-white/[0.05] rounded-md py-4 pl-8 pr-12 font-mono text-sm text-white/80 focus:outline-none focus:border-cyan-400/50 transition-all"
+                    className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-3 pl-8 pr-8 font-mono text-xs text-white focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all"
                   />
-                  <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-white/10 font-mono text-xl group-focus-within:text-cyan-400 transition-colors">/</div>
+                  <div className="absolute inset-y-0 right-3.5 flex items-center pointer-events-none text-text-muted font-mono text-base group-focus-within:text-primary-400 transition-colors">/</div>
                 </div>
               </div>
 
               {/* Flags Selector */}
-              <div className="space-y-3">
-                <label className="text-[10px] font-bold text-white/20 uppercase tracking-widest px-1 flex items-center gap-2">
-                  <Flag size={10} /> Global Flags
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-text-secondary flex items-center gap-1.5">
+                  <Flag size={12} className="text-accent-cyan" /> Flags
                 </label>
-                <div className="flex gap-1.5 p-1.5 bg-black/40 border border-white/[0.05] rounded-md">
+                <div className="flex gap-1.5 p-1.5 bg-white/[0.02] border border-white/[0.06] rounded-xl">
                   {['g', 'i', 'm', 's', 'u', 'y'].map((f) => (
                     <button
                       key={f}
+                      type="button"
                       onClick={() => toggleFlag(f)}
                       className={cn(
-                        "flex-1 py-2 rounded-md text-[10px] font-mono font-bold uppercase transition-all",
+                        "flex-1 py-1.5 rounded-lg text-xs font-mono font-bold uppercase transition-all",
                         flags.includes(f) 
-                          ? "bg-cyan-400/10 text-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.05)]" 
-                          : "text-white/20 hover:text-white/40"
+                          ? "bg-primary/25 text-primary-300 border border-primary/40" 
+                          : "text-text-muted hover:text-white"
                       )}
                       title={`Flag: ${f}`}
                     >
@@ -188,16 +192,17 @@ export default function RegexTester() {
               </div>
 
               {/* Snippets */}
-              <div className="space-y-3">
-                <label className="text-[10px] font-bold text-white/20 uppercase tracking-widest px-1 flex items-center gap-2">
-                  <Code2 size={10} /> Snippet Library
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-text-secondary flex items-center gap-1.5">
+                  <Code2 size={12} className="text-accent-pink" /> Presets
                 </label>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {snippets.map((s) => (
                     <button
                       key={s.name}
+                      type="button"
                       onClick={() => setRegexStr(s.pattern)}
-                      className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-md text-[10px] font-bold uppercase tracking-widest text-white/40 hover:text-cyan-400 hover:border-cyan-400/30 transition-all"
+                      className="px-2.5 py-1 bg-white/[0.03] border border-white/[0.08] rounded-lg text-xs font-medium text-text-secondary hover:text-white hover:border-primary/30 transition-all"
                     >
                       {s.name}
                     </button>
@@ -206,119 +211,80 @@ export default function RegexTester() {
               </div>
 
               {error && (
-                <div className="flex items-center gap-3 p-4 bg-red-400/5 border border-red-400/10 rounded-md">
-                  <AlertCircle className="text-red-400 flex-shrink-0" size={14} />
-                  <span className="text-[10px] font-mono text-red-400 uppercase tracking-widest leading-relaxed">{error}</span>
+                <div className="flex items-start gap-2.5 p-3.5 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-xs">
+                  <AlertCircle size={15} className="shrink-0 mt-0.5" />
+                  <span className="font-mono">{error}</span>
                 </div>
               )}
-            </div>
-
-            <div className="p-6 bg-cyan-400/5 border border-cyan-400/10 rounded-md space-y-4">
-              <div className="flex items-center gap-3 text-cyan-400">
-                <Cpu size={14} />
-                <span className="text-[10px] font-bold uppercase tracking-widest">Inference Protocol</span>
-              </div>
-              <p className="text-[10px] text-white/40 leading-relaxed font-inter uppercase tracking-widest">
-                Utilizing native V8 engine regex parsing for high-performance pattern matching and grouping.
-              </p>
             </div>
           </div>
         </div>
 
-        {/* Right Panel: Pattern Validation */}
-        <div className="lg:col-span-7 space-y-6">
-          <div className="bg-white/[0.02] border border-white/[0.05] rounded-md p-8 relative overflow-hidden flex flex-col min-h-[700px]">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-400/5 blur-[100px] rounded-full" />
-            
-            <div className="relative z-10 flex flex-col h-full space-y-8">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-[10px] font-bold tracking-[0.2em] text-cyan-400 uppercase mb-2">Protocol Result</div>
-                  <h2 className="text-xl font-outfit font-bold text-white uppercase tracking-widest">Pattern Validation</h2>
-                </div>
-                
-                <div className="flex items-center gap-2 bg-black/40 px-4 py-2 rounded-md border border-white/5">
-                  <Hash size={12} className="text-cyan-400" />
-                  <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{matches.length} Matches Found</span>
+        {/* Validation & Test Text */}
+        <div className="lg:col-span-7 space-y-4">
+          <div className="glass-card bg-[#0E101B]/80 border-white/[0.08] rounded-2xl p-6 relative flex flex-col min-h-[560px] shadow-xl">
+            <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/[0.08]">
+              <h3 className="text-sm font-bold text-white">Test String & Matches</h3>
+              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white/[0.04] rounded-lg border border-white/[0.06]">
+                <Hash size={12} className="text-primary-400" />
+                <span className="text-xs font-semibold text-white">{matches.length} Matches</span>
+              </div>
+            </div>
+
+            <div className="flex-1 space-y-4 flex flex-col">
+              {/* Text Input Container */}
+              <div className="relative flex-1 min-h-[160px] rounded-xl overflow-hidden border border-white/10 bg-white/[0.02]">
+                <textarea
+                  value={testText}
+                  onChange={(e) => setTestText(e.target.value)}
+                  onScroll={handleScroll}
+                  placeholder="Enter test string here..."
+                  className="w-full h-full p-4 font-mono text-xs bg-transparent text-transparent caret-white focus:outline-none resize-none z-10 relative leading-relaxed"
+                />
+                <div 
+                  ref={overlayRef}
+                  className="absolute inset-0 p-4 font-mono text-xs pointer-events-none whitespace-pre-wrap break-all overflow-y-auto leading-relaxed text-text-secondary z-0"
+                  aria-hidden="true"
+                >
+                  {highlightedText}
                 </div>
               </div>
 
-              <div className="flex-1 space-y-6 flex flex-col">
-                <div className="flex-1 relative group">
-                  <div className="absolute top-4 right-4 text-[10px] font-bold text-white/10 uppercase tracking-widest select-none z-20">
-                    Test Payload
-                  </div>
-                  <textarea
-                    value={testText}
-                    onChange={(e) => setTestText(e.target.value)}
-                    onScroll={handleScroll}
-                    className="w-full h-full bg-black/40 border border-white/[0.05] rounded-md p-8 font-mono text-sm focus:outline-none focus:border-cyan-400/50 transition-all resize-none text-transparent caret-white z-10 leading-relaxed"
-                  />
-                  <div 
-                    ref={overlayRef}
-                    className="absolute inset-0 p-8 font-mono text-sm pointer-events-none whitespace-pre-wrap break-all overflow-y-auto custom-scrollbar leading-relaxed text-white/40"
-                    aria-hidden="true"
-                  >
-                    {highlightedText}
-                  </div>
+              {/* Matches List */}
+              <div className="h-56 bg-black/40 border border-white/[0.06] rounded-xl flex flex-col overflow-hidden">
+                <div className="px-4 py-2.5 border-b border-white/[0.06] bg-white/[0.02] flex items-center justify-between text-xs text-text-muted">
+                  <span className="font-semibold uppercase tracking-wider text-[10px]">Captured Matches & Groups</span>
+                  <Settings size={12} />
                 </div>
-
-                <div className="h-48 bg-black/20 border border-white/[0.05] rounded-md flex flex-col overflow-hidden">
-                  <div className="px-6 py-3 border-b border-white/[0.05] bg-white/[0.02] flex items-center justify-between">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-white/20">Match Details</span>
-                    <Settings size={12} className="text-white/10" />
-                  </div>
-                  <div className="flex-1 overflow-auto custom-scrollbar p-6 space-y-4">
-                    {matches.length === 0 ? (
-                      <div className="h-full flex flex-col items-center justify-center opacity-20 space-y-2">
-                        <Search size={24} />
-                        <span className="text-[10px] font-bold uppercase tracking-widest">No Matches</span>
-                      </div>
-                    ) : (
-                      matches.map((m, i) => (
-                        <div key={i} className="flex flex-col gap-2 p-4 bg-white/[0.02] border border-white/[0.05] rounded-md group hover:border-cyan-400/30 transition-all">
-                          <div className="flex justify-between items-center">
-                            <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest">Match #{i + 1}</span>
-                            <span className="text-[10px] font-mono text-white/10">IDX: {m.index}</span>
-                          </div>
-                          <div className="font-mono text-xs text-white/80 break-all leading-relaxed bg-black/40 p-3 rounded-md">
-                            &quot;{m.text}&quot;
-                          </div>
-                          {m.groups.length > 0 && (
-                            <div className="grid grid-cols-2 gap-2 pt-2">
-                              {m.groups.map((g, gi) => (
-                                <div key={gi} className="text-[9px] font-mono text-white/30 uppercase tracking-tight flex gap-2">
-                                  <span className="text-cyan-400/40">GRP{gi + 1}:</span>
-                                  <span className="truncate">{g || 'NULL'}</span>
-                                </div>
-                              ))}
-                            </div>
-                          )}
+                <div className="flex-1 overflow-auto custom-scrollbar p-3 space-y-2">
+                  {matches.length === 0 ? (
+                    <div className="h-full flex flex-col items-center justify-center text-text-muted space-y-1.5 py-6">
+                      <Search size={20} />
+                      <span className="text-xs">No matches found</span>
+                    </div>
+                  ) : (
+                    matches.map((m, i) => (
+                      <div key={i} className="p-3 bg-white/[0.02] border border-white/[0.04] rounded-xl hover:border-primary/30 transition-all space-y-1.5">
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="font-bold text-primary-300">Match #{i + 1}</span>
+                          <span className="font-mono text-[10px] text-text-muted">Index: {m.index}</span>
                         </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-6 bg-white/[0.02] border border-white/[0.05] rounded-md space-y-4">
-                  <div className="flex items-center gap-3 text-cyan-400">
-                    <Zap size={14} />
-                    <span className="text-[10px] font-bold uppercase tracking-widest">Performance Trace</span>
-                  </div>
-                  <p className="text-[10px] text-white/40 leading-relaxed font-inter uppercase tracking-widest">
-                    Real-time backtracking analysis prevents ReDoS vulnerabilities during execution.
-                  </p>
-                </div>
-                <div className="p-6 bg-white/[0.02] border border-white/[0.05] rounded-md space-y-4">
-                  <div className="flex items-center gap-3 text-emerald-400">
-                    <ShieldCheck size={14} />
-                    <span className="text-[10px] font-bold uppercase tracking-widest">Security Audit</span>
-                  </div>
-                  <p className="text-[10px] text-white/40 leading-relaxed font-inter uppercase tracking-widest">
-                    Sanitizes expression strings to ensure safe execution in browser sandboxes.
-                  </p>
+                        <div className="font-mono text-xs text-white break-all bg-black/50 p-2 rounded-lg">
+                          &quot;{m.text}&quot;
+                        </div>
+                        {m.groups.length > 0 && (
+                          <div className="grid grid-cols-2 gap-1.5 pt-1">
+                            {m.groups.map((g, gi) => (
+                              <div key={gi} className="text-[10px] font-mono text-text-tertiary flex gap-1.5">
+                                <span className="text-accent-cyan">Group {gi + 1}:</span>
+                                <span className="truncate text-white/80">{g || 'undefined'}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             </div>

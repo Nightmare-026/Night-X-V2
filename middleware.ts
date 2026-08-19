@@ -25,9 +25,15 @@ export default auth((req) => {
     "/feedback",
     "/services",
     "/security",
+    "/pricing",
+    "/changelog",
+    "/status",
+    "/faq",
+    "/docs",
     "/auth/signin",
     "/auth/signup",
-    "/auth/error"
+    "/auth/error",
+    "/auth/forgot-password"
   ].some(route => nextUrl.pathname === route) || isPublicTool || isToolsCatalog;
 
   const isAuthRoute = nextUrl.pathname.startsWith("/auth");
@@ -35,6 +41,7 @@ export default auth((req) => {
   const isProtectedRoute = 
     (nextUrl.pathname.startsWith("/dashboard") || 
      nextUrl.pathname.startsWith("/settings") ||
+     nextUrl.pathname.startsWith("/profile") ||
      nextUrl.pathname.startsWith("/tools")) && !isPublicRoute;
 
   // Redirect authenticated users away from auth pages

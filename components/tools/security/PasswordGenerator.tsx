@@ -69,13 +69,13 @@ export default function PasswordGenerator() {
 
   const generate = useCallback(() => {
     if (!isValid) return;
-    setIsGenerating(true);
-    setTimeout(() => {
-      const pw = generatePassword(length, { upper, lower, numbers, symbols });
-      setPassword(pw);
-      setIsGenerating(false);
-    }, 400);
+    const pw = generatePassword(length, { upper, lower, numbers, symbols });
+    setPassword(pw);
   }, [length, upper, lower, numbers, symbols, isValid]);
+
+  React.useEffect(() => {
+    generate();
+  }, [generate]);
 
   const handleCopy = async () => {
     if (!password) return;

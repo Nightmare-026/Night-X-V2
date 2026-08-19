@@ -1,13 +1,15 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Tool, getRelatedTools } from '@/lib/tools-registry';
-import { Share2, Info, ChevronRight, ShieldCheck, Zap } from 'lucide-react';
+import { Share2, Info, ChevronRight, ShieldCheck, Zap, Sparkles, Check, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import AIChat from '@/components/dashboard/AIChat';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import ToolCard from '@/components/dashboard/ToolCard';
+import { ToolIcon } from '@/components/ui/ToolIcon';
+import { useToast } from '@/components/ui/Toast';
 
 interface ToolPageLayoutProps {
   tool: Tool;
@@ -17,14 +19,14 @@ interface ToolPageLayoutProps {
 }
 
 const containerVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 15 },
   visible: { 
     opacity: 1, 
     y: 0,
     transition: { 
-      duration: 0.6, 
+      duration: 0.4, 
       ease: [0.22, 1, 0.36, 1],
-      staggerChildren: 0.1
+      staggerChildren: 0.08
     }
   }
 };
@@ -34,25 +36,29 @@ const itemVariants = {
   visible: { 
     opacity: 1, 
     y: 0,
-    transition: { duration: 0.4, ease: "easeOut" }
+    transition: { duration: 0.3, ease: "easeOut" }
   }
 };
 
 export default function ToolPageLayout({ tool, children, howToUse }: ToolPageLayoutProps) {
+  const { toast } = useToast();
+  const [copiedShare, setCopiedShare] = useState(false);
   const relatedTools = getRelatedTools(tool.slug);
+
   const processingLabel =
     tool.processingType === 'client'
-      ? 'Client-side (Private)'
+      ? 'Client-Side (100% Private)'
       : tool.processingType === 'api'
-        ? 'API-based (Secure)'
-        : 'Server-side';
+        ? 'AI / Secure Cloud API'
+        : 'Server Execution';
+
   const privacyLabel =
     tool.processingType === 'client'
-      ? 'Data never leaves your browser'
-      : 'Secure processing on encrypted servers';
+      ? 'Files and data never leave your browser memory.'
+      : 'Encrypted end-to-end HTTPS payload processing.';
 
   const handleShare = async () => {
-    const shareUrl = `${window.location.origin}/tools/${tool.slug}`;
+    const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/tools/${tool.slug}` : '';
 
     if (navigator.share) {
       try {
@@ -62,154 +68,163 @@ export default function ToolPageLayout({ tool, children, howToUse }: ToolPageLay
           url: shareUrl,
         });
         return;
-      } catch (e) {
-        console.log('Share failed', e);
+      } catch {
+        // Fallback to clipboard
       }
     }
 
-    await navigator.clipboard.writeText(shareUrl);
+    if (navigator.clipboard) {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopiedShare(true);
+      toast('Tool link copied to clipboard!', 'success');
+      setTimeout(() => setCopiedShare(false), 2000);
+    }
   };
 
   return (
-    <div className="flex flex-col min-h-screen relative overflow-hidden bg-[#0A0A0F]">
+    <div className="flex flex-col min-h-screen relative overflow-hidden">
       <main className="flex-grow py-8 md:py-12">
         <motion.div 
-          className="container mx-auto px-4 lg:px-12"
+          className="container mx-auto px-4 lg:px-8 max-w-[1280px]"
           initial="hidden"
           animate="visible"
           variants={containerVariants}
         >
-          {/* Breadcrumbs & Actions */}
+          {/* Breadcrumbs & Share Action */}
           <motion.div 
             variants={itemVariants}
-            className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8"
+            className="flex flex-wrap items-center justify-between gap-4 mb-6"
           >
-            <nav className="flex items-center gap-2.5 text-[0.8125rem] font-medium">
-              <Link href="/dashboard" className="text-text-tertiary hover:text-white transition-colors">Dashboard</Link>
-              <ChevronRight size={14} className="text-white/10" />
-              <Link href={`/dashboard?category=${tool.category.toLowerCase()}`} className="text-text-tertiary hover:text-white transition-colors capitalize">
+            <nav className="flex items-center gap-2 text-xs font-medium" aria-label="Breadcrumb">
+              <Link href="/" className="text-text-muted hover:text-white transition-colors">Home</Link>
+              <ChevronRight size={13} className="text-white/20" />
+              <Link href="/tools" className="text-text-muted hover:text-white transition-colors">Tools</Link>
+              <ChevronRight size={13} className="text-white/20" />
+              <Link href={`/tools?category=${tool.category.toLowerCase()}`} className="text-text-muted hover:text-white transition-colors capitalize">
                 {tool.category}
               </Link>
-              <ChevronRight size={14} className="text-white/10" />
+              <ChevronRight size={13} className="text-white/20" />
               <span className="text-primary-400 font-bold">{tool.name}</span>
             </nav>
 
-            <div className="flex items-center gap-3">
-              <button
-                onClick={handleShare}
-                className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-[0.8125rem] font-semibold text-white/70 hover:bg-white/10 hover:text-white transition-all"
-              >
-                <Share2 size={16} />
-                Share Tool
-              </button>
-            </div>
+            <button
+              onClick={handleShare}
+              className="flex items-center gap-2 px-3.5 py-1.5 bg-surface-card border border-white/10 rounded-xl text-xs font-semibold text-text-secondary hover:text-white hover:border-primary/40 transition-all shadow-[var(--shadow-raised-sm)]"
+              aria-label="Share tool link"
+            >
+              {copiedShare ? <Check size={14} className="text-primary-400" /> : <Share2 size={14} />}
+              <span>{copiedShare ? 'Copied' : 'Share Tool'}</span>
+            </button>
           </motion.div>
 
           {/* Tool Header Section */}
           <motion.header 
             variants={itemVariants}
-            className="mb-10 space-y-4"
+            className="mb-8 rounded-3xl border border-white/[0.08] bg-surface-card p-6 sm:p-8 shadow-[var(--shadow-raised-md)] relative overflow-hidden"
           >
-            <div className="flex items-start gap-6">
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-[#16161F] border border-white/5 text-[2.5rem] shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
-                {tool.icon}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 relative z-10">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-surface-inset border border-white/10 text-primary-400 shadow-[var(--shadow-inset-sm)]">
+                <ToolIcon name={tool.icon} className="w-8 h-8" />
               </div>
-              <div className="space-y-2.5">
-                <div className="flex items-center gap-4">
-                  <h1 className="text-[2rem] font-black text-white tracking-tight leading-none">{tool.name}</h1>
+
+              <div className="space-y-1.5 flex-1">
+                <div className="flex flex-wrap items-center gap-3">
+                  <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-none">
+                    {tool.name}
+                  </h1>
+                  
+                  {tool.processingType === 'client' && (
+                    <span className="flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-400">
+                      <ShieldCheck size={11} /> 100% In-Browser Privacy
+                    </span>
+                  )}
                   {tool.isAI && (
-                    <span className="flex items-center gap-1.5 rounded-full bg-accent-pink/10 border border-accent-pink/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-accent-pink-light">
-                      <Zap size={10} fill="currentColor" /> AI Powered
+                    <span className="flex items-center gap-1 rounded-full bg-accent-pink/15 border border-accent-pink/30 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent-pink">
+                      <Sparkles size={11} /> AI Assisted
                     </span>
                   )}
                 </div>
-                <p className="text-text-tertiary text-[1rem] max-w-3xl leading-relaxed">{tool.description}</p>
+
+                <p className="text-xs sm:text-sm text-text-tertiary max-w-3xl leading-relaxed">
+                  {tool.description}
+                </p>
               </div>
             </div>
           </motion.header>
 
-          <div className="grid grid-cols-1 lg:grid-cols-1 gap-12 items-start">
-            {/* Main Content Area */}
+          {/* Tool Workbench Card Container */}
+          <div className="space-y-10">
             <motion.div 
               variants={itemVariants}
-              className="space-y-12 relative"
+              className="rounded-3xl border border-white/[0.08] bg-surface-card p-6 sm:p-8 shadow-[var(--shadow-raised-md)] relative overflow-hidden min-h-[300px]"
             >
-              <div className="relative z-10">
-                {children}
-              </div>
-
-              {/* Background Glow for Tool Area */}
-              <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[500px] bg-primary/5 blur-[120px] rounded-full pointer-events-none -z-10" />
-
-              {/* Information Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* How to Use Column */}
-                <div className="md:col-span-2 glass-card p-8 border-white/5 bg-white/[0.01]">
-                   <h2 className="text-[1.125rem] font-bold text-white mb-8 flex items-center gap-3">
-                    <Info className="w-5 h-5 text-primary-400" />
-                    How to use {tool.name}
-                  </h2>
-                  <div className="grid gap-6 sm:grid-cols-2">
-                    {howToUse && howToUse.length > 0 ? (
-                      howToUse.map((step, index) => (
-                        <div key={index} className="flex gap-4 group/step">
-                          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-[0.875rem] font-black text-primary-400 group-hover/step:bg-primary group-hover/step:text-black transition-all">
-                            {index + 1}
-                          </div>
-                          <p className="text-[0.875rem] text-text-tertiary leading-relaxed pt-1">{step}</p>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-text-muted italic">No instructions provided for this tool.</p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Technical Sidebar */}
-                <div className="glass-card p-8 border-white/5 bg-white/[0.01] space-y-8">
-                   <h3 className="text-[0.8125rem] font-black uppercase tracking-[0.15em] text-white/30 flex items-center gap-2">
-                    Technical Specifications
-                  </h3>
-                  
-                  <div className="space-y-6">
-                    <div className="flex items-start gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-                        <Zap size={18} className="text-primary-400" />
-                      </div>
-                      <div>
-                        <p className="text-[0.875rem] font-bold text-white/90">{processingLabel}</p>
-                        <p className="text-[0.75rem] text-text-tertiary mt-1">Status: Fully Operational</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-accent-cyan/10 border border-accent-cyan/20 flex items-center justify-center shrink-0">
-                        <ShieldCheck size={18} className="text-accent-cyan" />
-                      </div>
-                      <div>
-                        <p className="text-[0.875rem] font-bold text-white/90">Privacy Secured</p>
-                        <p className="text-[0.75rem] text-text-tertiary mt-1">{privacyLabel}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Related Tools */}
-              {relatedTools.length > 0 && (
-                <section className="space-y-8">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-[1.25rem] font-black text-white">Suggested Tools</h2>
-                    <Link href="/dashboard" className="text-sm text-primary-400 font-bold hover:underline">View All</Link>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {relatedTools.slice(0, 4).map((related) => (
-                      <ToolCard key={related.slug} tool={related} />
-                    ))}
-                  </div>
-                </section>
-              )}
+              {children}
             </motion.div>
+
+            {/* Information Grid: How to Use & Tech Specs */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* How to Use Column */}
+              <div className="md:col-span-2 rounded-2xl border border-white/[0.08] bg-surface-card p-6 sm:p-8 shadow-[var(--shadow-raised-sm)] space-y-6">
+                <h2 className="text-base font-bold text-white flex items-center gap-2.5">
+                  <Info className="w-4 h-4 text-primary-400" />
+                  How to Use {tool.name}
+                </h2>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {howToUse && howToUse.length > 0 ? (
+                    howToUse.map((step, index) => (
+                      <div key={index} className="flex gap-3.5">
+                        <div className="flex-shrink-0 w-7 h-7 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-xs font-bold text-primary-400">
+                          {index + 1}
+                        </div>
+                        <p className="text-xs text-text-secondary leading-relaxed pt-0.5">{step}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-xs text-text-muted italic">Follow the on-screen controls to use this tool.</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Technical Specifications Sidebar */}
+              <div className="rounded-2xl border border-white/[0.08] bg-surface-card p-6 sm:p-8 shadow-[var(--shadow-raised-sm)] space-y-5">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-text-muted flex items-center gap-2">
+                  <Zap size={14} className="text-primary-400" />
+                  Technical Specifications
+                </h3>
+                
+                <div className="space-y-4 text-xs">
+                  <div className="p-3 rounded-xl bg-surface-inset border border-white/[0.04] space-y-1">
+                    <p className="font-bold text-white">{processingLabel}</p>
+                    <p className="text-text-muted leading-relaxed">{privacyLabel}</p>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-surface-inset border border-white/[0.04] space-y-1">
+                    <p className="font-bold text-white">Execution Latency</p>
+                    <p className="text-text-muted font-mono">0ms (Local client engine)</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Related Tools Recommendation Grid */}
+            {relatedTools.length > 0 && (
+              <section className="space-y-5 pt-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-base sm:text-lg font-bold text-white">Suggested & Related Utilities</h2>
+                  <Link href="/tools" className="text-xs text-primary-400 font-bold hover:underline flex items-center gap-1">
+                    <span>View All Tools</span>
+                    <ChevronRight size={13} />
+                  </Link>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {relatedTools.slice(0, 4).map((related) => (
+                    <ToolCard key={related.slug} tool={related} />
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
         </motion.div>
       </main>

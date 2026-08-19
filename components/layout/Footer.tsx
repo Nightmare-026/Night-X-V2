@@ -3,97 +3,171 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Github, Twitter, Heart, Send, ExternalLink } from 'lucide-react';
+import { Github, Twitter, Heart, Send, CheckCircle2, ShieldCheck, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import BrandWordmark from '@/components/ui/BrandWordmark';
+import { useToast } from '@/components/ui/Toast';
 
 export default function Footer() {
   const pathname = usePathname();
+  const { toast } = useToast();
   const [email, setEmail] = useState('');
+  const [isSubscribing, setIsSubscribing] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
 
-  // Hide footer on auth pages or dashboard sub-pages if requested
   const isAuthPage = pathname?.startsWith('/auth');
   if (isAuthPage) return null;
 
-  const quickTools = [
-    { name: 'Image Tools', href: '/dashboard?category=image' },
-    { name: 'Security Tools', href: '/dashboard?category=security' },
-    { name: 'Text Tools', href: '/dashboard?category=text' },
-    { name: 'Developer Tools', href: '/dashboard?category=developer' },
-    { name: 'Utility Tools', href: '/dashboard?category=utility' },
-    { name: 'Daily Life Tools', href: '/dashboard?category=life' },
-    { name: 'AI Tools', href: '/dashboard?category=ai' },
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !email.includes('@')) {
+      toast('Please enter a valid email address', 'error');
+      return;
+    }
+
+    setIsSubscribing(true);
+    try {
+      const res = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      if (res.ok) {
+        setIsSubscribed(true);
+        toast('Subscribed to Night X updates!', 'success');
+        setEmail('');
+      } else {
+        const data = await res.json();
+        toast(data.error || 'Failed to subscribe', 'error');
+      }
+    } catch {
+      toast('Failed to subscribe. Please try again.', 'error');
+    } finally {
+      setIsSubscribing(false);
+    }
+  };
+
+  const toolCategories = [
+    { name: 'Image Processing', href: '/tools?category=image' },
+    { name: 'Security & Crypto', href: '/tools?category=security' },
+    { name: 'Text & Markdown', href: '/tools?category=text' },
+    { name: 'Developer Utilities', href: '/tools?category=developer' },
+    { name: 'Everyday Life', href: '/tools?category=life' },
+    { name: 'AI Workflows', href: '/dashboard/ai' },
+  ];
+
+  const platformLinks = [
+    { name: 'All Tools Catalog', href: '/tools' },
+    { name: 'Developer & API Docs', href: '/docs' },
+    { name: 'Pricing & Plans', href: '/pricing' },
+    { name: 'System Status', href: '/status' },
+    { name: 'Changelog & Updates', href: '/changelog' },
   ];
 
   const companyLinks = [
-    { name: 'About Us', href: '/about' },
+    { name: 'About Night X', href: '/about' },
+    { name: 'Security Center', href: '/security' },
     { name: 'Privacy Policy', href: '/privacy' },
-    { name: 'Terms & Conditions', href: '/terms' },
-    { name: 'Contact', href: '/contact' },
-    { name: 'Our Services', href: '/services' },
+    { name: 'Terms of Service', href: '/terms' },
   ];
 
   const supportLinks = [
-    { name: 'Feedback', href: '/feedback' },
-    { name: 'Report a Bug', href: '/support?tab=bug' },
-    { name: 'Support Us', href: '/support?tab=donate' },
-    { name: 'FAQ', href: '/support?tab=faq' },
+    { name: 'Help & Support', href: '/support' },
+    { name: 'Contact Us', href: '/contact' },
+    { name: 'Product Feedback', href: '/feedback' },
+    { name: 'Frequently Asked Questions', href: '/faq' },
   ];
 
   return (
-    <footer className="bg-black/40 border-t border-white/[0.05] pt-20 pb-10 px-6">
-      <div className="max-w-[1280px] mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
-          {/* Brand & Newsletter Column */}
-          <div className="space-y-8">
-            <div className="space-y-4">
-              <Link href="/" className="flex items-center gap-2 group">
-                <div className="w-[28px] h-[28px] rounded-lg bg-gradient-primary flex items-center justify-center text-white font-bold text-sm shadow-[0_0_12px_rgba(139,92,246,0.4)]">
-                  N
-                </div>
-                <span className="text-[1.25rem] font-bold bg-gradient-to-r from-primary to-accent-cyan bg-clip-text text-transparent tracking-[-0.02em]">
-                  Night X
-                </span>
+    <footer className="bg-[#06080C] border-t border-white/[0.06] pt-16 pb-12 px-4 sm:px-6 relative overflow-hidden" role="contentinfo">
+      {/* Subtle background glow */}
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
+
+      <div className="max-w-[1280px] mx-auto relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-10 mb-14">
+          {/* Brand & Newsletter Column (2 cols on lg) */}
+          <div className="lg:col-span-2 space-y-6">
+            <div className="space-y-3">
+              <Link href="/" className="inline-block outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg" aria-label="Night X Home">
+                <BrandWordmark size="md" />
               </Link>
-              <p className="text-[0.875rem] text-text-tertiary leading-[1.6] max-w-[240px]">
-                Practical tools for creators, developers, and everyday digital work in one focused interface.
+              <p className="text-[0.875rem] text-text-tertiary leading-[1.6] max-w-[340px]">
+                High-performance developer utilities, image processors, cryptographic keys, and AI workflows running locally in your browser.
               </p>
             </div>
 
-            <div className="space-y-4">
-              <h4 className="text-[0.8125rem] font-bold text-white/90 uppercase tracking-[0.05em]">Stay Updated</h4>
-              <div className="relative max-w-[240px] group">
+            <div className="space-y-3">
+              <h4 className="text-[0.75rem] font-bold text-white/90 uppercase tracking-[0.1em]">Stay Updated</h4>
+              <form onSubmit={handleSubscribe} className="relative max-w-[320px] group" aria-label="Newsletter Subscription Form">
                 <input 
                   type="email" 
-                  placeholder="Email address"
+                  placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-[0.8125rem] text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/5 transition-all"
+                  disabled={isSubscribed || isSubscribing}
+                  required
+                  aria-label="Email address for newsletter"
+                  className="w-full bg-surface-inset border border-white/[0.1] rounded-xl px-4 py-2.5 text-[0.8125rem] text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 transition-all disabled:opacity-60 shadow-[var(--shadow-inset-sm)]"
                 />
-                <button className="absolute right-1.5 top-1.5 p-1.5 bg-primary/10 text-primary hover:bg-primary/20 rounded-md transition-colors">
-                  <Send className="w-3.5 h-3.5" />
+                <button 
+                  type="submit" 
+                  disabled={isSubscribed || isSubscribing}
+                  aria-label="Submit newsletter subscription"
+                  className="absolute right-1.5 top-1.5 p-2 bg-primary/20 text-primary-300 hover:bg-primary/30 rounded-lg transition-colors disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-primary outline-none"
+                >
+                  {isSubscribed ? <CheckCircle2 className="w-3.5 h-3.5 text-primary-400" /> : <Send className="w-3.5 h-3.5" />}
                 </button>
-              </div>
+              </form>
+            </div>
+
+            {/* System Status Pill */}
+            <div>
+              <Link 
+                href="/status"
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-card border border-white/[0.08] text-xs font-semibold text-text-secondary hover:border-primary/40 hover:text-white transition-all shadow-[var(--shadow-raised-sm)]"
+              >
+                <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                <span>All Systems Operational</span>
+              </Link>
             </div>
           </div>
 
-          {/* Product Column */}
+          {/* Tools Column */}
           <div>
-            <h4 className="text-[0.8125rem] font-bold text-white/90 uppercase tracking-[0.05em] mb-6">Product</h4>
-            <ul className="space-y-3.5">
-              <li><Link href="/dashboard" className="text-[0.875rem] text-text-tertiary hover:text-primary-400 transition-colors">All Tools</Link></li>
-              <li><Link href="/pricing" className="text-[0.875rem] text-text-tertiary hover:text-primary-400 transition-colors">Pricing</Link></li>
-              <li><Link href="/api-docs" className="text-[0.875rem] text-text-tertiary hover:text-primary-400 transition-colors">API Docs</Link></li>
-              <li><Link href="/changelog" className="text-[0.875rem] text-text-tertiary hover:text-primary-400 transition-colors">Changelog</Link></li>
+            <h4 className="text-[0.75rem] font-bold text-white/90 uppercase tracking-[0.1em] mb-4">Ecosystem</h4>
+            <ul className="space-y-2.5">
+              {toolCategories.map((item) => (
+                <li key={item.name}>
+                  <Link href={item.href} className="text-[0.8125rem] text-text-tertiary hover:text-primary-300 transition-colors focus-visible:ring-2 focus-visible:ring-primary outline-none rounded">
+                    {item.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Platform Column */}
+          <div>
+            <h4 className="text-[0.75rem] font-bold text-white/90 uppercase tracking-[0.1em] mb-4">Platform</h4>
+            <ul className="space-y-2.5">
+              {platformLinks.map((link) => (
+                <li key={link.name}>
+                  <Link href={link.href} className="text-[0.8125rem] text-text-tertiary hover:text-primary-300 transition-colors focus-visible:ring-2 focus-visible:ring-primary outline-none rounded">
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
           {/* Company Column */}
           <div>
-            <h4 className="text-[0.8125rem] font-bold text-white/90 uppercase tracking-[0.05em] mb-6">Company</h4>
-            <ul className="space-y-3.5">
-              {companyLinks.slice(0, 4).map((link) => (
+            <h4 className="text-[0.75rem] font-bold text-white/90 uppercase tracking-[0.1em] mb-4">Company</h4>
+            <ul className="space-y-2.5">
+              {companyLinks.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} className="text-[0.875rem] text-text-tertiary hover:text-primary-400 transition-colors">
+                  <Link href={link.href} className="text-[0.8125rem] text-text-tertiary hover:text-primary-300 transition-colors focus-visible:ring-2 focus-visible:ring-primary outline-none rounded">
                     {link.name}
                   </Link>
                 </li>
@@ -103,27 +177,47 @@ export default function Footer() {
 
           {/* Support Column */}
           <div>
-            <h4 className="text-[0.8125rem] font-bold text-white/90 uppercase tracking-[0.05em] mb-6">Support</h4>
-            <ul className="space-y-3.5">
-              <li><Link href="/support" className="text-[0.875rem] text-text-tertiary hover:text-primary-400 transition-colors">Help Center</Link></li>
-              <li><Link href="/contact" className="text-[0.875rem] text-text-tertiary hover:text-primary-400 transition-colors">Contact Us</Link></li>
-              <li><Link href="/status" className="text-[0.875rem] text-text-tertiary hover:text-primary-400 transition-colors">System Status</Link></li>
-              <li className="flex items-center gap-4 pt-2">
-                <a href="#" className="text-text-tertiary hover:text-white transition-colors"><Github className="w-5 h-5" /></a>
-                <a href="#" className="text-text-tertiary hover:text-white transition-colors"><Twitter className="w-5 h-5" /></a>
+            <h4 className="text-[0.75rem] font-bold text-white/90 uppercase tracking-[0.1em] mb-4">Resources</h4>
+            <ul className="space-y-2.5">
+              {supportLinks.map((link) => (
+                <li key={link.name}>
+                  <Link href={link.href} className="text-[0.8125rem] text-text-tertiary hover:text-primary-300 transition-colors focus-visible:ring-2 focus-visible:ring-primary outline-none rounded">
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+              <li className="flex items-center gap-3 pt-3">
+                <a 
+                  href="https://github.com/Nightmare-026/Night-X-V2" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="p-2 rounded-lg bg-surface-card border border-white/[0.06] text-text-tertiary hover:text-white hover:border-primary/30 transition-colors focus-visible:ring-2 focus-visible:ring-primary outline-none"
+                  aria-label="Night X on GitHub"
+                >
+                  <Github className="w-4 h-4" />
+                </a>
+                <a 
+                  href="https://twitter.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="p-2 rounded-lg bg-surface-card border border-white/[0.06] text-text-tertiary hover:text-white hover:border-primary/30 transition-colors focus-visible:ring-2 focus-visible:ring-primary outline-none"
+                  aria-label="Night X on Twitter"
+                >
+                  <Twitter className="w-4 h-4" />
+                </a>
               </li>
             </ul>
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+        {/* Bottom Copyright Bar */}
+        <div className="pt-8 border-t border-white/[0.06] flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-[0.75rem] text-text-muted">
-            © {new Date().getFullYear()} Night X. All rights reserved.
+            © {new Date().getFullYear()} Night X. All rights reserved. Sovereign client-side first architecture.
           </p>
-          <div className="flex items-center gap-6">
-             <p className="text-[0.75rem] text-text-muted flex items-center gap-1.5">
-              Made with <Heart className="w-3 h-3 text-accent-pink fill-accent-pink" /> in India
+          <div className="flex items-center gap-4">
+            <p className="text-[0.75rem] text-text-muted flex items-center gap-1.5">
+              Built with precision and care <Heart className="w-3 h-3 text-primary-400 fill-primary-400" />
             </p>
           </div>
         </div>

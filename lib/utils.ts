@@ -170,7 +170,7 @@ export async function firestoreRateLimit(
   limit: number, 
   windowMs: number
 ): Promise<{ success: boolean; remaining: number }> {
-  if (!adminDb) return { success: true, remaining: 1 };
+  if (!adminDb) return { success: false, remaining: 0 };
 
   const now = Date.now();
   const rateLimitRef = adminDb.collection("rate_limits").doc(`${tool}_${identifier}`);
@@ -210,7 +210,7 @@ export async function firestoreRateLimit(
     return result;
   } catch (err) {
     console.error("Rate limit transaction failed:", err);
-    return { success: true, remaining: 1 }; // Fail open for UX
+    return { success: false, remaining: 0 }; // Fail closed
   }
 }
 

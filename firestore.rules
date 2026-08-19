@@ -30,30 +30,23 @@ service cloud.firestore {
     // Shortened URLs — Redirection is public, creation is restricted to protect against spam
     match /short_urls/{code} {
       allow read: if true;
-      allow create: if true; // Keep true for guest users, but rely on API rate limits
+      allow create: if false;
       allow update, delete: if isSignedIn() && resource.data.user_id == request.auth.uid;
     }
 
-    // Feedback & Contact — Strict write-only for public
+    // Feedback & Contact - server-side Admin API only
     match /feedback/{docId} {
-      allow create: if request.resource.data.keys().hasAll(['message', 'type', 'timestamp'])
-                    && request.resource.data.message.size() < 1000;
-      allow read, update, delete: if false;
+      allow read, write: if false;
     }
 
     match /contact_messages/{docId} {
-      allow create: if request.resource.data.keys().hasAll(['name', 'email', 'message', 'createdAt'])
-                    && request.resource.data.message.size() < 2000;
-      allow read, update, delete: if false;
+      allow read, write: if false;
     }
 
-    // Newsletter subscribers
+    // Newsletter subscribers - server-side Admin API only
     match /newsletter_subscribers/{docId} {
-      allow create: if request.resource.data.keys().hasAll(['email', 'subscribedAt'])
-                    && request.resource.data.email.matches('^[^@]+@[^@]+\\.[^@]+$');
-      allow read, update, delete: if false;
+      allow read, write: if false;
     }
-
     // Default deny for everything else
     match /{document=**} {
       allow read, write: if false;

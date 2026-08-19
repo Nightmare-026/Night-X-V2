@@ -1,82 +1,85 @@
 import { Metadata } from "next";
-import { Instagram, Mail, MapPin, MessageSquare } from "lucide-react";
+import { Mail, MapPin, MessageSquare, ShieldCheck, Heart, ArrowRight } from "lucide-react";
 import ContactForm from "./ContactForm";
+import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Contact Us | Night X",
-  description: "Get in touch with Night X support for bug reports, tool suggestions, or general inquiries. We prioritize your privacy and time.",
+  title: "Contact & Support | Night X",
+  description: "Get in touch with the Night X engineering team for bug reports, tool suggestions, or general inquiries.",
 };
 
 export default function ContactPage() {
   const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@night-x.app";
 
   return (
-    <div className="min-h-screen bg-background text-white pt-24 pb-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-5xl mx-auto">
-        <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold font-syne mb-4">
+    <div className="min-h-screen text-white pt-16 pb-16 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto space-y-12">
+        <div className="text-center max-w-2xl mx-auto space-y-3 pt-6">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary-400">
+            <MessageSquare size={14} />
+            <span>Support & Communications</span>
+          </div>
+
+          <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
             Get in Touch
           </h1>
-          <p className="text-white/50 text-lg max-w-2xl mx-auto font-dm-sans">
-            Questions, bug reports, and tool suggestions all belong here. 
-            Email is our primary support channel for professional inquiries.
+
+          <p className="text-sm text-text-tertiary">
+            Bug reports, feature suggestions, or enterprise partnerships. We read every message and prioritize critical feedback.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-12">
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-8 backdrop-blur-xl">
+        <div className="grid md:grid-cols-12 gap-8 items-start">
+          <div className="md:col-span-7 rounded-3xl border border-white/[0.08] bg-surface-card p-6 sm:p-8 shadow-[var(--shadow-raised-md)] space-y-6">
+            <div>
+              <h2 className="text-lg font-bold text-white mb-1">Send a Direct Message</h2>
+              <p className="text-xs text-text-tertiary">Fill out the form below and we'll reply to your email address.</p>
+            </div>
             <ContactForm />
           </div>
 
-          <div className="space-y-8">
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-8 backdrop-blur-xl">
-              <h3 className="text-xl font-bold mb-6 font-syne">Contact Information</h3>
-              <div className="space-y-6 font-dm-sans">
-                <div className="flex items-center gap-4 text-white/70">
-                  <div className="p-3 bg-accent-cyan/10 rounded-lg text-accent-cyan">
-                    <Mail className="w-5 h-5" />
+          <div className="md:col-span-5 space-y-6">
+            <div className="rounded-2xl border border-white/[0.08] bg-surface-card p-6 shadow-[var(--shadow-raised-sm)] space-y-5">
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Direct Contacts</h3>
+              
+              <div className="space-y-4 text-xs">
+                <div className="flex items-start gap-3.5">
+                  <div className="p-2.5 rounded-xl bg-surface-inset border border-white/10 text-primary-400 shrink-0">
+                    <Mail size={16} />
                   </div>
-                  <div className="overflow-hidden">
-                    <p className="font-medium text-white">Email Us</p>
-                    <p className="truncate">{supportEmail}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4 text-white/70">
-                  <div className="p-3 bg-accent-purple/10 rounded-lg text-accent-purple">
-                    <Instagram className="w-5 h-5" />
-                  </div>
-                  <div className="overflow-hidden">
-                    <p className="font-medium text-white">Instagram</p>
-                    <a href="https://instagram.com/nightmare_ff_26" target="_blank" rel="noopener noreferrer" className="truncate block hover:text-white transition-colors">
-                      @nightmare_ff_26
+                  <div>
+                    <p className="font-semibold text-white">Engineering Support</p>
+                    <a href={`mailto:${supportEmail}`} className="text-primary-400 hover:underline font-mono">
+                      {supportEmail}
                     </a>
                   </div>
                 </div>
-                <div className="flex items-center gap-4 text-white/70">
-                  <div className="p-3 bg-accent-cyan/10 rounded-lg text-accent-cyan">
-                    <MapPin className="w-5 h-5" />
+
+                <div className="flex items-start gap-3.5">
+                  <div className="p-2.5 rounded-xl bg-surface-inset border border-white/10 text-accent-cyan shrink-0">
+                    <MapPin size={16} />
                   </div>
                   <div>
-                    <p className="font-medium text-white">Location</p>
-                    <p>Global / Remote</p>
+                    <p className="font-semibold text-white">Operations</p>
+                    <p className="text-text-tertiary">Global / Remote Distributed</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-8 backdrop-blur-xl">
-              <h3 className="text-xl font-bold mb-6 flex items-center gap-2 font-syne">
-                <MessageSquare className="w-5 h-5 text-accent-cyan" />
-                Frequently Asked
+            <div className="rounded-2xl border border-white/[0.08] bg-surface-card p-6 shadow-[var(--shadow-raised-sm)] space-y-4">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <MessageSquare size={16} className="text-primary-400" />
+                Quick Answers
               </h3>
-              <div className="space-y-4 font-dm-sans">
+              <div className="space-y-3 text-xs">
                 <div>
-                  <h4 className="font-medium text-white mb-1">How fast do you reply?</h4>
-                  <p className="text-sm text-white/45">Most replies happen within 1-3 business days. Critical bug reports are prioritized.</p>
+                  <h4 className="font-semibold text-white mb-0.5">Response Time</h4>
+                  <p className="text-text-tertiary leading-relaxed">Most non-critical inquiries receive a response within 1-2 business days.</p>
                 </div>
                 <div>
-                  <h4 className="font-medium text-white mb-1">Can I request a new tool?</h4>
-                  <p className="text-sm text-white/45">Yes. Use this form or the feedback page and include your specific use case.</p>
+                  <h4 className="font-semibold text-white mb-0.5">New Tool Requests</h4>
+                  <p className="text-text-tertiary leading-relaxed">We love community suggestions! Please describe the use case and expected input/output formats.</p>
                 </div>
               </div>
             </div>

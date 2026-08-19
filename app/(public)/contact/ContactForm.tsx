@@ -1,7 +1,10 @@
 'use client';
 
 import { useState } from "react";
-import { Loader2, Send } from "lucide-react";
+import { Loader2, Send, CheckCircle2 } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Textarea } from "@/components/ui/Textarea";
 
 export default function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,66 +49,65 @@ export default function ContactForm() {
 
   if (submitted) {
     return (
-      <div className="h-full flex flex-col items-center justify-center text-center space-y-4">
-        <div className="w-16 h-16 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center">
-          <Send className="w-8 h-8" />
+      <div className="h-full flex flex-col items-center justify-center text-center space-y-4 py-8">
+        <div className="w-16 h-16 bg-primary/15 text-primary-400 border border-primary/30 rounded-2xl flex items-center justify-center shadow-lg">
+          <CheckCircle2 className="w-8 h-8" />
         </div>
-        <h3 className="text-2xl font-bold">Message Sent</h3>
-        <p className="text-white/45">Thanks for reaching out. We review messages manually and reply as soon as possible.</p>
-        <button
+        <h3 className="text-xl font-bold text-white">Message Sent Successfully</h3>
+        <p className="text-xs text-text-tertiary max-w-xs leading-relaxed">
+          Thanks for reaching out. Our engineering team reviews inquiries manually and will reply to your email.
+        </p>
+        <Button
           onClick={() => setSubmitted(false)}
-          className="mt-4 px-6 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+          variant="secondary"
+          size="sm"
         >
-          Send Another
-        </button>
+          Send Another Message
+        </Button>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-white/70">Name</label>
-          <input
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-text-secondary">Your Name</label>
+          <Input
             type="text"
             name="name"
             required
-            className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-cyan transition-all text-white placeholder:text-white/50"
-            placeholder="John Doe"
+            placeholder="Jane Doe"
           />
         </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-white/70">Email</label>
-          <input
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-text-secondary">Email Address</label>
+          <Input
             type="email"
             name="email"
             required
-            className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-cyan transition-all text-white placeholder:text-white/50"
-            placeholder="john@example.com"
+            placeholder="jane@example.com"
           />
         </div>
       </div>
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-white/70">Subject</label>
-        <input
+      <div className="space-y-1.5">
+        <label className="text-xs font-semibold text-text-secondary">Subject</label>
+        <Input
           type="text"
           name="subject"
           required
-          className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-cyan transition-all text-white placeholder:text-white/50"
-          placeholder="Bug report, feature request, partnership..."
+          placeholder="Bug report, tool request, partnership inquiry..."
         />
       </div>
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-white/70">Message</label>
-        <textarea
+      <div className="space-y-1.5">
+        <label className="text-xs font-semibold text-text-secondary">Message Details</label>
+        <Textarea
           name="message"
           required
-          rows={5}
-          className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-cyan transition-all text-white placeholder:text-white/50 resize-none"
-          placeholder="Tell us what happened, what page you were on, and how we can help."
+          rows={4}
+          placeholder="Provide details about what happened, what browser you are using, or your specific suggestion."
         />
       </div>
 
@@ -114,25 +116,21 @@ export default function ContactForm() {
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-xs text-red-300">
           {error}
         </div>
       )}
 
-      <button
+      <Button
         type="submit"
         disabled={isSubmitting}
-        className="w-full bg-gradient-to-r from-accent-cyan to-accent-purple hover:opacity-95 text-black font-semibold py-3 rounded-lg transition-all flex items-center justify-center gap-2"
+        isLoading={isSubmitting}
+        variant="primary"
+        className="w-full text-xs font-bold py-3"
       >
-        {isSubmitting ? (
-          <Loader2 className="w-5 h-5 animate-spin" />
-        ) : (
-          <>
-            <Send className="w-5 h-5" />
-            Send Message
-          </>
-        )}
-      </button>
+        <Send size={14} className="mr-2" />
+        Send Message
+      </Button>
     </form>
   );
 }

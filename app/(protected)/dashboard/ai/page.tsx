@@ -2,22 +2,18 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  MessageSquare, 
   Send, 
   Bot, 
   Sparkles, 
   User, 
   Loader2, 
   Zap, 
-  Cpu, 
   History, 
-  Brain,
-  ShieldCheck,
-  Terminal,
-  ChevronRight,
-  Database,
-  Search,
-  Plus
+  Terminal, 
+  Search, 
+  RotateCcw,
+  CheckCircle2,
+  ShieldAlert
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSession } from 'next-auth/react';
@@ -43,13 +39,13 @@ export default function AIChatPage() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, isLoading]);
 
   const fetchUsage = async () => {
     try {
       const res = await fetch('/api/ai/usage?tool=chatbot');
       const data = await res.json();
-      setUsage({ count: data.count, limit: data.limit });
+      setUsage({ count: data.count || 0, limit: data.limit || 30 });
     } catch (error) {
       console.error('Error fetching usage:', error);
     }
@@ -86,7 +82,13 @@ export default function AIChatPage() {
       if (res.status === 429) {
         setMessages((prev) => [...prev, {
           role: 'assistant',
-          content: 'Daily limit reached. Please try again tomorrow.',
+          content: 'You have reached your daily AI usage limit. Please come back tomorrow or upgrade your plan.',
+          timestamp: new Date(),
+        }]);
+      } else if (!res.ok) {
+        setMessages((prev) => [...prev, {
+          role: 'assistant',
+          content: data.error || 'I encountered an error processing your request. Please try again.',
           timestamp: new Date(),
         }]);
       } else {
@@ -98,10 +100,10 @@ export default function AIChatPage() {
       }
       
       fetchUsage();
-    } catch (error) {
+    } catch {
       setMessages((prev) => [...prev, {
         role: 'assistant',
-        content: 'Sorry, I encountered an error. Please try again later.',
+        content: 'Unable to connect to the AI service. Please verify your network and try again.',
         timestamp: new Date(),
       }]);
     } finally {
@@ -109,196 +111,146 @@ export default function AIChatPage() {
     }
   };
 
+  const clearConversation = () => {
+    setMessages([]);
+  };
+
   const suggestions = [
-    "How do I use the Background Remover?",
-    "Explain the 'Violet Protocol' design system",
-    "Generate a professional bio for a developer",
-    "What's the best tool for checking Regex?",
+    "How can I compress an image without losing quality?",
+    "Explain how to write a regex for validating UUID v4",
+    "Generate a concise, professional developer bio",
+    "What is the difference between Base64 and SHA-256?",
   ];
 
+  const quotaPercent = Math.min(100, Math.round((usage.count / Math.max(1, usage.limit)) * 100));
+
   return (
-    <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 h-[calc(100vh-120px)]">
+    <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 py-8 h-[calc(100vh-100px)]">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-stretch">
         
-        {/* Left Panel: Neural Control (5 Columns) */}
+        {/* Left Sidebar: Controls & Stats (4 Columns) */}
         <div className="lg:col-span-4 flex flex-col gap-6 h-full">
-          {/* Intelligence Overview */}
-          <section className="glass-card border-white/[0.05] bg-black/40 p-6 rounded-md relative overflow-hidden shrink-0">
-            <div className="absolute -right-4 -top-4 opacity-[0.03] rotate-12">
-              <Brain size={160} />
+          {/* Quota & Model Card */}
+          <section className="rounded-3xl border border-white/[0.08] bg-surface-card p-6 rounded-2xl relative overflow-hidden shrink-0 shadow-[var(--shadow-raised-sm)] space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center text-primary-400">
+                  <Sparkles size={16} />
+                </div>
+                <div>
+                  <h2 className="text-sm font-bold text-white tracking-tight">AI Assistant</h2>
+                  <p className="text-[11px] text-text-muted">High-precision language engine</p>
+                </div>
+              </div>
+              <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full flex items-center gap-1">
+                <CheckCircle2 size={10} /> Online
+              </span>
             </div>
 
-            <div className="relative z-10 space-y-6">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="h-2 w-2 rounded-full bg-violet-400 shadow-[0_0_8px_rgba(167,139,250,0.6)]" />
-                <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-white/50 font-outfit">
-                  Intelligence Overview
-                </h2>
+            {/* Usage Progress */}
+            <div className="space-y-2 p-3.5 bg-surface-inset border border-white/[0.06] rounded-xl shadow-[var(--shadow-inset-sm)]">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-text-secondary font-medium">Daily Quota</span>
+                <span className="font-mono text-white font-semibold">{usage.count} / {usage.limit} requests</span>
               </div>
-
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-white/[0.02] border border-white/[0.05] rounded-md">
-                  <div className="flex items-center gap-3">
-                    <Database size={14} className="text-violet-400" />
-                    <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Active Model</span>
-                  </div>
-                  <span className="text-xs font-mono font-bold text-white">GPT-4O-PRO</span>
-                </div>
-
-                <div className="flex items-center justify-between p-3 bg-white/[0.02] border border-white/[0.05] rounded-md">
-                  <div className="flex items-center gap-3">
-                    <Zap size={14} className="text-violet-400" />
-                    <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Quota Usage</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-xs font-mono font-bold text-white">{usage.count}/{usage.limit}</span>
-                    <div className="w-20 h-1 bg-white/5 rounded-full mt-1 overflow-hidden">
-                      <div 
-                        className="h-full bg-violet-400" 
-                        style={{ width: `${(usage.count / usage.limit) * 100}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between p-3 bg-white/[0.02] border border-white/[0.05] rounded-md">
-                  <div className="flex items-center gap-3">
-                    <ShieldCheck size={14} className="text-violet-400" />
-                    <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Protocol</span>
-                  </div>
-                  <span className="text-[10px] font-mono font-bold text-violet-400 uppercase tracking-widest bg-violet-400/10 px-2 py-0.5 rounded">VIOLET_ENCRYPT</span>
-                </div>
+              <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-primary to-accent-cyan rounded-full transition-all duration-500" 
+                  style={{ width: `${quotaPercent}%` }}
+                />
               </div>
+              <p className="text-[10px] text-text-muted">Resets daily at 00:00 UTC</p>
             </div>
           </section>
 
-          {/* Quick Queries / Suggestions */}
-          <section className="glass-card border-white/[0.05] bg-black/40 p-6 rounded-md flex-1 overflow-hidden flex flex-col">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-2">
-                <Terminal size={14} className="text-violet-400" />
-                <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/50">Suggested Queries</h3>
+          {/* Prompt Suggestions */}
+          <section className="rounded-3xl border border-white/[0.08] bg-surface-card p-6 rounded-2xl flex-1 overflow-hidden flex flex-col shadow-[var(--shadow-raised-sm)]">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2 text-xs font-bold text-white uppercase tracking-wider">
+                <Terminal size={14} className="text-primary-400" />
+                <span>Suggested Prompts</span>
               </div>
-              <Plus size={14} className="text-white/20 cursor-pointer hover:text-white transition-colors" />
+              {messages.length > 0 && (
+                <button 
+                  onClick={clearConversation}
+                  className="text-[11px] text-text-muted hover:text-red-400 flex items-center gap-1 transition-colors"
+                  aria-label="Clear chat history"
+                >
+                  <RotateCcw size={12} /> Clear
+                </button>
+              )}
             </div>
 
-            <div className="space-y-2 overflow-y-auto no-scrollbar">
+            <div className="space-y-2.5 overflow-y-auto no-scrollbar flex-1">
               {suggestions.map((suggestion, i) => (
                 <button
                   key={i}
                   onClick={() => setInput(suggestion)}
-                  className="w-full text-left p-3 rounded-md bg-white/[0.02] border border-white/[0.05] hover:border-violet-400/30 hover:bg-violet-400/5 group transition-all"
+                  className="w-full text-left p-3 rounded-xl bg-surface-inset border border-white/[0.06] hover:border-primary/40 hover:bg-primary/[0.06] group transition-all"
                 >
-                  <div className="flex items-start gap-3">
-                    <Search size={12} className="text-white/10 group-hover:text-violet-400 mt-1 transition-colors" />
-                    <p className="text-[11px] text-white/40 group-hover:text-white/80 leading-relaxed font-inter italic">
-                      &quot;{suggestion}&quot;
+                  <div className="flex items-start gap-2.5">
+                    <Search size={13} className="text-white/30 group-hover:text-primary-400 mt-0.5 transition-colors shrink-0" />
+                    <p className="text-xs text-text-secondary group-hover:text-white leading-relaxed">
+                      {suggestion}
                     </p>
                   </div>
                 </button>
               ))}
             </div>
-
-            {/* Session Audit */}
-            <div className="mt-auto pt-6 border-t border-white/[0.05] flex items-center justify-between opacity-50">
-              <div className="flex items-center gap-2">
-                <History size={12} className="text-violet-400" />
-                <span className="text-[10px] font-mono text-white/40 tracking-tighter uppercase">Session: {new Date().toLocaleDateString()}</span>
-              </div>
-              <Cpu size={12} className="text-white/20" />
-            </div>
           </section>
         </div>
 
-        {/* Right Panel: Synchronized Intelligence (8 Columns) */}
+        {/* Right Panel: Chat Interface (8 Columns) */}
         <div className="lg:col-span-8 h-full">
-          <div className="glass-card border-white/[0.05] bg-black/40 rounded-md h-full flex flex-col relative overflow-hidden shadow-2xl">
-            {/* Header */}
-            <div className="px-8 py-6 border-b border-white/[0.05] bg-white/[0.02] flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-4">
-                <div className="h-10 w-10 rounded bg-violet-400/10 flex items-center justify-center border border-violet-400/20">
-                  <Bot size={20} className="text-violet-400" />
-                </div>
-                <div>
-                  <h2 className="text-sm font-bold text-white font-outfit uppercase tracking-wider flex items-center gap-2">
-                    Night X Neural Hub
-                    <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse ml-2" />
-                  </h2>
-                  <p className="text-[10px] text-white/30 uppercase tracking-widest font-mono">Synchronized Intelligence // Active Session</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="px-3 py-1 rounded bg-white/5 border border-white/10">
-                  <span className="text-[9px] font-mono text-white/40 tracking-widest uppercase">Latency: 24ms</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-8 space-y-8 no-scrollbar scroll-smooth">
+          <div className="rounded-3xl border border-white/[0.08] bg-surface-card rounded-2xl h-full flex flex-col relative overflow-hidden shadow-[var(--shadow-raised-md)]">
+            {/* Chat Messages */}
+            <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6 custom-scrollbar">
               {messages.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-center max-w-md mx-auto py-20">
-                  <div className="w-20 h-20 rounded-md bg-white/[0.02] border border-white/[0.05] flex items-center justify-center text-white/5 mb-8 relative">
-                    <Bot size={40} className="relative z-10" />
-                    <div className="absolute inset-0 bg-violet-400/5 blur-3xl rounded-full animate-pulse" />
+                <div className="h-full flex flex-col items-center justify-center text-center max-w-md mx-auto py-16">
+                  <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary-400 mb-6 shadow-md">
+                    <Bot size={32} />
                   </div>
-                  <h3 className="text-lg font-bold text-white font-outfit uppercase tracking-[0.2em] mb-4">
-                    Neural Hub Active
+                  <h3 className="text-xl font-bold text-white tracking-tight mb-2">
+                    How can I assist your workflow today?
                   </h3>
-                  <p className="text-[11px] text-white/30 leading-relaxed uppercase tracking-widest font-mono mb-8">
-                    I am your Sovereign-Grade Assistant. I can help you orchestrate workflows, debug code, or navigate the Night X ecosystem.
+                  <p className="text-xs text-text-tertiary leading-relaxed mb-6">
+                    Ask questions about code formatting, security algorithms, regex patterns, or tool recommendations across the Night X suite.
                   </p>
-                  <div className="grid grid-cols-2 gap-4 w-full">
-                    <div className="p-4 rounded border border-white/5 bg-white/[0.01] text-[10px] text-white/20 uppercase tracking-tighter">
-                      End-to-End Encrypted
-                    </div>
-                    <div className="p-4 rounded border border-white/5 bg-white/[0.01] text-[10px] text-white/20 uppercase tracking-tighter">
-                      Context Aware Sync
-                    </div>
-                  </div>
                 </div>
               ) : (
                 messages.map((msg, i) => (
                   <motion.div
                     key={i}
-                    initial={{ opacity: 0, y: 10 }}
+                    initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     className={cn(
-                      "flex gap-6 max-w-4xl mx-auto",
-                      msg.role === 'user' ? "flex-row-reverse" : ""
+                      "flex gap-4 max-w-3xl",
+                      msg.role === 'user' ? "ml-auto flex-row-reverse" : "mr-auto"
                     )}
                   >
                     <div className={cn(
-                      "h-10 w-10 rounded shrink-0 flex items-center justify-center border",
+                      "w-8 h-8 rounded-xl shrink-0 flex items-center justify-center border text-xs font-bold shadow-sm",
                       msg.role === 'user' 
-                        ? "bg-violet-400/10 border-violet-400/20 text-violet-400" 
-                        : "bg-white/5 border-white/10 text-white/20"
+                        ? "bg-primary/20 border-primary/30 text-primary-300" 
+                        : "bg-surface-inset border-white/10 text-primary-400"
                     )}>
-                      {msg.role === 'user' ? <User size={18} /> : <Bot size={18} className="text-violet-400" />}
+                      {msg.role === 'user' ? <User size={15} /> : <Bot size={15} />}
                     </div>
                     
                     <div className={cn(
-                      "flex-1 space-y-2",
+                      "space-y-1",
                       msg.role === 'user' ? "text-right" : "text-left"
                     )}>
-                      <div className="flex items-center gap-3 mb-1 justify-end">
-                         {msg.role === 'user' ? (
-                            <>
-                              <span className="text-[9px] font-mono text-white/20 uppercase tracking-widest">{msg.timestamp.toLocaleTimeString()}</span>
-                              <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Sovereign_User</span>
-                            </>
-                         ) : (
-                            <>
-                              <span className="text-[10px] font-bold text-violet-400 uppercase tracking-widest">Neural_Assistant</span>
-                              <span className="text-[9px] font-mono text-white/20 uppercase tracking-widest">{msg.timestamp.toLocaleTimeString()}</span>
-                            </>
-                         )}
+                      <div className="flex items-center gap-2 px-1">
+                        <span className="text-[11px] font-semibold text-text-muted">
+                          {msg.role === 'user' ? (session?.user?.name || 'You') : 'Night X AI'}
+                        </span>
                       </div>
                       <div className={cn(
-                        "p-6 rounded-md border text-sm leading-relaxed font-inter",
+                        "p-4 rounded-2xl border text-xs sm:text-sm leading-relaxed whitespace-pre-wrap font-normal",
                         msg.role === 'user'
-                          ? "bg-violet-400/5 border-violet-400/20 text-white/90"
-                          : "bg-white/[0.03] border-white/[0.05] text-white/80"
+                          ? "bg-primary/20 border-primary/40 text-white shadow-sm font-medium"
+                          : "bg-surface-inset border-white/[0.08] text-text-secondary"
                       )}>
                         {msg.content}
                       </div>
@@ -306,61 +258,42 @@ export default function AIChatPage() {
                   </motion.div>
                 ))
               )}
+
               {isLoading && (
-                <div className="flex gap-6 max-w-4xl mx-auto">
-                  <div className="h-10 w-10 rounded shrink-0 flex items-center justify-center border bg-white/5 border-white/10 text-white/20">
-                    <Bot size={18} className="text-violet-400" />
+                <div className="flex gap-4 max-w-3xl mr-auto">
+                  <div className="w-8 h-8 rounded-xl shrink-0 flex items-center justify-center border bg-surface-inset border-white/10 text-primary-400">
+                    <Bot size={15} />
                   </div>
-                  <div className="flex-1 space-y-4">
-                    <div className="flex items-center gap-3">
-                      <span className="text-[10px] font-bold text-violet-400 uppercase tracking-widest">Neural_Assistant</span>
-                      <Loader2 size={12} className="animate-spin text-violet-400/50" />
-                    </div>
-                    <div className="p-6 rounded-md bg-white/[0.03] border border-white/[0.05] flex gap-1.5">
-                      <div className="w-1.5 h-1.5 rounded-full bg-violet-400/40 animate-bounce" />
-                      <div className="w-1.5 h-1.5 rounded-full bg-violet-400/40 animate-bounce [animation-delay:0.2s]" />
-                      <div className="w-1.5 h-1.5 rounded-full bg-violet-400/40 animate-bounce [animation-delay:0.4s]" />
-                    </div>
+                  <div className="p-4 rounded-2xl bg-surface-inset border border-white/[0.08] flex items-center gap-2">
+                    <Loader2 size={16} className="animate-spin text-primary-400" />
+                    <span className="text-xs text-text-tertiary">Thinking...</span>
                   </div>
                 </div>
               )}
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Input Area */}
-            <div className="p-8 border-t border-white/[0.05] bg-black/40 shrink-0">
-              <div className="max-w-4xl mx-auto relative group">
+            {/* Input Box */}
+            <div className="p-4 sm:p-5 border-t border-white/[0.08] bg-surface-inset shrink-0">
+              <div className="relative flex items-center">
                 <input
                   type="text"
-                  placeholder="Enter semantic instruction or command..."
-                  className="w-full bg-white/[0.02] border border-white/[0.1] rounded-md px-6 py-5 pr-16 text-sm text-white/80 outline-none focus:border-violet-400/50 focus:bg-violet-400/[0.02] transition-all font-inter placeholder:text-white/10"
+                  placeholder="Ask a question or request assistance..."
+                  className="w-full bg-surface-card border border-white/[0.1] rounded-xl px-4 py-3 pr-14 text-xs sm:text-sm text-white outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-text-muted shadow-[var(--shadow-inset-sm)]"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                   disabled={isLoading}
+                  aria-label="AI message prompt input"
                 />
                 <button
                   onClick={handleSend}
                   disabled={!input.trim() || isLoading || usage.count >= usage.limit}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded bg-violet-400 text-black flex items-center justify-center hover:bg-violet-300 disabled:opacity-20 disabled:cursor-not-allowed transition-all shadow-[0_0_15px_rgba(167,139,250,0.3)]"
+                  aria-label="Send message"
+                  className="absolute right-2 p-2 rounded-lg bg-primary text-black hover:bg-primary-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm focus-visible:ring-2 focus-visible:ring-primary outline-none"
                 >
-                  <Send size={18} />
+                  <Send size={15} />
                 </button>
-              </div>
-              <div className="max-w-4xl mx-auto flex items-center justify-between mt-4">
-                <div className="flex items-center gap-4 text-[9px] font-mono text-white/20 uppercase tracking-widest">
-                  <span className="flex items-center gap-1.5"><Sparkles size={10} /> ENGINE: VIOLET_CORE</span>
-                  <span className="flex items-center gap-1.5"><Terminal size={10} /> MODE: SYNCHRONIZED</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="h-1 w-24 bg-white/5 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-violet-400/50" 
-                      style={{ width: `${(usage.count / usage.limit) * 100}%` }}
-                    />
-                  </div>
-                  <span className="text-[9px] font-mono text-white/40 uppercase tracking-widest">Load: {usage.count}/{usage.limit}</span>
-                </div>
               </div>
             </div>
           </div>

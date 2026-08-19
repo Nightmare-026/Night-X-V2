@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { adminDb, incrementAIUsage } from "@/lib/firebaseAdmin";
+import { adminDb, reserveAIUsage } from "@/lib/firebaseAdmin";
 import { NextResponse } from "next/server";
 import { generateAIResponse } from "@/lib/ai-service";
 import { extractJson } from "@/lib/utils";
@@ -12,23 +12,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const today = new Date().toISOString().split('T')[0];
   const tool = "ai-paraphraser";
-  const usageId = `${session.user.id}_${tool}_${today}`;
 
   try {
     if (!adminDb) {
       return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
     }
-    const doc = await adminDb.collection("ai_usage").doc(usageId).get();
-    const currentCount = doc.exists ? doc.data()?.count || 0 : 0;
+    const reserved = await reserveAIUsage(session.user.id, tool, 30);
+    if (!reserved) return NextResponse.json({ error: "Daily limit reached or quota service unavailable." }, { status: 429 });
 
-    if (currentCount >= 30) {
-      return NextResponse.json(
-        { error: "Daily limit reached for this tool. Resets at midnight." },
-        { status: 429 }
-      );
-    }
 
     const { text, tone } = await req.json();
 
@@ -70,21 +62,15 @@ export async function POST(req: Request) {
         throw new Error("Invalid paraphrase format from AI or extraction failed");
       }
 
-      await incrementAIUsage(session.user.id, tool);
+      // Usage is reserved atomically before provider work.
       return NextResponse.json(parsedResponse);
     } catch (parseError: any) {
-      console.error("AI Paraphrase Parse Error:", parseError.message, "Response:", aiResponseText);
-      return NextResponse.json({ 
-        error: `AI Response Format Error: ${parseError.message}`,
-        rawResponse: aiResponseText.substring(0, 200) 
-      }, { status: 500 });
+      console.error("AI Paraphrase Parse Error:", parseError.message);
+      return NextResponse.json({ error: "AI response format error" }, { status: 502 });
     }
 
   } catch (error: any) {
     console.error("AI Paraphrase API General Error:", error);
-    return NextResponse.json({ 
-      error: error.message || "Internal Server Error",
-      details: "Check AI service status or API configuration"
-    }, { status: 500 });
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

@@ -4,12 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, X, Send, Bot, Sparkles, User, Loader2 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
+import { cn } from '@/lib/utils';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -103,72 +98,73 @@ export default function AIChat() {
     <>
       {/* Floating Button */}
       <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
+        whileHover={{ scale: 1.06 }}
+        whileTap={{ scale: 0.94 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-br from-accent-purple to-accent-cyan shadow-lg shadow-accent-purple/40 z-50 flex items-center justify-center text-white"
+        className="fixed bottom-6 right-6 w-13 h-13 rounded-2xl bg-gradient-to-br from-primary via-emerald-500 to-green-600 shadow-[0_8px_25px_rgba(34,197,94,0.4)] z-50 flex items-center justify-center text-black border border-white/20 p-3.5"
+        aria-label="Toggle AI Assistant"
       >
-        <div className="absolute inset-0 rounded-full animate-ping bg-accent-purple/20 -z-10" />
-        {isOpen ? <X /> : <Bot />}
+        {isOpen ? <X size={22} /> : <Bot size={22} />}
       </motion.button>
 
       {/* Chat Panel */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.9, transformOrigin: 'bottom right' }}
+            initial={{ opacity: 0, y: 15, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            className="fixed bottom-24 right-6 w-[360px] max-w-[calc(100vw-3rem)] h-[500px] max-h-[calc(100vh-8rem)] glass-card flex flex-col z-50 overflow-hidden border-white/10 shadow-2xl"
+            exit={{ opacity: 0, y: 15, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            className="fixed bottom-24 right-6 w-[360px] max-w-[calc(100vw-3rem)] h-[500px] max-h-[calc(100vh-8rem)] rounded-3xl bg-surface-base border border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.85)] flex flex-col z-50 overflow-hidden"
           >
             {/* Header */}
-            <div className="p-4 border-b border-white/10 bg-white/5 flex items-center justify-between">
+            <div className="p-4 border-b border-white/[0.08] bg-surface-card flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-accent-purple/20 flex items-center justify-center text-accent-purple">
+                <div className="w-8 h-8 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center text-primary-400">
                   <Bot size={18} />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold font-syne">Night X AI</h3>
+                  <h3 className="text-xs font-bold text-white">Night X Assistant</h3>
                   <div className="flex items-center gap-1.5">
-                    <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                    <span className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Online</span>
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="text-[10px] text-text-muted font-bold tracking-wider uppercase">Active</span>
                   </div>
                 </div>
               </div>
-              <button onClick={() => setIsOpen(false)} className="text-white/40 hover:text-white">
-                <X size={18} />
+              <button onClick={() => setIsOpen(false)} className="text-text-muted hover:text-white p-1 rounded">
+                <X size={16} />
               </button>
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
+            <div className="flex-1 overflow-y-auto p-4 space-y-3.5 no-scrollbar">
               {messages.length === 0 && (
-                <div className="flex gap-3">
-                  <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0">
-                    <Bot size={14} className="text-accent-cyan" />
+                <div className="flex gap-2.5">
+                  <div className="w-7 h-7 rounded-lg bg-surface-card border border-white/10 flex items-center justify-center flex-shrink-0 text-primary-400">
+                    <Bot size={14} />
                   </div>
-                  <div className="bg-white/5 rounded-2xl rounded-tl-none p-3 text-sm text-white/80 border border-white/5">
+                  <div className="bg-surface-card border border-white/[0.06] rounded-2xl rounded-tl-none p-3 text-xs text-text-secondary leading-relaxed shadow-sm">
                     {welcomeMessage}
                   </div>
                 </div>
               )}
 
               {messages.map((msg, i) => (
-                <div key={i} className={cn("flex gap-3", msg.role === 'user' ? "flex-row-reverse" : "")}>
+                <div key={i} className={cn("flex gap-2.5", msg.role === 'user' ? "flex-row-reverse" : "")}>
                   <div className={cn(
-                    "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
-                    msg.role === 'user' ? "bg-accent-purple/20" : "bg-white/5"
+                    "w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 text-xs",
+                    msg.role === 'user' ? "bg-primary/20 text-primary-300" : "bg-surface-card border border-white/10 text-primary-400"
                   )}>
-                    {msg.role === 'user' ? <User size={14} className="text-accent-purple" /> : <Bot size={14} className="text-accent-cyan" />}
+                    {msg.role === 'user' ? <User size={13} /> : <Bot size={13} />}
                   </div>
                   <div className={cn(
-                    "max-w-[80%] p-3 text-sm rounded-2xl border",
+                    "max-w-[82%] p-3 text-xs rounded-2xl leading-relaxed",
                     msg.role === 'user' 
-                      ? "bg-accent-purple/10 border-accent-purple/20 rounded-tr-none text-white" 
-                      : "bg-white/5 border-white/5 rounded-tl-none text-white/80"
+                      ? "bg-primary/20 border border-primary/30 rounded-tr-none text-white font-medium" 
+                      : "bg-surface-card border border-white/[0.06] rounded-tl-none text-text-secondary"
                   )}>
                     {msg.content}
-                    <div className="text-[10px] text-white/20 mt-1">
+                    <div className="text-[9px] text-text-muted mt-1 text-right">
                       {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
                   </div>
@@ -176,14 +172,14 @@ export default function AIChat() {
               ))}
 
               {isLoading && (
-                <div className="flex gap-3">
-                  <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0">
-                    <Bot size={14} className="text-accent-cyan" />
+                <div className="flex gap-2.5">
+                  <div className="w-7 h-7 rounded-lg bg-surface-card border border-white/10 flex items-center justify-center flex-shrink-0 text-primary-400">
+                    <Bot size={14} />
                   </div>
-                  <div className="bg-white/5 rounded-2xl rounded-tl-none p-3 flex gap-1">
-                    <div className="w-1.5 h-1.5 rounded-full bg-white/40 animate-bounce" />
-                    <div className="w-1.5 h-1.5 rounded-full bg-white/40 animate-bounce [animation-delay:0.2s]" />
-                    <div className="w-1.5 h-1.5 rounded-full bg-white/40 animate-bounce [animation-delay:0.4s]" />
+                  <div className="bg-surface-card border border-white/[0.06] rounded-2xl rounded-tl-none p-3 flex gap-1 items-center">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary-400 animate-bounce" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary-400 animate-bounce [animation-delay:0.2s]" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary-400 animate-bounce [animation-delay:0.4s]" />
                   </div>
                 </div>
               )}
@@ -191,18 +187,18 @@ export default function AIChat() {
             </div>
 
             {/* Footer / Input */}
-            <div className="p-4 border-t border-white/10 bg-white/5">
+            <div className="p-3 border-t border-white/[0.08] bg-surface-card space-y-2">
               {usage.count >= usage.limit ? (
-                <div className="text-center py-2">
-                  <p className="text-xs text-red-400 font-medium">Daily limit reached (30/30)</p>
-                  <p className="text-[10px] text-white/40">Resets at midnight</p>
+                <div className="text-center py-1">
+                  <p className="text-xs text-red-400 font-medium">Daily limit reached ({usage.limit}/{usage.limit})</p>
+                  <p className="text-[10px] text-text-muted">Resets at midnight</p>
                 </div>
               ) : (
                 <div className="flex gap-2">
                   <input
                     type="text"
-                    placeholder="Ask me anything..."
-                    className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm outline-none focus:border-accent-purple/50 transition-colors"
+                    placeholder="Ask about any tool..."
+                    className="flex-1 bg-surface-inset border border-white/10 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-primary/60 shadow-[var(--shadow-inset-sm)]"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSend()}
@@ -211,20 +207,19 @@ export default function AIChat() {
                   <button
                     onClick={handleSend}
                     disabled={!input.trim() || isLoading}
-                    className="w-10 h-10 rounded-xl bg-accent-purple flex items-center justify-center text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-accent-purple/90 transition-colors"
+                    className="w-8 h-8 rounded-xl bg-primary text-black flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary-400 transition-colors shrink-0"
+                    aria-label="Send query"
                   >
-                    {isLoading ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} />}
+                    {isLoading ? <Loader2 className="animate-spin" size={14} /> : <Send size={14} />}
                   </button>
                 </div>
               )}
-              <div className="flex items-center justify-between mt-3 px-1">
-                <span className="text-[10px] text-white/20 uppercase font-bold tracking-widest flex items-center gap-1">
-                  <Sparkles size={10} />
-                  Powered by AI
+              <div className="flex items-center justify-between px-1 text-[10px] text-text-muted">
+                <span className="flex items-center gap-1">
+                  <Sparkles size={9} className="text-primary-400" />
+                  <span>AI Powered</span>
                 </span>
-                <span className="text-[10px] text-white/40">
-                  {usage.count}/{usage.limit} messages
-                </span>
+                <span>{usage.count}/{usage.limit} queries</span>
               </div>
             </div>
           </motion.div>

@@ -1,8 +1,11 @@
-"use client";
+'use client';
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { MessageSquarePlus, Bug, Lightbulb, MessageCircle, Send, Loader2 } from "lucide-react";
+import { MessageSquarePlus, Bug, Lightbulb, MessageCircle, Send, CheckCircle2 } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Textarea } from "@/components/ui/Textarea";
 
 export default function FeedbackPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -10,9 +13,9 @@ export default function FeedbackPage() {
   const [type, setType] = useState("feature");
 
   const types = [
-    { id: "feature", label: "Feature Request", icon: <Lightbulb className="w-5 h-5" /> },
-    { id: "bug", label: "Report a Bug", icon: <Bug className="w-5 h-5" /> },
-    { id: "general", label: "General Feedback", icon: <MessageCircle className="w-5 h-5" /> },
+    { id: "feature", label: "Feature Request", icon: <Lightbulb className="w-4 h-4" /> },
+    { id: "bug", label: "Report a Bug", icon: <Bug className="w-4 h-4" /> },
+    { id: "general", label: "General Feedback", icon: <MessageCircle className="w-4 h-4" /> },
   ];
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -44,123 +47,104 @@ export default function FeedbackPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white pt-24 pb-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
-        <div className="text-center mb-12">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="inline-flex items-center justify-center p-4 bg-accent-purple/10 text-accent-purple rounded-full mb-6"
-          >
-            <MessageSquarePlus className="w-8 h-8" />
-          </motion.div>
-          <motion.h1 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-5xl font-bold mb-4"
-          >
-            Help Us Improve
-          </motion.h1>
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-gray-400 text-lg max-w-2xl mx-auto"
-          >
-            Night X is built for you. Tell us what you love, what&apos;s broken, or what tool we should build next.
-          </motion.p>
+    <div className="min-h-screen text-white pt-16 pb-16 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto space-y-12">
+        <div className="text-center max-w-2xl mx-auto space-y-3 pt-6">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary-400">
+            <MessageSquarePlus size={14} />
+            <span>Community Voice</span>
+          </div>
+
+          <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+            Help Us Improve Night X
+          </h1>
+
+          <p className="text-sm text-text-tertiary">
+            Night X is built for developers, designers, and creators. Tell us what tool we should build next or what can be improved.
+          </p>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-white/5 border border-white/10 rounded-3xl p-8 md:p-12 backdrop-blur-xl"
-        >
+        <div className="rounded-3xl border border-white/[0.08] bg-surface-card p-6 sm:p-10 shadow-[var(--shadow-raised-md)]">
           {submitted ? (
-            <div className="text-center py-12">
-              <div className="w-20 h-20 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Send className="w-10 h-10" />
+            <div className="text-center py-10 space-y-4">
+              <div className="w-16 h-16 bg-primary/15 text-primary-400 border border-primary/30 rounded-2xl flex items-center justify-center mx-auto shadow-lg">
+                <CheckCircle2 className="w-8 h-8" />
               </div>
-              <h3 className="text-3xl font-bold mb-4">Feedback Sent!</h3>
-              <p className="text-gray-400 text-lg mb-8">
-                Thank you for helping us make Night X better. We read every single message.
+              <h3 className="text-2xl font-bold text-white">Feedback Received!</h3>
+              <p className="text-xs text-text-tertiary max-w-sm mx-auto leading-relaxed">
+                Thank you for contributing to Night X. Our team reads every submission and reviews tool requests weekly.
               </p>
-              <button 
-                onClick={() => setSubmitted(false)}
-                className="px-8 py-3 bg-white/10 hover:bg-white/20 rounded-xl transition-colors font-medium"
-              >
-                Send More Feedback
-              </button>
+              <div className="pt-2">
+                <Button 
+                  onClick={() => setSubmitted(false)}
+                  variant="secondary"
+                  size="sm"
+                >
+                  Submit Another Note
+                </Button>
+              </div>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-8">
-              
-              <div className="space-y-4">
-                <label className="text-lg font-medium text-white block">What kind of feedback is this?</label>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2.5">
+                <label className="text-xs font-bold text-text-secondary uppercase tracking-wider block">Feedback Category</label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {types.map((t) => (
                     <button
                       key={t.id}
                       type="button"
                       onClick={() => setType(t.id)}
-                      className={`flex items-center gap-3 p-4 rounded-xl border transition-all ${
+                      className={`flex items-center gap-2.5 p-3.5 rounded-xl border text-xs font-semibold transition-all ${
                         type === t.id
-                          ? 'bg-accent-purple/20 border-accent-purple text-accent-purple'
-                          : 'bg-black/50 border-white/10 hover:bg-white/5 text-gray-400'
+                          ? 'bg-primary/20 border-primary text-primary-300 shadow-[var(--shadow-raised-sm)]'
+                          : 'bg-surface-inset border-white/10 hover:border-white/20 text-text-tertiary'
                       }`}
                     >
                       {t.icon}
-                      <span className="font-medium">{t.label}</span>
+                      <span>{t.label}</span>
                     </button>
                   ))}
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-lg font-medium text-white block">Your Feedback</label>
-                <textarea 
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-text-secondary uppercase tracking-wider block">Your Feedback & Suggestions</label>
+                <Textarea 
                   name="message"
                   required
-                  rows={6}
-                  className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all text-white placeholder-gray-600 resize-none"
+                  rows={5}
                   placeholder={
-                    type === 'feature' ? "I'd love to see a tool that..." :
-                    type === 'bug' ? "I encountered an issue when..." :
-                    "I just wanted to say..."
+                    type === 'feature' ? "I'd love to see a tool that supports converting..." :
+                    type === 'bug' ? "I encountered an error when trying to upload a file in..." :
+                    "What I like most and what could be faster..."
                   }
                 />
               </div>
 
-              <div className="space-y-2">
-                <label className="text-lg font-medium text-white block flex justify-between">
-                  <span>Email <span className="text-gray-500 text-sm font-normal">(Optional)</span></span>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-text-secondary uppercase tracking-wider flex justify-between">
+                  <span>Your Email <span className="text-text-muted font-normal lowercase">(optional - for follow-up)</span></span>
                 </label>
-                <input 
+                <Input 
                   type="email" 
                   name="email"
-                  className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all text-white placeholder-gray-600"
-                  placeholder="So we can follow up with you"
+                  placeholder="you@example.com"
                 />
               </div>
 
-              <button 
+              <Button 
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-gradient-to-r from-accent-purple to-blue-600 hover:from-accent-purple/90 hover:to-blue-500 text-white font-semibold py-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-accent-purple/25"
+                isLoading={isSubmitting}
+                variant="primary"
+                className="w-full text-xs font-bold py-3.5"
               >
-                {isSubmitting ? (
-                  <Loader2 className="w-6 h-6 animate-spin" />
-                ) : (
-                  <>
-                    <Send className="w-5 h-5" />
-                    Submit Feedback
-                  </>
-                )}
-              </button>
+                <Send size={14} className="mr-2" />
+                Submit Feedback
+              </Button>
             </form>
           )}
-        </motion.div>
+        </div>
       </div>
     </div>
   );

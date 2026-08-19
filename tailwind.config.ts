@@ -9,25 +9,38 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "#0A0A0F",
+        background: "#080A0E",
         surface: {
-          base: "#111118",
-          elevated: "#16161F",
-          card: "#1C1C28",
-          hover: "#22222F",
+          base: "#0E1118",
+          elevated: "#141824",
+          card: "#111520",
+          hover: "#1A2030",
+          inset: "#0A0D13",
         },
         primary: {
-          50:  "#F5F3FF",
-          100: "#EDE9FE",
-          200: "#DDD6FE",
-          300: "#C4B5FD",
-          400: "#A78BFA",
-          500: "#8B5CF6",
-          600: "#7C3AED",
-          700: "#6D28D9",
-          800: "#5B21B6",
-          900: "#4C1D95",
-          DEFAULT: "#8B5CF6",
+          50:  "#F0FDF4",
+          100: "#DCFCE7",
+          200: "#BBF7D0",
+          300: "#86EFAC",
+          400: "#4ADE80",
+          500: "#22C55E",
+          600: "#16A34A",
+          700: "#15803D",
+          800: "#166534",
+          900: "#14532D",
+          DEFAULT: "#22C55E",
+        },
+        green: {
+          50:  "#F0FDF4",
+          100: "#DCFCE7",
+          200: "#BBF7D0",
+          300: "#86EFAC",
+          400: "#4ADE80",
+          500: "#22C55E",
+          600: "#16A34A",
+          700: "#15803D",
+          800: "#166534",
+          900: "#14532D",
         },
         accent: {
           cyan: {
@@ -46,27 +59,33 @@ const config: Config = {
             DEFAULT: "#F59E0B",
             light: "#FCD34D",
           },
+          purple: {
+            DEFAULT: "#8B5CF6",
+            light: "#C4B5FD",
+          },
         },
         text: {
           primary: "#FFFFFF",
-          secondary: "rgba(255, 255, 255, 0.7)",
-          tertiary: "rgba(255, 255, 255, 0.45)",
-          muted: "rgba(255, 255, 255, 0.3)",
+          secondary: "rgba(255, 255, 255, 0.78)",
+          tertiary: "rgba(255, 255, 255, 0.52)",
+          muted: "rgba(255, 255, 255, 0.35)",
         },
         border: {
           DEFAULT: "rgba(255, 255, 255, 0.08)",
-          hover: "rgba(255, 255, 255, 0.16)",
+          hover: "rgba(255, 255, 255, 0.18)",
+          active: "rgba(34, 197, 94, 0.5)",
         }
       },
       fontFamily: {
         inter: ["Inter", "sans-serif"],
+        display: ["Manrope", "Inter", "sans-serif"],
         mono: ["JetBrains Mono", "monospace"],
       },
       backgroundImage: {
-        "gradient-primary": "linear-gradient(135deg, #8B5CF6 0%, #7C3AED 50%, #6D28D9 100%)",
-        "gradient-hero": "linear-gradient(135deg, #8B5CF6 0%, #EC4899 50%, #06B6D4 100%)",
-        "gradient-card-border": "linear-gradient(135deg, rgba(139,92,246,0.3), rgba(6,182,212,0.1))",
-        "noise": "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E\")",
+        "gradient-primary": "linear-gradient(135deg, #2ED66B 0%, #22C55E 50%, #16A34A 100%)",
+        "gradient-hero": "linear-gradient(135deg, #22C55E 0%, #06B6D4 50%, #8B5CF6 100%)",
+        "gradient-card-border": "linear-gradient(135deg, rgba(34,197,94,0.3), rgba(6,182,212,0.1))",
+        "noise": "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E\")",
       },
       animation: {
         "float": "float 6s ease-in-out infinite",
@@ -86,8 +105,8 @@ const config: Config = {
           "50%": { transform: "translateY(-10px)" },
         },
         glowPulse: {
-          "0%, 100%": { boxShadow: "0 0 20px rgba(139,92,246,0.3)" },
-          "50%": { boxShadow: "0 0 40px rgba(139,92,246,0.6), 0 0 80px rgba(139,92,246,0.2)" },
+          "0%, 100%": { boxShadow: "0 0 20px rgba(34,197,94,0.3)" },
+          "50%": { boxShadow: "0 0 40px rgba(34,197,94,0.6), 0 0 80px rgba(34,197,94,0.2)" },
         },
         shimmer: {
           "0%": { backgroundPosition: "-200% 0" },
@@ -127,4 +146,3 @@ const config: Config = {
   plugins: [],
 };
 export default config;
-

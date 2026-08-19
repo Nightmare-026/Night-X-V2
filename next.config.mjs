@@ -21,12 +21,6 @@ const nextConfig = {
       }
     ],
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   transpilePackages: ['@imgly/background-removal', 'onnxruntime-web'],
   webpack: (config) => {
     config.resolve.alias.canvas = false;
@@ -42,11 +36,6 @@ const nextConfig = {
   },
   async redirects() {
     return [
-      {
-        source: '/tools',
-        destination: '/dashboard',
-        permanent: true,
-      },
       {
         source: '/signin',
         destination: '/auth/signin',
@@ -71,6 +60,10 @@ const nextConfig = {
           {
             key: 'X-Content-Type-Options',
             value: 'nosniff',
+          },
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on',
           },
           {
             key: 'Referrer-Policy',

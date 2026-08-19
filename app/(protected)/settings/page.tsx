@@ -10,342 +10,304 @@ import {
   Palette, 
   Trash2, 
   Save, 
+  CreditCard, 
+  Lock, 
+  ChevronRight, 
+  CheckCircle2, 
+  Sparkles, 
+  Loader2, 
   ExternalLink,
-  CreditCard,
-  Smartphone,
-  Cpu,
-  Monitor,
-  Lock,
-  ChevronRight,
-  Database,
-  Cloud,
-  Zap
+  ArrowRight
 } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/components/ui/Toast';
 
-type SettingsTab = 'profile' | 'preferences' | 'security' | 'billing';
+type SettingsTab = 'profile' | 'appearance' | 'security' | 'billing';
 
 export default function SettingsPage() {
   const { data: session } = useSession();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
   const [isSaving, setIsSaving] = useState(false);
+  const [name, setName] = useState(session?.user?.name || '');
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [toolHistoryEnabled, setToolHistoryEnabled] = useState(true);
+  const [selectedTheme, setSelectedTheme] = useState('dark');
 
   const tabs = [
-    { id: 'profile', label: 'Identity', icon: User, desc: 'Personal parameters' },
-    { id: 'preferences', label: 'Interface', icon: Palette, desc: 'UI personalization' },
-    { id: 'security', label: 'Security', icon: Shield, desc: 'Access protocols' },
-    { id: 'billing', label: 'Subsystem', icon: CreditCard, desc: 'Resource quotas' },
+    { id: 'profile', label: 'Profile & Account', icon: User, desc: 'Manage your name and identity' },
+    { id: 'appearance', label: 'Preferences', icon: Palette, desc: 'Theme, animations and defaults' },
+    { id: 'security', label: 'Security & Privacy', icon: Shield, desc: 'Authentication and credentials' },
+    { id: 'billing', label: 'Plan & Billing', icon: CreditCard, desc: 'Usage quotas and subscriptions' },
   ];
 
   const handleSave = () => {
     setIsSaving(true);
     setTimeout(() => {
       setIsSaving(false);
-    }, 1500);
+      toast('Settings saved successfully', 'success');
+    }, 500);
   };
 
   return (
-    <div className="max-w-6xl mx-auto py-6 space-y-8">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-4">
-        <div>
-          <h1 className="text-4xl font-black text-white font-outfit tracking-tighter">ENVIRONMENT<span className="text-violet-500">_CONFIG</span></h1>
-          <p className="text-[10px] font-mono text-white/30 uppercase tracking-[0.3em] mt-2 italic">Global Node Settings // Agent Parameters</p>
-        </div>
+    <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 space-y-8">
+      <div>
+        <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">Account Settings</h1>
+        <p className="text-xs text-text-tertiary mt-1">Manage your account preferences, interface options, and subscription</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Navigation Manifest */}
-        <aside className="lg:col-span-3 space-y-2">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as SettingsTab)}
-              className={cn(
-                "w-full flex items-center gap-4 px-4 py-3.5 rounded-md transition-all group relative overflow-hidden",
-                activeTab === tab.id 
-                  ? "bg-violet-600/10 border border-violet-600/20 text-white" 
-                  : "text-white/40 hover:text-white/60 hover:bg-white/[0.02] border border-transparent"
-              )}
-            >
-              {activeTab === tab.id && (
-                <motion.div 
-                  layoutId="active-tab-indicator"
-                  className="absolute left-0 w-[2px] h-1/2 bg-violet-500 rounded-full"
-                />
-              )}
-              <tab.icon size={18} className={cn("transition-colors", activeTab === tab.id ? "text-violet-500" : "text-white/20 group-hover:text-white/40")} />
-              <div className="text-left">
-                <p className="text-[11px] font-bold uppercase tracking-widest leading-none">{tab.label}</p>
-                <p className="text-[8px] font-mono uppercase tracking-tighter text-white/20 mt-1">{tab.desc}</p>
-              </div>
-            </button>
-          ))}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
+        {/* Navigation Tabs */}
+        <aside className="lg:col-span-4 space-y-2">
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as SettingsTab)}
+                className={cn(
+                  "w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl transition-all group relative text-left focus-visible:ring-2 focus-visible:ring-primary outline-none",
+                  isActive 
+                    ? "bg-surface-card border border-primary/40 text-white shadow-[var(--shadow-raised-sm)]" 
+                    : "text-text-secondary hover:text-white hover:bg-white/[0.03] border border-transparent"
+                )}
+                aria-selected={isActive}
+                role="tab"
+              >
+                <tab.icon size={18} className={cn("transition-colors shrink-0", isActive ? "text-primary-400" : "text-text-muted group-hover:text-white")} />
+                <div>
+                  <p className="text-xs font-bold leading-tight">{tab.label}</p>
+                  <p className="text-[10px] text-text-muted mt-0.5">{tab.desc}</p>
+                </div>
+              </button>
+            );
+          })}
         </aside>
 
-        {/* Configuration Module */}
-        <main className="lg:col-span-9">
-          <div className="glass-card bg-black/40 border-white/[0.05] p-8 md:p-10 rounded-md relative min-h-[600px] flex flex-col">
-            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/5 to-transparent" />
-            
+        {/* Content Container */}
+        <main className="lg:col-span-8">
+          <div className="rounded-3xl border border-white/[0.08] bg-surface-card p-6 sm:p-8 relative min-h-[460px] flex flex-col shadow-[var(--shadow-raised-md)]">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                transition={{ duration: 0.2 }}
-                className="flex-1"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.15 }}
+                className="flex-1 space-y-6"
               >
                 {activeTab === 'profile' && (
-                  <div className="space-y-10">
-                    <div className="flex flex-col md:flex-row gap-10 items-start">
-                      <div className="relative group">
-                        <div className="w-28 h-28 rounded-md border border-white/10 p-1 bg-black/40 relative overflow-hidden">
-                          {session?.user?.image ? (
-                            <Image 
-                              src={session.user.image} 
-                              alt={session.user.name || 'User'} 
-                              width={112} 
-                              height={112}
-                              className="w-full h-full object-cover rounded-md opacity-80 group-hover:opacity-100 transition-opacity"
-                              unoptimized
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-white/[0.02] text-white/10">
-                              <User size={48} strokeWidth={1} />
-                            </div>
-                          )}
-                        </div>
-                        <button className="absolute -bottom-3 -right-3 bg-violet-600 p-2 rounded-md border border-white/10 text-white shadow-xl hover:bg-violet-500 transition-colors">
-                          <Smartphone size={14} />
-                        </button>
-                      </div>
-                      
-                      <div className="flex-1 space-y-6 w-full">
-                        <div className="space-y-2">
-                          <label className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] ml-1">Entity Handle</label>
-                          <input 
-                            type="text" 
-                            defaultValue={session?.user?.name || ''} 
-                            className="w-full h-12 bg-white/[0.02] border border-white/10 rounded-md px-5 text-sm text-white focus:outline-none focus:border-violet-500/50 transition-all"
-                            placeholder="John Doe"
+                  <div className="space-y-6">
+                    <div className="flex flex-col sm:flex-row items-center gap-6 pb-6 border-b border-white/[0.08]">
+                      <div className="w-18 h-18 rounded-2xl overflow-hidden border border-white/15 p-0.5 bg-surface-inset relative">
+                        {session?.user?.image ? (
+                          <Image 
+                            src={session.user.image} 
+                            alt={session.user.name || 'User'} 
+                            width={72} 
+                            height={72}
+                            className="w-full h-full object-cover rounded-xl"
+                            unoptimized
                           />
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] ml-1">Identity Vector (Read-Only)</label>
-                          <div className="relative">
-                            <input 
-                              type="email" 
-                              value={session?.user?.email || ''} 
-                              disabled 
-                              className="w-full h-12 bg-white/[0.01] border border-white/5 rounded-md px-5 text-sm text-white/20 cursor-not-allowed font-mono"
-                            />
-                            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-white/10">
-                              <Lock size={14} />
-                            </div>
+                        ) : (
+                          <div className="w-full h-full bg-primary/20 flex items-center justify-center text-primary-400 font-bold text-2xl">
+                            {session?.user?.name?.[0] || 'U'}
                           </div>
-                          <p className="text-[8px] text-white/20 font-mono uppercase tracking-tighter ml-1">
-                            Auth Method: {session?.user?.email?.includes('gmail.com') ? 'Google OAuth 2.0' : 'Internal Registry'}
-                          </p>
-                        </div>
+                        )}
+                      </div>
+                      <div className="text-center sm:text-left">
+                        <h3 className="text-base font-bold text-white">{session?.user?.name || 'User'}</h3>
+                        <p className="text-xs text-text-tertiary">{session?.user?.email}</p>
+                        <span className="inline-block mt-2 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-bold text-emerald-400">
+                          Active Account
+                        </span>
                       </div>
                     </div>
 
-                    <div className="p-6 rounded-md border border-white/[0.03] bg-white/[0.01] space-y-4">
-                      <h4 className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Metadata Sync</h4>
-                      <div className="flex items-center justify-between py-2 border-b border-white/5">
-                        <span className="text-[11px] text-white/60">Cloud Storage Sync</span>
-                        <div className="w-10 h-5 bg-violet-600/20 border border-violet-600/30 rounded-full relative cursor-pointer">
-                          <div className="absolute right-1 top-1 w-3 h-3 bg-violet-500 rounded-full" />
-                        </div>
+                    <div className="space-y-4">
+                      <div className="space-y-1.5">
+                        <label htmlFor="settings-name" className="text-xs font-semibold text-text-secondary block">
+                          Display Name
+                        </label>
+                        <input 
+                          id="settings-name"
+                          type="text" 
+                          value={name} 
+                          onChange={(e) => setName(e.target.value)}
+                          className="w-full h-11 bg-surface-inset border border-white/[0.1] rounded-xl px-4 text-xs text-white focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 shadow-[var(--shadow-inset-sm)] transition-all"
+                          placeholder="Your display name"
+                        />
                       </div>
-                      <div className="flex items-center justify-between py-2">
-                        <span className="text-[11px] text-white/60">Real-time Telemetry</span>
-                        <div className="w-10 h-5 bg-white/5 border border-white/10 rounded-full relative cursor-pointer">
-                          <div className="absolute left-1 top-1 w-3 h-3 bg-white/20 rounded-full" />
+
+                      <div className="space-y-1.5">
+                        <label htmlFor="settings-email" className="text-xs font-semibold text-text-secondary block">
+                          Email Address
+                        </label>
+                        <div className="relative">
+                          <input 
+                            id="settings-email"
+                            type="email" 
+                            value={session?.user?.email || ''} 
+                            disabled 
+                            className="w-full h-11 bg-surface-inset border border-white/[0.06] rounded-xl px-4 text-xs text-text-muted cursor-not-allowed shadow-[var(--shadow-inset-sm)]"
+                          />
+                          <Lock size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted" />
                         </div>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {activeTab === 'preferences' && (
-                  <div className="space-y-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="p-8 rounded-md bg-white/[0.02] border border-white/[0.05] space-y-6">
-                        <div className="flex items-center gap-3">
-                          <Palette className="text-cyan-400" size={18} />
-                          <h3 className="text-xs font-bold uppercase tracking-widest text-white/80">Kernel Theme</h3>
-                        </div>
-                        <div className="grid grid-cols-1 gap-2">
-                          {['Neural Dark (Active)', 'Light Protocol', 'System Default'].map((t, i) => (
-                            <button 
-                              key={t}
-                              className={cn(
-                                "flex items-center justify-between px-4 py-3 rounded-md text-[10px] font-bold uppercase tracking-widest border transition-all",
-                                i === 0 ? "bg-cyan-400/5 border-cyan-400/20 text-cyan-400" : "bg-black/20 border-white/5 text-white/20 hover:text-white/40"
-                              )}
-                            >
-                              {t}
-                              {i === 0 && <ChevronRight size={12} />}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="p-8 rounded-md bg-white/[0.02] border border-white/[0.05] space-y-6">
-                        <div className="flex items-center gap-3">
-                          <Cpu className="text-violet-400" size={18} />
-                          <h3 className="text-xs font-bold uppercase tracking-widest text-white/80">Compute Hub</h3>
-                        </div>
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between">
-                            <span className="text-[11px] text-white/60 uppercase tracking-tighter">Auto-Deploy Dashboard</span>
-                            <div className="w-10 h-5 bg-violet-600/20 border border-violet-600/30 rounded-full relative cursor-pointer">
-                              <div className="absolute right-1 top-1 w-3 h-3 bg-violet-500 rounded-full" />
-                            </div>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-[11px] text-white/60 uppercase tracking-tighter">Show Neural Flux</span>
-                            <div className="w-10 h-5 bg-white/5 border border-white/10 rounded-full relative cursor-pointer">
-                              <div className="absolute left-1 top-1 w-3 h-3 bg-white/20 rounded-full" />
-                            </div>
-                          </div>
-                        </div>
+                {activeTab === 'appearance' && (
+                  <div className="space-y-6">
+                    <div className="space-y-3">
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-white">Color Theme</h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {[
+                          { id: 'dark', name: 'Dark Obsidian (Default)', desc: 'Soft Green Neumorphic' },
+                          { id: 'contrast', name: 'High Contrast', desc: 'Sharper borders & deep black' },
+                          { id: 'system', name: 'System Default', desc: 'Syncs with OS theme' }
+                        ].map((t) => (
+                          <button
+                            key={t.id}
+                            onClick={() => setSelectedTheme(t.id)}
+                            className={cn(
+                              "p-4 rounded-2xl border text-left transition-all focus-visible:ring-2 focus-visible:ring-primary outline-none",
+                              selectedTheme === t.id
+                                ? "bg-primary/15 border-primary/40 text-white shadow-sm"
+                                : "bg-surface-inset border-white/[0.06] text-text-secondary hover:border-white/[0.15]"
+                            )}
+                          >
+                            <p className="text-xs font-bold text-white">{t.name}</p>
+                            <p className="text-[10px] text-text-muted mt-1">{t.desc}</p>
+                          </button>
+                        ))}
                       </div>
                     </div>
-                    
-                    <div className="p-8 rounded-md bg-white/[0.02] border border-white/[0.05]">
-                      <div className="flex items-center gap-3 mb-8">
-                        <Bell className="text-yellow-400" size={18} />
-                        <h3 className="text-xs font-bold uppercase tracking-widest text-white/80">Signal Notifications</h3>
-                      </div>
-                      <div className="space-y-4 max-w-md">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[11px] text-white/60 uppercase tracking-tighter">Major Protocol Updates</span>
-                          <div className="w-10 h-5 bg-white/5 border border-white/10 rounded-full relative cursor-pointer" />
+
+                    <div className="pt-4 border-t border-white/[0.08] space-y-3">
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-white">Tool & Workflow Preferences</h3>
+                      
+                      <label className="flex items-center justify-between p-3.5 rounded-2xl bg-surface-inset border border-white/[0.06] cursor-pointer hover:border-white/15 transition-all">
+                        <div>
+                          <p className="text-xs font-semibold text-white">Recent Tool History</p>
+                          <p className="text-[10px] text-text-muted">Save your recently used tools locally for faster access</p>
                         </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-[11px] text-white/60 uppercase tracking-tighter">System Health Alerts</span>
-                          <div className="w-10 h-5 bg-white/5 border border-white/10 rounded-full relative cursor-pointer" />
+                        <input 
+                          type="checkbox" 
+                          checked={toolHistoryEnabled}
+                          onChange={(e) => setToolHistoryEnabled(e.target.checked)}
+                          className="w-4 h-4 rounded accent-primary cursor-pointer"
+                        />
+                      </label>
+
+                      <label className="flex items-center justify-between p-3.5 rounded-2xl bg-surface-inset border border-white/[0.06] cursor-pointer hover:border-white/15 transition-all">
+                        <div>
+                          <p className="text-xs font-semibold text-white">Email Notification Digests</p>
+                          <p className="text-[10px] text-text-muted">Receive occasional updates on new tools and features</p>
                         </div>
-                      </div>
+                        <input 
+                          type="checkbox" 
+                          checked={emailNotifications}
+                          onChange={(e) => setEmailNotifications(e.target.checked)}
+                          className="w-4 h-4 rounded accent-primary cursor-pointer"
+                        />
+                      </label>
                     </div>
                   </div>
                 )}
 
                 {activeTab === 'security' && (
-                  <div className="space-y-8">
-                    <div className="p-8 rounded-md bg-white/[0.02] border border-white/[0.05] space-y-6">
-                      <div className="flex items-center gap-3">
-                        <Shield className="text-emerald-400" size={18} />
-                        <h3 className="text-xs font-bold uppercase tracking-widest text-white/80">Access Shield</h3>
+                  <div className="space-y-6">
+                    <div className="p-5 rounded-2xl bg-surface-inset border border-white/[0.08] space-y-2.5">
+                      <div className="flex items-center gap-2.5">
+                        <Shield size={16} className="text-emerald-400" />
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-white">Account Security</h3>
                       </div>
-                      <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-md">
-                        <p className="text-[10px] text-emerald-400/80 leading-relaxed uppercase tracking-tighter font-mono">
-                          Identity verified via External Provider. Your credentials are encrypted and managed by your identity custodian.
-                        </p>
+                      <p className="text-xs text-text-secondary leading-relaxed">
+                        Your session is protected with industry-standard cryptographic sessions and encrypted credentials.
+                      </p>
+                      <div className="flex items-center gap-2 pt-1">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                        <span className="text-xs text-emerald-400 font-semibold">Protected & Authenticated</span>
                       </div>
-                      <button className="text-[10px] font-black text-cyan-400 flex items-center gap-2 hover:underline uppercase tracking-widest">
-                        Manage Identity Hub <ExternalLink size={12} />
-                      </button>
                     </div>
 
-                    <div className="p-8 rounded-md bg-red-500/5 border border-red-500/10 space-y-6">
-                      <div className="flex items-center gap-3">
-                        <Trash2 className="text-red-500" size={18} />
-                        <h3 className="text-xs font-bold uppercase tracking-widest text-red-500">Hazardous Operations</h3>
+                    <div className="p-5 rounded-2xl bg-red-500/[0.05] border border-red-500/20 space-y-3">
+                      <div className="flex items-center gap-2.5">
+                        <Trash2 size={16} className="text-red-400" />
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-red-400">Danger Zone</h3>
                       </div>
-                      <p className="text-[11px] text-white/30 leading-relaxed uppercase tracking-tighter">
-                        Terminating your instance is an irreversible operation. All neural assets and logs will be purged from the global node.
+                      <p className="text-xs text-text-muted leading-relaxed">
+                        Permanently delete your Night X account and wipe all stored preferences and history. This action is irreversible.
                       </p>
-                      <button className="px-6 py-3 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white text-[10px] font-black uppercase tracking-widest rounded-md transition-all">
-                        Purge Account Instance
+                      <button 
+                        onClick={() => toast('Please contact support@night-x.app for account deletion requests.', 'info')}
+                        className="px-4 py-2 bg-red-500/10 border border-red-500/25 text-red-400 hover:bg-red-500 hover:text-white rounded-xl text-xs font-semibold transition-all focus-visible:ring-2 focus-visible:ring-red-500 outline-none"
+                      >
+                        Delete Account
                       </button>
                     </div>
                   </div>
                 )}
 
                 {activeTab === 'billing' && (
-                  <div className="flex flex-col items-center justify-center py-20 text-center space-y-8">
-                    <div className="relative">
-                      <div className="w-24 h-24 bg-violet-600/10 rounded-full flex items-center justify-center border border-violet-600/20 relative z-10">
-                        <CreditCard className="w-10 h-10 text-violet-500" />
+                  <div className="space-y-6">
+                    <div className="p-6 rounded-2xl bg-gradient-to-r from-primary/10 to-surface-inset border border-primary/20 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Sparkles size={16} className="text-primary-400" />
+                          <h3 className="text-sm font-bold text-white">Night X Community Plan</h3>
+                        </div>
+                        <span className="px-2.5 py-0.5 rounded-full bg-primary/20 text-[10px] font-bold text-primary-300">
+                          Active Free Tier
+                        </span>
                       </div>
-                      <div className="absolute inset-0 bg-violet-500/20 blur-3xl opacity-20" />
-                    </div>
-                    
-                    <div>
-                      <h3 className="text-xl font-bold text-white font-outfit uppercase tracking-wider mb-2">Standard Protocol</h3>
-                      <p className="text-[10px] text-white/30 uppercase tracking-[0.2em] max-w-xs mx-auto">
-                        Limited compute cycle allocation. Verified Agent status active.
+                      <p className="text-xs text-text-secondary leading-relaxed">
+                        Access to all 42 local browser tools, 30 AI assistant requests per day, and fast local processing.
                       </p>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
-                      <div className="p-4 rounded-md border border-white/5 bg-white/[0.01]">
-                        <p className="text-[8px] text-white/20 uppercase tracking-widest mb-1">AI Flux</p>
-                        <p className="text-xs font-bold text-white">50/Day</p>
+                      <div className="grid grid-cols-2 gap-3 pt-2">
+                        <div className="p-3 rounded-xl bg-surface-card border border-white/[0.06]">
+                          <p className="text-[10px] text-text-muted uppercase tracking-wider font-semibold">Daily AI Queries</p>
+                          <p className="text-sm font-bold text-white mt-0.5">30 / day</p>
+                        </div>
+                        <div className="p-3 rounded-xl bg-surface-card border border-white/[0.06]">
+                          <p className="text-[10px] text-text-muted uppercase tracking-wider font-semibold">Local Processing</p>
+                          <p className="text-sm font-bold text-emerald-400 mt-0.5">Unlimited</p>
+                        </div>
                       </div>
-                      <div className="p-4 rounded-md border border-white/5 bg-white/[0.01]">
-                        <p className="text-[8px] text-white/20 uppercase tracking-widest mb-1">Storage</p>
-                        <p className="text-xs font-bold text-white">500 MB</p>
+
+                      <div className="pt-2">
+                        <Link 
+                          href="/pricing" 
+                          className="btn-primary text-xs py-2 px-4 inline-flex items-center gap-1.5"
+                        >
+                          <span>Upgrade to Pro Creator</span>
+                          <ArrowRight size={13} />
+                        </Link>
                       </div>
                     </div>
-
-                    <button className="px-10 py-4 bg-violet-600 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-md hover:bg-violet-500 transition-all shadow-xl shadow-violet-900/40 group">
-                      Initialize Pro Flux 
-                      <ChevronRight className="inline ml-2 group-hover:translate-x-1 transition-transform" size={12} />
-                    </button>
                   </div>
                 )}
               </motion.div>
             </AnimatePresence>
 
-            {/* Global Footer Controls */}
-            <div className="mt-auto pt-10 border-t border-white/[0.03] flex items-center justify-between">
-              <div className="flex items-center gap-6">
-                <div className="flex items-center gap-2 text-white/20">
-                  <Database size={12} />
-                  <span className="text-[9px] font-bold uppercase tracking-widest">NX-SQL-V2</span>
-                </div>
-                <div className="flex items-center gap-2 text-white/20">
-                  <Cloud size={12} />
-                  <span className="text-[9px] font-bold uppercase tracking-widest">Global CDN</span>
-                </div>
-              </div>
-              
+            {/* Footer Save Action */}
+            <div className="mt-8 pt-6 border-t border-white/[0.08] flex items-center justify-end">
               <button 
                 onClick={handleSave}
                 disabled={isSaving}
-                className="flex items-center gap-2 px-8 py-3 bg-white text-black hover:bg-violet-50 disabled:opacity-50 text-[10px] font-black uppercase tracking-[0.2em] rounded-md transition-all shadow-xl"
+                className="btn-primary text-xs font-semibold py-2.5 px-6 shadow-sm flex items-center gap-2"
               >
                 {isSaving ? <Loader2 className="animate-spin" size={14} /> : <Save size={14} />}
-                {isSaving ? 'Syncing...' : 'Sync Parameters'}
+                <span>{isSaving ? 'Saving Changes...' : 'Save Settings'}</span>
               </button>
             </div>
           </div>
         </main>
       </div>
     </div>
-  );
-}
-
-function Loader2({ className, size }: { className?: string, size?: number }) {
-  return (
-    <svg 
-      className={cn("animate-spin", className)} 
-      width={size || 16} 
-      height={size || 16} 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round"
-    >
-      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-    </svg>
   );
 }

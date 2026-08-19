@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (!adminDb) {
-      console.warn('Feedback received but Firestore is not initialized:', data);
+      console.warn('Feedback received but Firestore is not initialized');
       return NextResponse.json({ 
         message: 'Feedback received (logged to server console only)',
         warning: 'Firestore not initialized'

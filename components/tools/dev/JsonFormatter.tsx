@@ -46,12 +46,8 @@ export default function JsonFormatter() {
   }, []);
 
   const handleFormat = () => {
-    setIsFormatting(true);
-    setTimeout(() => {
-      format(input, indentSize);
-      setIsFormatting(false);
-      if (!error && input) toast("JSON Formatted", "success");
-    }, 300);
+    format(input, indentSize);
+    if (!error && input) toast("JSON Formatted", "success");
   };
 
   const handleCopy = async () => {

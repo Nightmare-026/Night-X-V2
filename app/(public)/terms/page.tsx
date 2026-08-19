@@ -1,81 +1,79 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import { Shield, FileText, AlertTriangle, Scale } from "lucide-react";
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Shield, FileText, AlertTriangle, Scale, Mail } from 'lucide-react';
 
 export default function TermsPage() {
   const sections = [
     {
       title: "1. Acceptance of Terms",
-      icon: <Shield className="w-6 h-6 text-blue-400" />,
-      content: "By accessing or using Night X, you agree to these terms. Night X provides online utility tools, AI-assisted features, and account-based dashboards. The service is provided on an as-is and as-available basis."
+      icon: <Shield className="w-5 h-5 text-primary-400" />,
+      content: "By accessing or utilizing the Night X application, you agree to these Terms of Service. Night X provides browser-first utility tools, cryptographic processors, and AI-assisted workflows. Services are provided on an as-is and as-available basis."
     },
     {
-      title: "2. User Conduct",
-      icon: <AlertTriangle className="w-6 h-6 text-amber-400" />,
-      content: "You must use the service lawfully and responsibly. Do not upload malware, abuse APIs, probe for vulnerabilities, automate excessive traffic, or use Night X to violate another person's privacy or intellectual property rights."
+      title: "2. Lawful & Permissible Use",
+      icon: <AlertTriangle className="w-5 h-5 text-accent-amber" />,
+      content: "You agree to use Night X tools responsibly and in compliance with all applicable laws. You may not use automated scripts to spam API endpoints, attempt to bypass rate limits, or process malicious payloads."
     },
     {
-      title: "3. Privacy & Data Handling",
-      icon: <FileText className="w-6 h-6 text-green-400" />,
-      content: "Some tools work locally in the browser, while others require server processing or third-party providers. Your use of the service is also governed by the Privacy Policy, which explains how account data, support requests, payments, and AI requests are handled."
+      title: "3. Local Execution & Data Ownership",
+      icon: <FileText className="w-5 h-5 text-accent-cyan" />,
+      content: "For all client-side tools, input data, files, and outputs remain exclusively within your device memory. Night X claims no intellectual property rights over any images, code, or documents processed through the platform."
     },
     {
-      title: "4. Intellectual Property",
-      icon: <Scale className="w-6 h-6 text-purple-400" />,
-      content: "Night X branding, site content, and original application code remain the property of the project owner or applicable licensors. You may not copy, resell, or redistribute protected parts of the service except where an open-source license explicitly allows it."
+      title: "4. Intellectual Property & Brand",
+      icon: <Scale className="w-5 h-5 text-primary-400" />,
+      content: "The Night X platform interface, custom algorithms, design systems, and brand assets are protected by copyright and intellectual property laws. Open-source components are subject to their respective licenses."
     }
   ];
 
   return (
-    <div className="min-h-screen bg-background text-white pt-24 pb-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-16"
-        >
-          <h1 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600 mb-4">
+    <div className="min-h-screen text-white pt-16 pb-16 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto space-y-12">
+        <div className="text-center max-w-2xl mx-auto space-y-3 pt-6">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary-400">
+            <FileText size={14} />
+            <span>Platform Agreement</span>
+          </div>
+
+          <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
             Terms of Service
           </h1>
-          <p className="text-white/50 text-lg">
-            Last updated: April 23, 2026
-          </p>
-        </motion.div>
 
-        <div className="space-y-8">
+          <p className="text-sm text-text-tertiary">
+            Clear guidelines on service availability, responsible usage, and data ownership.
+          </p>
+        </div>
+
+        <div className="grid gap-6">
           {sections.map((section, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-              className="bg-white/5 border border-white/10 rounded-2xl p-8 backdrop-blur-xl"
+              transition={{ delay: index * 0.05 }}
+              className="rounded-2xl border border-white/[0.08] bg-surface-card p-6 sm:p-8 shadow-[var(--shadow-raised-sm)] space-y-3"
             >
-              <div className="flex items-center gap-4 mb-4">
-                <div className="p-3 bg-white/5 rounded-xl">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-surface-inset border border-white/10 flex items-center justify-center">
                   {section.icon}
                 </div>
-                <h2 className="text-2xl font-semibold text-white">
+                <h2 className="text-lg font-bold text-white">
                   {section.title}
                 </h2>
               </div>
-              <p className="text-white/55 leading-relaxed text-lg">
+              <p className="text-xs sm:text-sm text-text-secondary leading-relaxed pl-13">
                 {section.content}
               </p>
             </motion.div>
           ))}
         </div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          className="mt-12 text-center text-white/35"
-        >
-          <p>If you have questions about these terms, contact <a href="mailto:support@night-x.app" className="text-accent-cyan hover:underline">support@night-x.app</a>.</p>
-        </motion.div>
+        <div className="p-6 rounded-2xl border border-white/[0.06] bg-surface-card text-center text-xs text-text-muted">
+          For legal inquiries or enterprise questions, contact: <a href="mailto:support@night-x.app" className="text-primary-400 font-semibold hover:underline">support@night-x.app</a>
+        </div>
       </div>
     </div>
   );

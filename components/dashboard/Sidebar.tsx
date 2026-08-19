@@ -9,23 +9,17 @@ import {
   User, 
   LogOut, 
   Zap, 
-  Search,
   MessageSquare,
   History,
   Star,
-  ExternalLink,
-  ChevronRight,
   Shield,
-  Cpu,
-  Monitor,
   X,
-  Menu,
-  Fingerprint,
-  Activity
+  Menu
 } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import BrandWordmark from '@/components/ui/BrandWordmark';
 
 interface SidebarProps {
   user?: {
@@ -36,35 +30,34 @@ interface SidebarProps {
 }
 
 const navItems = [
-  { icon: LayoutDashboard, label: 'Overview', href: '/dashboard', desc: 'System Core' },
-  { icon: Zap, label: 'All Tools', href: '/dashboard?category=all', desc: 'Utility Matrix' },
-  { icon: Star, label: 'Favorites', href: '/dashboard/favorites', desc: 'Priority Buffers' },
-  { icon: History, label: 'History', href: '/dashboard/history', desc: 'Process Logs' },
-  { icon: MessageSquare, label: 'Neural Chat', href: '/dashboard/ai', desc: 'AI Interface' },
+  { icon: LayoutDashboard, label: 'Overview', href: '/dashboard' },
+  { icon: Zap, label: 'All 42 Tools', href: '/tools' },
+  { icon: MessageSquare, label: 'AI Workspace', href: '/dashboard/ai' },
+  { icon: Shield, label: 'Security Center', href: '/security' },
 ];
 
 const secondaryItems = [
-  { icon: User, label: 'Identity', href: '/profile', desc: 'Agent Profile' },
-  { icon: Settings, label: 'Parameters', href: '/settings', desc: 'System Config' },
+  { icon: User, label: 'My Profile', href: '/profile' },
+  { icon: Settings, label: 'Settings', href: '/settings' },
 ];
 
 export default function Sidebar({ user }: SidebarProps) {
   const pathname = usePathname();
-  const [isOpen, setIsOpen] = useState(false); // For mobile
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
-      {/* Mobile Header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-black/80 backdrop-blur-xl border-b border-white/[0.05] z-50 px-6 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <Zap className="h-5 w-5 text-violet-500 fill-violet-500" />
-          <span className="text-sm font-black tracking-tighter text-white uppercase">Night<span className="text-violet-500">X</span></span>
+      {/* Mobile Header Bar */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-[#080A0E]/90 backdrop-blur-2xl border-b border-white/[0.08] z-50 px-4 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2 outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg">
+          <BrandWordmark size="sm" />
         </Link>
         <button 
           onClick={() => setIsOpen(true)}
-          className="p-2 text-white/40 hover:text-white"
+          className="p-2 text-white/60 hover:text-white rounded-lg hover:bg-white/[0.06] transition-colors focus-visible:ring-2 focus-visible:ring-primary outline-none"
+          aria-label="Open sidebar menu"
         >
-          <Menu size={20} />
+          <Menu size={22} />
         </button>
       </div>
 
@@ -76,82 +69,73 @@ export default function Sidebar({ user }: SidebarProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setIsOpen(false)}
-            className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
+            className="lg:hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-[60]"
           />
         )}
       </AnimatePresence>
 
-      {/* Sidebar Component */}
-      <aside className={cn(
-        "fixed left-0 top-0 z-[70] h-screen w-64 border-r border-white/[0.05] bg-[#030303] px-4 py-8 flex flex-col transition-transform duration-500 ease-in-out lg:translate-x-0",
-        isOpen ? "translate-x-0" : "-translate-x-full"
-      )}>
+      {/* Main Sidebar Aside */}
+      <aside 
+        className={cn(
+          "fixed left-0 top-0 z-[70] h-screen w-64 border-r border-white/[0.07] bg-[#0E1118] px-4 py-6 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 shadow-2xl",
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+        aria-label="Sidebar Navigation"
+      >
         {/* Mobile Close Button */}
         <button 
           onClick={() => setIsOpen(false)}
-          className="lg:hidden absolute top-6 right-6 text-white/20 hover:text-white transition-colors"
+          className="lg:hidden absolute top-5 right-5 text-white/40 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-white/[0.08]"
+          aria-label="Close sidebar menu"
         >
           <X size={20} />
         </button>
 
-        {/* Branding Hub */}
-        <div className="mb-12 px-2">
-          <Link href="/" className="group flex flex-col gap-1">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-black border border-white/10 rounded-md flex items-center justify-center shadow-lg group-hover:border-violet-500/50 transition-all">
-                <Zap className="h-4 w-4 text-violet-500 fill-violet-500" />
-              </div>
-              <span className="text-xl font-black tracking-tighter text-white uppercase font-outfit">
-                Night<span className="text-violet-500">X</span>
-              </span>
-            </div>
-            <p className="text-[8px] font-bold text-white/10 uppercase tracking-[0.4em] ml-11 italic">Sovereign_OS</p>
+        {/* Brand Wordmark */}
+        <div className="mb-8 px-2">
+          <Link href="/" className="inline-block outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg">
+            <BrandWordmark size="md" />
           </Link>
         </div>
 
-        {/* Navigation Manifest */}
-        <nav className="flex-1 space-y-8 overflow-y-auto no-scrollbar pb-8">
-          {/* Section: Core */}
+        {/* Navigation Items */}
+        <nav className="flex-1 space-y-6 overflow-y-auto no-scrollbar pb-6">
+          {/* Main Navigation Group */}
           <div className="space-y-1">
-            <div className="px-3 mb-4 text-[9px] font-black uppercase tracking-[0.2em] text-white/20 flex items-center justify-between">
-              <span>Main_Matrix</span>
-              <Activity size={10} className="opacity-50" />
+            <div className="px-3 mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-text-muted">
+              Workspace
             </div>
             {navItems.map((item) => {
-              const isActive = pathname === item.href;
+              const isActive = pathname === item.href || (item.href.includes('?') && pathname === item.href.split('?')[0]);
               return (
                 <Link
                   key={item.label}
                   href={item.href}
                   className={cn(
-                    "group flex items-center gap-3 rounded-md px-3 py-3 transition-all relative overflow-hidden",
+                    "group flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all text-xs font-medium relative focus-visible:ring-2 focus-visible:ring-primary outline-none",
                     isActive 
-                      ? "bg-violet-600/10 border border-violet-600/20 text-white shadow-[inset_0_0_20px_rgba(139,92,246,0.05)]" 
-                      : "text-white/40 hover:bg-white/[0.02] hover:text-white/60 border border-transparent"
+                      ? "bg-primary/15 text-primary-300 font-bold border border-primary/30 shadow-[var(--shadow-raised-sm)]" 
+                      : "text-text-secondary hover:bg-white/[0.05] hover:text-white border border-transparent"
                   )}
                   onClick={() => setIsOpen(false)}
                 >
                   {isActive && (
                     <motion.div 
-                      layoutId="active-pill"
-                      className="absolute left-0 w-[2px] h-1/2 bg-violet-500 rounded-full"
+                      layoutId="active-nav-pill"
+                      className="absolute left-0 w-[3px] h-3/5 bg-primary rounded-r-full"
                     />
                   )}
-                  <item.icon size={18} className={cn("transition-colors shrink-0", isActive ? "text-violet-500" : "text-white/20 group-hover:text-white/40")} />
-                  <div className="flex flex-col">
-                    <span className="text-[11px] font-bold uppercase tracking-widest leading-none">{item.label}</span>
-                    <span className="text-[7px] font-mono uppercase tracking-tighter text-white/10 mt-1.5">{item.desc}</span>
-                  </div>
+                  <item.icon size={17} className={cn("transition-colors shrink-0", isActive ? "text-primary-400" : "text-text-muted group-hover:text-white")} />
+                  <span>{item.label}</span>
                 </Link>
               );
             })}
           </div>
 
-          {/* Section: Secondary */}
+          {/* Preferences Group */}
           <div className="space-y-1">
-            <div className="px-3 mb-4 text-[9px] font-black uppercase tracking-[0.2em] text-white/20 flex items-center justify-between">
-              <span>Agent_Parameters</span>
-              <Shield size={10} className="opacity-50" />
+            <div className="px-3 mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-text-muted">
+              Account
             </div>
             {secondaryItems.map((item) => {
               const isActive = pathname === item.href;
@@ -160,57 +144,50 @@ export default function Sidebar({ user }: SidebarProps) {
                   key={item.label}
                   href={item.href}
                   className={cn(
-                    "group flex items-center gap-3 rounded-md px-3 py-3 transition-all relative overflow-hidden",
+                    "group flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all text-xs font-medium relative focus-visible:ring-2 focus-visible:ring-primary outline-none",
                     isActive 
-                      ? "bg-cyan-600/10 border border-cyan-600/20 text-white shadow-[inset_0_0_20px_rgba(6,182,212,0.05)]" 
-                      : "text-white/40 hover:bg-white/[0.02] hover:text-white/60 border border-transparent"
+                      ? "bg-primary/15 text-primary-300 font-bold border border-primary/30" 
+                      : "text-text-secondary hover:bg-white/[0.05] hover:text-white border border-transparent"
                   )}
                   onClick={() => setIsOpen(false)}
                 >
-                  {isActive && (
-                    <motion.div 
-                      layoutId="active-pill-sec"
-                      className="absolute left-0 w-[2px] h-1/2 bg-cyan-500 rounded-full"
-                    />
-                  )}
-                  <item.icon size={18} className={cn("transition-colors shrink-0", isActive ? "text-cyan-500" : "text-white/20 group-hover:text-white/40")} />
-                  <div className="flex flex-col">
-                    <span className="text-[11px] font-bold uppercase tracking-widest leading-none">{item.label}</span>
-                    <span className="text-[7px] font-mono uppercase tracking-tighter text-white/10 mt-1.5">{item.desc}</span>
-                  </div>
+                  <item.icon size={17} className={cn("transition-colors shrink-0", isActive ? "text-primary-400" : "text-text-muted group-hover:text-white")} />
+                  <span>{item.label}</span>
                 </Link>
               );
             })}
           </div>
         </nav>
 
-        {/* Agent Profile Footer */}
-        <div className="mt-auto pt-6 border-t border-white/[0.03] space-y-4">
-          <div className="p-3 rounded-md bg-white/[0.01] border border-white/[0.03] flex items-center gap-3 group/profile">
+        {/* User Profile & Sign Out Footer */}
+        <div className="mt-auto pt-4 border-t border-white/[0.08] space-y-3">
+          <Link 
+            href="/profile" 
+            onClick={() => setIsOpen(false)}
+            className="p-2.5 rounded-xl bg-surface-inset border border-white/[0.06] hover:border-primary/30 transition-all flex items-center gap-3 group outline-none focus-visible:ring-2 focus-visible:ring-primary shadow-[var(--shadow-inset-sm)]"
+          >
             <div className="relative">
-              <div className="w-10 h-10 rounded-md border border-white/10 p-0.5 bg-black/40 overflow-hidden relative z-10">
+              <div className="w-9 h-9 rounded-lg bg-primary/20 border border-primary/30 flex items-center justify-center text-primary-400 font-bold text-xs">
                 {user?.image ? (
-                  <img src={user.image} alt={user.name || 'Agent'} className="h-full w-full object-cover rounded-md opacity-80 group-hover/profile:opacity-100 transition-opacity" />
+                  <img src={user.image} alt={user.name || 'User'} className="h-full w-full object-cover rounded-lg" />
                 ) : (
-                  <div className="h-full w-full flex items-center justify-center text-white/20">
-                    <Fingerprint size={18} strokeWidth={1} />
-                  </div>
+                  <span>{user?.name?.[0] || 'U'}</span>
                 )}
               </div>
-              <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 border-2 border-[#030303] rounded-full z-20 shadow-lg" />
+              <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-[#0E1118] rounded-full" />
             </div>
-            <div className="flex-1 overflow-hidden">
-              <p className="truncate text-[11px] font-bold text-white tracking-wide uppercase">{user?.name || 'Authorized Agent'}</p>
-              <p className="truncate text-[9px] font-mono text-white/20 uppercase tracking-tighter mt-0.5">{user?.email || 'telemetry_node'}</p>
+            <div className="flex-1 min-w-0">
+              <p className="truncate text-xs font-semibold text-white group-hover:text-primary-300 transition-colors">{user?.name || 'User Account'}</p>
+              <p className="truncate text-[10px] text-text-muted">{user?.email || 'Logged in'}</p>
             </div>
-          </div>
+          </Link>
 
           <button
             onClick={() => signOut({ callbackUrl: '/' })}
-            className="group flex w-full items-center justify-center gap-3 rounded-md h-12 bg-red-500/5 border border-red-500/10 text-red-500/40 transition-all hover:bg-red-500 hover:text-white hover:border-red-500"
+            className="flex w-full items-center justify-center gap-2 rounded-xl h-10 bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold hover:bg-red-500 hover:text-white transition-all focus-visible:ring-2 focus-visible:ring-red-500 outline-none"
           >
-            <LogOut size={16} className="transition-transform group-hover:-translate-x-1" />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Terminate</span>
+            <LogOut size={15} />
+            <span>Sign Out</span>
           </button>
         </div>
       </aside>

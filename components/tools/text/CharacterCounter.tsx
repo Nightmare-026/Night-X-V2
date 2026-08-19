@@ -3,8 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { Type, Hash, Space, Fingerprint, Binary, Copy, Check, RotateCcw, Info, BarChart2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useToast } from '@/components/ui/Toast';
 
 const CharacterCounter = () => {
+  const { toast } = useToast();
   const [text, setText] = useState('');
   const [stats, setStats] = useState({
     total: 0,
@@ -37,7 +39,7 @@ const CharacterCounter = () => {
       special
     });
 
-    // Calculate character frequency (top 10)
+    // Calculate character frequency (top 8)
     const freq: Record<string, number> = {};
     const cleanText = text.replace(/\s/g, '').toLowerCase();
     for (const char of cleanText) {
@@ -51,7 +53,7 @@ const CharacterCounter = () => {
         percentage: (count / (cleanText.length || 1)) * 100
       }))
       .sort((a, b) => b.count - a.count)
-      .slice(0, 10);
+      .slice(0, 8);
 
     setCharFrequency(sortedFreq);
   }, [text]);
@@ -59,94 +61,99 @@ const CharacterCounter = () => {
   const handleCopy = () => {
     navigator.clipboard.writeText(text);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    toast('Text copied to clipboard', 'success');
+    setTimeout(() => setCopied(false), 1500);
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
       {/* Input Area */}
       <div className="lg:col-span-8 space-y-4">
-        <div className="rounded-md border border-white/[0.05] bg-white/[0.02] p-6 space-y-4">
+        <div className="rounded-2xl border border-white/[0.08] bg-surface-card p-5 space-y-4 shadow-[var(--shadow-raised-sm)]">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
-              <Type className="text-accent-blue" size={16} />
-              <h2 className="text-xs font-outfit font-bold uppercase tracking-widest text-white/80">Text Analysis</h2>
+              <Type className="text-primary-400" size={16} />
+              <h2 className="text-xs font-bold uppercase tracking-wider text-white">Text Buffer Analysis</h2>
             </div>
             <div className="flex gap-2">
               <button
                 onClick={handleCopy}
                 disabled={!text}
-                className="p-2 text-white/20 hover:text-white transition-colors disabled:opacity-0"
+                className="p-2 bg-surface-inset border border-white/10 hover:border-primary/40 rounded-xl text-text-muted hover:text-white transition-all disabled:opacity-30 flex items-center gap-1 text-xs"
+                aria-label="Copy input text"
               >
-                {copied ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
+                {copied ? <Check size={14} className="text-primary-400" /> : <Copy size={14} />}
+                <span className="text-[11px] font-semibold">{copied ? 'Copied' : 'Copy'}</span>
               </button>
               <button
                 onClick={() => setText('')}
-                className="p-2 text-white/20 hover:text-white transition-colors"
+                disabled={!text}
+                className="p-2 bg-surface-inset border border-white/10 hover:border-red-500/40 rounded-xl text-text-muted hover:text-red-400 transition-all disabled:opacity-30 text-xs"
+                aria-label="Clear text"
               >
-                <RotateCcw size={16} />
+                <RotateCcw size={14} />
               </button>
             </div>
           </div>
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Start typing or paste your content here..."
-            className="w-full h-[500px] bg-black/40 border border-white/[0.05] rounded-md px-6 py-5 focus:outline-none focus:border-accent-blue transition-all resize-none text-white/90 font-inter text-base leading-relaxed custom-scrollbar"
+            placeholder="Type or paste your text here to see real-time character, line, whitespace, and frequency metrics..."
+            className="w-full h-80 bg-surface-inset border border-white/10 rounded-xl p-4 focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 shadow-[var(--shadow-inset-sm)] transition-all resize-none text-white text-xs sm:text-sm leading-relaxed"
           />
         </div>
       </div>
 
       {/* Analysis Sidebar */}
-      <div className="lg:col-span-4 space-y-6">
+      <div className="lg:col-span-4 space-y-4">
         {/* Core Metrics */}
-        <div className="rounded-md border border-white/[0.05] bg-white/[0.02] p-6 space-y-6">
+        <div className="rounded-2xl border border-white/[0.08] bg-surface-card p-5 space-y-4 shadow-[var(--shadow-raised-sm)]">
           <div className="flex items-center gap-2">
-            <BarChart2 className="text-accent-blue" size={16} />
-            <h2 className="text-xs font-outfit font-bold uppercase tracking-widest text-white/80">Core Metrics</h2>
+            <BarChart2 className="text-primary-400" size={16} />
+            <h2 className="text-xs font-bold uppercase tracking-wider text-white">Core Metrics</h2>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 border border-white/[0.05] bg-white/[0.01] rounded-md text-center space-y-1">
-              <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest">Total</p>
-              <p className="text-xl font-bold text-white font-inter">{stats.total}</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="p-3 border border-white/[0.06] bg-surface-inset rounded-xl text-center space-y-0.5 shadow-[var(--shadow-inset-sm)]">
+              <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Total Chars</p>
+              <p className="text-xl font-bold text-white font-mono">{stats.total}</p>
             </div>
-            <div className="p-4 border border-white/[0.05] bg-white/[0.01] rounded-md text-center space-y-1">
-              <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest">No Spaces</p>
-              <p className="text-xl font-bold text-white font-inter">{stats.noSpaces}</p>
+            <div className="p-3 border border-white/[0.06] bg-surface-inset rounded-xl text-center space-y-0.5 shadow-[var(--shadow-inset-sm)]">
+              <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider">No Spaces</p>
+              <p className="text-xl font-bold text-primary-400 font-mono">{stats.noSpaces}</p>
             </div>
-            <div className="p-4 border border-white/[0.05] bg-white/[0.01] rounded-md text-center space-y-1">
-              <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest">Spaces</p>
-              <p className="text-xl font-bold text-white font-inter">{stats.spaces}</p>
+            <div className="p-3 border border-white/[0.06] bg-surface-inset rounded-xl text-center space-y-0.5 shadow-[var(--shadow-inset-sm)]">
+              <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Spaces</p>
+              <p className="text-xl font-bold text-white font-mono">{stats.spaces}</p>
             </div>
-            <div className="p-4 border border-white/[0.05] bg-white/[0.01] rounded-md text-center space-y-1">
-              <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest">Lines</p>
-              <p className="text-xl font-bold text-white font-inter">{stats.lines}</p>
+            <div className="p-3 border border-white/[0.06] bg-surface-inset rounded-xl text-center space-y-0.5 shadow-[var(--shadow-inset-sm)]">
+              <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Lines</p>
+              <p className="text-xl font-bold text-accent-cyan font-mono">{stats.lines}</p>
             </div>
           </div>
         </div>
 
         {/* Composition Breakdown */}
-        <div className="rounded-md border border-white/[0.05] bg-white/[0.02] p-6 space-y-6">
+        <div className="rounded-2xl border border-white/[0.08] bg-surface-card p-5 space-y-4 shadow-[var(--shadow-raised-sm)]">
           <div className="flex items-center gap-2">
-            <Binary className="text-accent-blue" size={16} />
-            <h2 className="text-xs font-outfit font-bold uppercase tracking-widest text-white/80">Composition</h2>
+            <Binary className="text-primary-400" size={16} />
+            <h2 className="text-xs font-bold uppercase tracking-wider text-white">Composition</h2>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-3">
             {[
-              { label: 'Letters', value: stats.letters, color: 'bg-accent-blue' },
-              { label: 'Digits', value: stats.digits, color: 'bg-green-500' },
-              { label: 'Special', value: stats.special, color: 'bg-purple-500' }
+              { label: 'Letters', value: stats.letters, color: 'bg-primary' },
+              { label: 'Digits', value: stats.digits, color: 'bg-accent-cyan' },
+              { label: 'Special Symbols', value: stats.special, color: 'bg-accent-pink' }
             ].map((item) => (
-              <div key={item.label} className="space-y-2">
-                <div className="flex justify-between text-[10px] uppercase tracking-wider font-inter">
-                  <span className="text-white/40">{item.label}</span>
-                  <span className="text-white font-bold">{item.value}</span>
+              <div key={item.label} className="space-y-1">
+                <div className="flex justify-between text-[11px] font-semibold">
+                  <span className="text-text-tertiary">{item.label}</span>
+                  <span className="text-white font-mono">{item.value}</span>
                 </div>
-                <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                <div className="h-1.5 w-full bg-surface-inset rounded-full overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${(item.value / (stats.total || 1)) * 100}%` }}
-                    className={`h-full ${item.color}`}
+                    className={`h-full ${item.color} rounded-full`}
                   />
                 </div>
               </div>
@@ -155,28 +162,25 @@ const CharacterCounter = () => {
         </div>
 
         {/* Character Frequency */}
-        <div className="rounded-md border border-white/[0.05] bg-white/[0.02] p-6 space-y-6">
+        <div className="rounded-2xl border border-white/[0.08] bg-surface-card p-5 space-y-4 shadow-[var(--shadow-raised-sm)]">
           <div className="flex items-center gap-2">
-            <Hash className="text-accent-blue" size={16} />
-            <h2 className="text-xs font-outfit font-bold uppercase tracking-widest text-white/80">Top Characters</h2>
+            <Hash className="text-primary-400" size={16} />
+            <h2 className="text-xs font-bold uppercase tracking-wider text-white">Top Frequency</h2>
           </div>
           {charFrequency.length > 0 ? (
-            <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-2">
               {charFrequency.map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between group">
-                  <div className="flex items-center gap-3">
-                    <span className="w-8 h-8 rounded border border-white/[0.05] bg-white/[0.02] flex items-center justify-center text-xs font-mono text-white group-hover:border-accent-blue transition-colors">
-                      {item.char === ' ' ? '␣' : item.char}
-                    </span>
-                    <span className="text-[10px] text-white/40 font-inter">{item.count} occurrences</span>
-                  </div>
-                  <span className="text-[10px] font-mono text-accent-blue">{item.percentage.toFixed(1)}%</span>
+                <div key={idx} className="flex items-center justify-between p-2 rounded-lg bg-surface-inset border border-white/[0.04]">
+                  <span className="w-6 h-6 rounded bg-surface-card border border-white/10 flex items-center justify-center text-xs font-mono text-primary-400 font-bold">
+                    {item.char === ' ' ? '␣' : item.char}
+                  </span>
+                  <span className="text-[10px] font-mono text-text-secondary">{item.count}× ({item.percentage.toFixed(0)}%)</span>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="py-8 text-center text-[10px] text-white/20 uppercase tracking-widest font-inter italic">
-              No data available
+            <div className="py-4 text-center text-xs text-text-muted italic">
+              Type or paste text to compute character frequency.
             </div>
           )}
         </div>

@@ -1,8 +1,13 @@
 import { NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
+import { auth } from '@/auth';
+import { rateLimit } from '@/lib/rate-limit';
 
 export async function POST(request: Request) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!rateLimit(request as any, { limit: 5, windowMs: 60_000 }).success) return NextResponse.json({ error: 'Too many order requests' }, { status: 429 });
     if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
       return NextResponse.json({ error: 'Payments are not configured for this deployment.' }, { status: 503 });
     }
@@ -14,7 +19,7 @@ export async function POST(request: Request) {
 
     const { amount } = await request.json();
 
-    if (!amount || amount < 1) {
+    if (!Number.isInteger(amount) || amount < 1 || amount > 100000) {
       return NextResponse.json({ error: 'Invalid amount' }, { status: 400 });
     }
 

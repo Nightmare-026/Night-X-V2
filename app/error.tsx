@@ -19,42 +19,39 @@ export default function Error({
   return (
     <div className="min-h-[80vh] flex flex-col items-center justify-center p-6 text-center">
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
+        initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="max-w-md w-full glass-card p-10 border-white/5 relative overflow-hidden"
+        className="max-w-md w-full rounded-3xl border border-white/[0.08] bg-surface-card p-8 sm:p-10 shadow-[var(--shadow-raised-lg)] relative overflow-hidden"
       >
-        {/* Subtle Gradient Glow */}
-        <div className="absolute -top-24 -left-24 w-48 h-48 bg-accent-purple/10 blur-[80px] rounded-full pointer-events-none" />
-        
-        <div className="relative z-10">
-          <div className="w-16 h-16 bg-accent-purple/10 text-accent-purple rounded-2xl flex items-center justify-center mx-auto mb-6 rotate-6 border border-accent-purple/20">
-            <AlertTriangle className="w-8 h-8" />
+        <div className="relative z-10 space-y-4">
+          <div className="w-14 h-14 bg-accent-amber/10 text-accent-amber rounded-2xl flex items-center justify-center mx-auto mb-4 border border-accent-amber/25 shadow-[var(--shadow-raised-sm)]">
+            <AlertTriangle className="w-7 h-7" />
           </div>
           
-          <h2 className="text-3xl font-bold font-syne mb-3 text-white">Something Stalled</h2>
-          <p className="text-white/50 mb-8 font-dm-sans leading-relaxed">
-            The application encountered an unexpected state. We&apos;ve logged the details and are ready to recover.
+          <h2 className="text-2xl font-bold text-white tracking-tight">Something Stalled</h2>
+          <p className="text-text-secondary text-xs sm:text-sm leading-relaxed">
+            The application encountered an unexpected runtime condition. You can safely retry or return to your dashboard.
           </p>
 
-          <div className="flex flex-col gap-3">
+          <div className="pt-2 flex flex-col gap-2.5">
             <button
               onClick={() => reset()}
-              className="w-full px-6 py-4 bg-accent-purple text-white rounded-xl transition-all font-bold shadow-lg shadow-accent-purple/20 hover:shadow-accent-purple/40 flex items-center justify-center gap-2"
+              className="btn-primary w-full py-3 text-xs font-bold flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(34,197,94,0.35)]"
             >
               <RotateCcw className="w-4 h-4" /> Try Again
             </button>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2.5">
               <Link
                 href="/dashboard"
-                className="px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-colors font-bold text-xs text-white/70 flex items-center justify-center gap-2"
+                className="btn-secondary py-2.5 text-xs font-semibold flex items-center justify-center gap-1.5"
               >
-                <Home size={14} /> Dashboard
+                <Home size={13} /> Dashboard
               </Link>
               <Link
                 href="/support"
-                className="px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-colors font-bold text-xs text-white/70 flex items-center justify-center gap-2"
+                className="btn-secondary py-2.5 text-xs font-semibold flex items-center justify-center gap-1.5"
               >
-                <LifeBuoy size={14} /> Support
+                <LifeBuoy size={13} /> Support Hub
               </Link>
             </div>
           </div>

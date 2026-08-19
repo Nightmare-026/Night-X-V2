@@ -1,9 +1,46 @@
 import { auth } from "@/auth";
-import { adminDb, incrementAIUsage } from "@/lib/firebaseAdmin";
+import { adminDb, reserveAIUsage } from "@/lib/firebaseAdmin";
 import { NextResponse } from "next/server";
-import { generateAIResponse, generateAIResponseFromHistory } from "@/lib/ai-service";
+import { generateAIResponseFromHistory } from "@/lib/ai-service";
 
 export const dynamic = 'force-dynamic';
+
+const MAX_MESSAGES = 20;
+const MAX_MESSAGE_CHARS = 4000;
+const MAX_TOTAL_CHARS = 12000;
+const ALLOWED_ROLES = new Set(["user", "assistant"]);
+
+type ChatMessage = {
+  role: "user" | "assistant";
+  content: string;
+};
+
+function validateMessages(value: unknown): ChatMessage[] | null {
+  if (!Array.isArray(value) || value.length === 0 || value.length > MAX_MESSAGES) {
+    return null;
+  }
+
+  let totalChars = 0;
+  const messages: ChatMessage[] = [];
+
+  for (const item of value) {
+    if (!item || typeof item !== "object") return null;
+
+    const { role, content } = item as { role?: unknown; content?: unknown };
+    if (typeof role !== "string" || !ALLOWED_ROLES.has(role)) return null;
+    if (typeof content !== "string") return null;
+
+    const trimmedContent = content.trim();
+    if (!trimmedContent || trimmedContent.length > MAX_MESSAGE_CHARS) return null;
+
+    totalChars += trimmedContent.length;
+    if (totalChars > MAX_TOTAL_CHARS) return null;
+
+    messages.push({ role: role as ChatMessage["role"], content: trimmedContent });
+  }
+
+  return messages;
+}
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -11,47 +48,38 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const today = new Date().toISOString().split('T')[0];
-  const tool = "chatbot";
-  const usageId = `${session.user.id}_${tool}_${today}`;
+  const contentLength = Number(req.headers.get("content-length") || "0");
+  if (contentLength > 64 * 1024) {
+    return NextResponse.json({ error: "Request body is too large" }, { status: 413 });
+  }
 
   try {
-    // 1. Check Rate Limit
+    const { messages: bodyMessages } = await req.json();
+    const messages = validateMessages(bodyMessages);
+    if (!messages) {
+      return NextResponse.json({ error: "Invalid or too-large chat history" }, { status: 400 });
+    }
+
     if (!adminDb) {
       return NextResponse.json({ error: "Service unavailable (Firebase not initialized)" }, { status: 503 });
     }
-    const doc = await adminDb.collection("ai_usage").doc(usageId).get();
-    const currentCount = doc.exists ? doc.data()?.count || 0 : 0;
 
-    if (currentCount >= 30) {
-      return NextResponse.json(
-        { error: "Daily limit reached. Resets at midnight." },
-        { status: 429 }
-      );
+    const reserved = await reserveAIUsage(session.user.id, "chatbot", 30);
+    if (!reserved) {
+      return NextResponse.json({ error: "Daily limit reached or quota service unavailable." }, { status: 429 });
     }
 
-    const { messages: bodyMessages } = await req.json();
-
-    // 2. Call AI Service with full history
     const aiResponse = await generateAIResponseFromHistory(
-      bodyMessages,
+      messages,
       "You are Night X, a helpful utility hub assistant. Help users find and use the 40+ tools available on this platform."
     );
 
-    // 3. Track usage
-    try {
-      await incrementAIUsage(session.user.id, tool);
-    } catch (usageError) {
-      console.error("Failed to track usage:", usageError);
-    }
-
     return NextResponse.json({ response: aiResponse });
-
-  } catch (error: any) {
+  } catch (error) {
     console.error("AI Chat API Error:", error);
-    return NextResponse.json({ 
-      error: error.message || "Internal Server Error",
-      details: "Check AI service status or API configuration"
-    }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error", details: "Chat response generation failed" },
+      { status: 500 }
+    );
   }
 }

@@ -8,8 +8,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
   try {
     const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || 'anonymous';
-    
-    // Persistent Rate limit signups: 3 per hour per IP
+
     const { success } = await firestoreRateLimit(adminDb, ip, 'registration', 3, 3600000);
     if (!success) {
       return NextResponse.json(
@@ -20,36 +19,38 @@ export async function POST(req: NextRequest) {
 
     const { name, email, password, terms_accepted, website_url, turnstileToken } = await req.json();
 
-    // Verify Turnstile Token
     if (!turnstileToken) {
       return NextResponse.json({ message: "Security check missing" }, { status: 400 });
     }
 
-    const verifyUrl = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
-    const verifyRes = await fetch(verifyUrl, {
+    const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
+    if (!turnstileSecret) {
+      return NextResponse.json({ message: "Security verification is not configured" }, { status: 503 });
+    }
+
+    const verifyRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: `secret=${process.env.TURNSTILE_SECRET_KEY || '1x0000000000000000000000000000000AA'}&response=${turnstileToken}`
+      body: new URLSearchParams({ secret: turnstileSecret, response: turnstileToken }),
     });
+
+    if (!verifyRes.ok) {
+      return NextResponse.json({ message: "Security check failed. Please try again." }, { status: 400 });
+    }
 
     const verifyData = await verifyRes.json();
     if (!verifyData.success) {
       return NextResponse.json({ message: "Security check failed. Please try again." }, { status: 400 });
     }
 
-    // Honeypot check
     if (website_url) {
       return NextResponse.json({ message: "User registered successfully" }, { status: 201 });
     }
 
     if (!email || !password || !name) {
-      return NextResponse.json(
-        { message: "Missing required fields" },
-        { status: 400 }
-      );
+      return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
     }
 
-    // Robust email validation
     const emailValidation = isValidEmail(email);
     if (!emailValidation.isValid) {
       return NextResponse.json({ message: emailValidation.reason }, { status: 400 });
@@ -64,37 +65,32 @@ export async function POST(req: NextRequest) {
     }
 
     if (!terms_accepted) {
-      return NextResponse.json(
-        { message: "You must accept the terms and conditions" },
-        { status: 400 }
-      );
+      return NextResponse.json({ message: "You must accept the terms and conditions" }, { status: 400 });
     }
 
-    // Check if user already exists and create in a transaction for atomicity
     if (!adminDb) {
       return NextResponse.json({ message: "Service unavailable" }, { status: 503 });
     }
 
-    const userDocRef = adminDb.collection("users").doc(email.toLowerCase());
-    
+    const normalizedEmail = email.toLowerCase();
+    const userDocRef = adminDb.collection("users").doc(normalizedEmail);
+
     try {
       const registrationResult = await adminDb.runTransaction(async (transaction) => {
         const userDoc = await transaction.get(userDocRef);
-        
+
         if (userDoc.exists) {
           return { error: "User already exists with this email", status: 400 };
         }
 
-        // Hash password inside transaction (or just before)
         const hashedPassword = await hash(password, 12);
-
         const userData = {
           name,
-          email: email.toLowerCase(),
+          email: normalizedEmail,
           password_hash: hashedPassword,
           terms_accepted_at: new Date().toISOString(),
           createdAt: new Date().toISOString(),
-          uid: userDocRef.id // Store the ID for convenience
+          uid: userDocRef.id,
         };
 
         transaction.set(userDocRef, userData);
@@ -106,27 +102,18 @@ export async function POST(req: NextRequest) {
       }
 
       return NextResponse.json(
-        { 
-          message: "User registered successfully", 
-          user: { 
-            id: userDocRef.id, 
-            name: name, 
-            email: email.toLowerCase() 
-          } 
+        {
+          message: "User registered successfully",
+          user: { id: userDocRef.id, name, email: normalizedEmail },
         },
         { status: 201 }
       );
-    } catch (transactionError: any) {
+    } catch (transactionError) {
       console.error("Registration transaction failed:", transactionError);
       return NextResponse.json({ message: "Registration failed. Please try again." }, { status: 500 });
     }
-
-    
   } catch (error) {
     console.error("Registration error:", error);
-    return NextResponse.json(
-      { message: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: "Internal server error" }, { status: 500 });
   }
 }
