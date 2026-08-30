@@ -1,145 +1,85 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Github, Twitter, Heart, Send, CheckCircle2, ShieldCheck, Zap } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Github, ShieldCheck, Heart } from 'lucide-react';
 import BrandWordmark from '@/components/ui/BrandWordmark';
-import { useToast } from '@/components/ui/Toast';
 
 export default function Footer() {
   const pathname = usePathname();
-  const { toast } = useToast();
-  const [email, setEmail] = useState('');
-  const [isSubscribing, setIsSubscribing] = useState(false);
-  const [isSubscribed, setIsSubscribed] = useState(false);
 
   const isAuthPage = pathname?.startsWith('/auth');
   if (isAuthPage) return null;
 
-  const handleSubscribe = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !email.includes('@')) {
-      toast('Please enter a valid email address', 'error');
-      return;
-    }
-
-    setIsSubscribing(true);
-    try {
-      const res = await fetch('/api/newsletter', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-
-      if (res.ok) {
-        setIsSubscribed(true);
-        toast('Subscribed to Night X updates!', 'success');
-        setEmail('');
-      } else {
-        const data = await res.json();
-        toast(data.error || 'Failed to subscribe', 'error');
-      }
-    } catch {
-      toast('Failed to subscribe. Please try again.', 'error');
-    } finally {
-      setIsSubscribing(false);
-    }
-  };
-
   const toolCategories = [
     { name: 'Image Processing', href: '/tools?category=image' },
-    { name: 'Security & Crypto', href: '/tools?category=security' },
+    { name: 'Security & Cryptography', href: '/tools?category=security' },
     { name: 'Text & Markdown', href: '/tools?category=text' },
     { name: 'Developer Utilities', href: '/tools?category=developer' },
-    { name: 'Everyday Life', href: '/tools?category=life' },
+    { name: 'Everyday Life Helpers', href: '/tools?category=life' },
     { name: 'AI Workflows', href: '/dashboard/ai' },
   ];
 
   const platformLinks = [
-    { name: 'All Tools Catalog', href: '/tools' },
+    { name: 'All 42 Tools Catalog', href: '/tools' },
+    { name: 'Why 100% Free?', href: '/pricing' },
     { name: 'Developer & API Docs', href: '/docs' },
-    { name: 'Pricing & Plans', href: '/pricing' },
     { name: 'System Status', href: '/status' },
-    { name: 'Changelog & Updates', href: '/changelog' },
+    { name: 'Release Changelog', href: '/changelog' },
   ];
 
-  const companyLinks = [
+  const resourceLinks = [
     { name: 'About Night X', href: '/about' },
-    { name: 'Security Center', href: '/security' },
+    { name: 'Security Architecture', href: '/security' },
     { name: 'Privacy Policy', href: '/privacy' },
     { name: 'Terms of Service', href: '/terms' },
-  ];
-
-  const supportLinks = [
     { name: 'Help & Support', href: '/support' },
-    { name: 'Contact Us', href: '/contact' },
     { name: 'Product Feedback', href: '/feedback' },
-    { name: 'Frequently Asked Questions', href: '/faq' },
   ];
 
   return (
-    <footer className="bg-[#06080C] border-t border-white/[0.06] pt-16 pb-12 px-4 sm:px-6 relative overflow-hidden" role="contentinfo">
-      {/* Subtle background glow */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
+    <footer className="bg-[#06080C] border-t border-white/[0.06] pt-14 pb-10 px-4 sm:px-6 relative overflow-hidden" role="contentinfo">
+      {/* Subtle bottom glow */}
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[150px] bg-primary/4 blur-[100px] rounded-full pointer-events-none" />
 
       <div className="max-w-[1280px] mx-auto relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-10 mb-14">
-          {/* Brand & Newsletter Column (2 cols on lg) */}
-          <div className="lg:col-span-2 space-y-6">
-            <div className="space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
+          {/* Brand Column (2 cols on lg) */}
+          <div className="lg:col-span-2 space-y-4">
+            <div className="space-y-2.5">
               <Link href="/" className="inline-block outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg" aria-label="Night X Home">
                 <BrandWordmark size="md" />
               </Link>
-              <p className="text-[0.875rem] text-text-tertiary leading-[1.6] max-w-[340px]">
-                High-performance developer utilities, image processors, cryptographic keys, and AI workflows running locally in your browser.
+              <p className="text-xs text-text-tertiary leading-[1.7] max-w-[320px]">
+                High-performance developer utilities, image processors, cryptographic instruments, and AI workflows running locally in your browser.
               </p>
             </div>
 
-            <div className="space-y-3">
-              <h4 className="text-[0.75rem] font-bold text-white/90 uppercase tracking-[0.1em]">Stay Updated</h4>
-              <form onSubmit={handleSubscribe} className="relative max-w-[320px] group" aria-label="Newsletter Subscription Form">
-                <input 
-                  type="email" 
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={isSubscribed || isSubscribing}
-                  required
-                  aria-label="Email address for newsletter"
-                  className="w-full bg-surface-inset border border-white/[0.1] rounded-xl px-4 py-2.5 text-[0.8125rem] text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 transition-all disabled:opacity-60 shadow-[var(--shadow-inset-sm)]"
-                />
-                <button 
-                  type="submit" 
-                  disabled={isSubscribed || isSubscribing}
-                  aria-label="Submit newsletter subscription"
-                  className="absolute right-1.5 top-1.5 p-2 bg-primary/20 text-primary-300 hover:bg-primary/30 rounded-lg transition-colors disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-primary outline-none"
-                >
-                  {isSubscribed ? <CheckCircle2 className="w-3.5 h-3.5 text-primary-400" /> : <Send className="w-3.5 h-3.5" />}
-                </button>
-              </form>
-            </div>
+            {/* Privacy Promise Pill */}
+            <div className="pt-2 flex flex-col gap-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-card border border-white/[0.06] text-xs text-text-secondary w-fit">
+                <ShieldCheck size={14} className="text-emerald-400" />
+                <span>100% In-Browser Memory Safety</span>
+              </div>
 
-            {/* System Status Pill */}
-            <div>
               <Link 
                 href="/status"
-                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-card border border-white/[0.08] text-xs font-semibold text-text-secondary hover:border-primary/40 hover:text-white transition-all shadow-[var(--shadow-raised-sm)]"
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-card border border-white/[0.06] text-xs text-text-secondary hover:border-primary/40 hover:text-white transition-all w-fit"
               >
-                <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                <span>All Systems Operational</span>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>All Client Engines Operational</span>
               </Link>
             </div>
           </div>
 
-          {/* Tools Column */}
+          {/* Ecosystem Column */}
           <div>
-            <h4 className="text-[0.75rem] font-bold text-white/90 uppercase tracking-[0.1em] mb-4">Ecosystem</h4>
-            <ul className="space-y-2.5">
+            <h4 className="text-[11px] font-bold text-white uppercase tracking-[0.1em] mb-3.5">Tool Suites</h4>
+            <ul className="space-y-2">
               {toolCategories.map((item) => (
                 <li key={item.name}>
-                  <Link href={item.href} className="text-[0.8125rem] text-text-tertiary hover:text-primary-300 transition-colors focus-visible:ring-2 focus-visible:ring-primary outline-none rounded">
+                  <Link href={item.href} className="text-xs text-text-tertiary hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-primary outline-none rounded">
                     {item.name}
                   </Link>
                 </li>
@@ -149,11 +89,11 @@ export default function Footer() {
 
           {/* Platform Column */}
           <div>
-            <h4 className="text-[0.75rem] font-bold text-white/90 uppercase tracking-[0.1em] mb-4">Platform</h4>
-            <ul className="space-y-2.5">
+            <h4 className="text-[11px] font-bold text-white uppercase tracking-[0.1em] mb-3.5">Platform</h4>
+            <ul className="space-y-2">
               {platformLinks.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} className="text-[0.8125rem] text-text-tertiary hover:text-primary-300 transition-colors focus-visible:ring-2 focus-visible:ring-primary outline-none rounded">
+                  <Link href={link.href} className="text-xs text-text-tertiary hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-primary outline-none rounded">
                     {link.name}
                   </Link>
                 </li>
@@ -161,49 +101,27 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Company Column */}
+          {/* Resources Column */}
           <div>
-            <h4 className="text-[0.75rem] font-bold text-white/90 uppercase tracking-[0.1em] mb-4">Company</h4>
-            <ul className="space-y-2.5">
-              {companyLinks.map((link) => (
+            <h4 className="text-[11px] font-bold text-white uppercase tracking-[0.1em] mb-3.5">Resources & Trust</h4>
+            <ul className="space-y-2">
+              {resourceLinks.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} className="text-[0.8125rem] text-text-tertiary hover:text-primary-300 transition-colors focus-visible:ring-2 focus-visible:ring-primary outline-none rounded">
+                  <Link href={link.href} className="text-xs text-text-tertiary hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-primary outline-none rounded">
                     {link.name}
                   </Link>
                 </li>
               ))}
-            </ul>
-          </div>
-
-          {/* Support Column */}
-          <div>
-            <h4 className="text-[0.75rem] font-bold text-white/90 uppercase tracking-[0.1em] mb-4">Resources</h4>
-            <ul className="space-y-2.5">
-              {supportLinks.map((link) => (
-                <li key={link.name}>
-                  <Link href={link.href} className="text-[0.8125rem] text-text-tertiary hover:text-primary-300 transition-colors focus-visible:ring-2 focus-visible:ring-primary outline-none rounded">
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-              <li className="flex items-center gap-3 pt-3">
+              <li className="pt-2">
                 <a 
                   href="https://github.com/Nightmare-026/Night-X-V2" 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className="p-2 rounded-lg bg-surface-card border border-white/[0.06] text-text-tertiary hover:text-white hover:border-primary/30 transition-colors focus-visible:ring-2 focus-visible:ring-primary outline-none"
+                  className="inline-flex items-center gap-2 p-2 rounded-lg bg-surface-card border border-white/[0.06] text-xs text-text-secondary hover:text-white hover:border-primary/30 transition-colors focus-visible:ring-2 focus-visible:ring-primary outline-none"
                   aria-label="Night X on GitHub"
                 >
-                  <Github className="w-4 h-4" />
-                </a>
-                <a 
-                  href="https://twitter.com" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="p-2 rounded-lg bg-surface-card border border-white/[0.06] text-text-tertiary hover:text-white hover:border-primary/30 transition-colors focus-visible:ring-2 focus-visible:ring-primary outline-none"
-                  aria-label="Night X on Twitter"
-                >
-                  <Twitter className="w-4 h-4" />
+                  <Github className="w-3.5 h-3.5 text-primary" />
+                  <span>GitHub Repository</span>
                 </a>
               </li>
             </ul>
@@ -211,15 +129,13 @@ export default function Footer() {
         </div>
 
         {/* Bottom Copyright Bar */}
-        <div className="pt-8 border-t border-white/[0.06] flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-[0.75rem] text-text-muted">
-            © {new Date().getFullYear()} Night X. All rights reserved. Sovereign client-side first architecture.
+        <div className="pt-6 border-t border-white/[0.06] flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-text-muted">
+          <p>
+            © {new Date().getFullYear()} Night X. Free sovereign client-side architecture.
           </p>
-          <div className="flex items-center gap-4">
-            <p className="text-[0.75rem] text-text-muted flex items-center gap-1.5">
-              Built with precision and care <Heart className="w-3 h-3 text-primary-400 fill-primary-400" />
-            </p>
-          </div>
+          <p className="flex items-center gap-1.5">
+            Crafted for speed and privacy <Heart className="w-3 h-3 text-primary fill-primary" />
+          </p>
         </div>
       </div>
     </footer>

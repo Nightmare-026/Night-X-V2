@@ -1,60 +1,20 @@
-/* Mobile fixes for small screens */
-@media (max-width: 640px) {
-  /* Fix header overlapping content */
-  body {
-    padding-top: env(safe-area-inset-top);
-  }
+/* Responsive helper utilities */
+.safe-pb {
+  padding-bottom: env(safe-area-inset-bottom, 1rem);
+}
 
-  /* Prevent horizontal scrolling on mobile */
+.safe-pt {
+  padding-top: env(safe-area-inset-top, 1rem);
+}
+
+@media (max-width: 640px) {
+  /* Prevent horizontal overflow on small devices */
   html, body {
     overflow-x: hidden;
   }
 
-  /* Make sure large inputs don't break layout */
+  /* Responsive media input containment */
   input, textarea, select {
     max-width: 100%;
-  }
-
-  /* Improve tap targets on mobile */
-  button, a {
-    min-height: 44px;
-    min-width: 44px;
-  }
-}
-
-/* Tablet adjustments */
-@media (min-width: 641px) and (max-width: 1024px) {
-  .sidebar-collapsed-on-tablet {
-    display: none;
-  }
-}
-
-/* Safe areas for notched phones */
-.safe-pb {
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-.safe-pt {
-  padding-top: env(safe-area-inset-top);
-}
-
-/* Category Card Alignment Fix */
-@media (max-width: 1024px) {
-  .category-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
-  }
-}
-
-@media (max-width: 640px) {
-  .category-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  
-  .hero-title {
-    font-size: 2.5rem !important;
-    line-height: 1.1 !important;
   }
 }

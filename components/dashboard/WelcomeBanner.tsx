@@ -25,26 +25,26 @@ export default function WelcomeBanner() {
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          initial={{ opacity: 0, y: -15 }}
+          initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          className="mb-8 rounded-3xl border border-primary/30 bg-gradient-to-r from-surface-elevated to-surface-card p-6 shadow-[var(--shadow-raised-md)]"
+          exit={{ opacity: 0, scale: 0.98 }}
+          className="rounded-2xl border border-primary/30 bg-gradient-to-r from-surface-elevated to-surface-card p-5 shadow-[var(--shadow-raised-sm)]"
         >
           <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/15 border border-primary/30 text-primary-400 shrink-0">
-                <Sparkles className="h-6 w-6" />
+            <div className="flex items-center gap-3.5">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 border border-primary/30 text-primary shrink-0">
+                <Sparkles className="h-5 w-5" />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-white">Welcome to Night X Workspace!</h2>
+                <h2 className="text-sm font-bold text-white">Welcome to Night X Workspace!</h2>
                 <p className="text-xs text-text-secondary">
-                  Your private suite of 42+ developer, security, image, and AI utilities is ready.
+                  Your private suite of 42+ developer, security, media, and AI tools is ready.
                 </p>
               </div>
             </div>
             <button
               onClick={() => setIsVisible(false)}
-              className="rounded-xl bg-white/[0.04] p-2 text-text-muted hover:bg-white/10 hover:text-white transition-colors"
+              className="rounded-lg bg-white/[0.04] p-1.5 text-text-muted hover:bg-white/10 hover:text-white transition-colors"
               aria-label="Dismiss banner"
             >
               <X className="h-4 w-4" />

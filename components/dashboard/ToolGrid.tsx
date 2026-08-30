@@ -4,7 +4,6 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { TOOLS, ToolCategory, searchTools } from '@/lib/tools-registry';
 import ToolCard from './ToolCard';
-import { motion, AnimatePresence } from 'framer-motion';
 import { SearchX, FilterX, RotateCcw } from 'lucide-react';
 import CategoryFilter from './CategoryFilter';
 
@@ -17,7 +16,7 @@ export default function ToolGrid() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 600);
+    }, 200);
     return () => clearTimeout(timer);
   }, []);
 
@@ -73,28 +72,13 @@ export default function ToolGrid() {
     }, {} as Record<string, number>);
   }, []);
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.05,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 },
-  };
-
   if (isLoading) {
     return (
-      <div className="w-full">
-        <div className="h-10 w-64 bg-white/5 animate-pulse rounded-full mb-8" />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="w-full space-y-6">
+        <div className="h-9 w-64 bg-white/5 animate-pulse rounded-xl" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
           {[...Array(8)].map((_, i) => (
-            <div key={i} className="glass-card h-64 w-full animate-pulse opacity-50" />
+            <div key={i} className="h-44 rounded-2xl bg-surface-card border border-white/[0.06] animate-pulse" />
           ))}
         </div>
       </div>
@@ -102,8 +86,8 @@ export default function ToolGrid() {
   }
 
   return (
-    <div className="w-full">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+    <div className="w-full space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <CategoryFilter
           activeCategory={activeCategory}
           onCategoryChange={setActiveCategory}
@@ -111,61 +95,47 @@ export default function ToolGrid() {
         />
       </div>
 
-      <div className="flex items-center justify-between mb-6 gap-4">
-        <h2 className="text-xl font-syne font-bold flex items-center gap-2">
-          {activeCategory === 'all' ? 'All Tools' : `${activeCategory.charAt(0).toUpperCase() + activeCategory.slice(1)} Tools`}
-          <span className="text-white/40 text-sm font-dm-sans font-normal" aria-live="polite">
-            ({filteredTools.length} found)
+      <div className="flex items-center justify-between gap-4">
+        <h2 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+          <span>{activeCategory === 'all' ? 'All Workspace Tools' : `${activeCategory.charAt(0).toUpperCase() + activeCategory.slice(1)} Tools`}</span>
+          <span className="text-text-muted text-xs font-normal">
+            ({filteredTools.length} available)
           </span>
         </h2>
 
         {(searchQuery || activeCategory !== 'all') && (
           <button
             onClick={clearFilters}
-            className="text-xs font-medium text-white/40 hover:text-white flex items-center gap-1 transition-colors shrink-0"
+            className="text-xs font-semibold text-primary hover:underline flex items-center gap-1 transition-colors shrink-0"
           >
             <RotateCcw size={12} />
-            Clear Filters
+            <span>Clear Filters</span>
           </button>
         )}
       </div>
 
-      <AnimatePresence mode="popLayout">
-        {filteredTools.length > 0 ? (
-          <motion.div
-            key="grid"
-            variants={containerVariants}
-            initial="hidden"
-            animate="show"
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch"
-          >
-            {filteredTools.map((tool) => (
-              <motion.div key={tool.slug} variants={itemVariants} layout className="h-full">
-                <ToolCard tool={tool} />
-              </motion.div>
-            ))}
-          </motion.div>
-        ) : (
-          <motion.div
-            key="empty"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="flex flex-col items-center justify-center py-20 glass-card"
-          >
-            <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mb-4">
-              {searchQuery ? <SearchX className="text-white/20" size={40} /> : <FilterX className="text-white/20" size={40} />}
+      {filteredTools.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 items-stretch">
+          {filteredTools.map((tool) => (
+            <div key={tool.slug} className="h-full">
+              <ToolCard tool={tool} />
             </div>
-            <h3 className="text-xl font-bold mb-2">No tools found</h3>
-            <p className="text-white/40 mb-6 text-center max-w-xs">
-              We couldn&apos;t find any tools matching your {searchQuery ? 'search' : 'filters'}. Try something else.
-            </p>
-            <button onClick={clearFilters} className="btn-primary">
-              Reset All Filters
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center py-16 p-8 rounded-2xl border border-dashed border-white/10 bg-surface-card/50 text-center">
+          <div className="w-14 h-14 rounded-2xl bg-surface-inset border border-white/10 flex items-center justify-center mb-3 text-text-muted">
+            {searchQuery ? <SearchX size={26} /> : <FilterX size={26} />}
+          </div>
+          <h3 className="text-base font-bold text-white mb-1">No matching tools</h3>
+          <p className="text-xs text-text-tertiary mb-5 max-w-xs">
+            We couldn&apos;t find any tools matching your {searchQuery ? 'search query' : 'category filter'}.
+          </p>
+          <button onClick={clearFilters} className="btn-primary text-xs py-2 px-4">
+            Reset All Filters
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { MessageSquarePlus, Bug, Lightbulb, MessageCircle, Send, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -47,32 +46,32 @@ export default function FeedbackPage() {
   };
 
   return (
-    <div className="min-h-screen text-white pt-16 pb-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto space-y-12">
-        <div className="text-center max-w-2xl mx-auto space-y-3 pt-6">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary-400">
-            <MessageSquarePlus size={14} />
+    <div className="min-h-screen text-white pt-24 md:pt-28 pb-16 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto space-y-10">
+        <div className="text-center max-w-2xl mx-auto space-y-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary">
+            <MessageSquarePlus size={13} />
             <span>Community Voice</span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tight">
             Help Us Improve Night X
           </h1>
 
-          <p className="text-sm text-text-tertiary">
+          <p className="text-xs sm:text-sm text-text-tertiary">
             Night X is built for developers, designers, and creators. Tell us what tool we should build next or what can be improved.
           </p>
         </div>
 
-        <div className="rounded-3xl border border-white/[0.08] bg-surface-card p-6 sm:p-10 shadow-[var(--shadow-raised-md)]">
+        <div className="rounded-2xl border border-white/[0.08] bg-surface-card p-6 sm:p-8 shadow-[var(--shadow-raised-sm)]">
           {submitted ? (
-            <div className="text-center py-10 space-y-4">
-              <div className="w-16 h-16 bg-primary/15 text-primary-400 border border-primary/30 rounded-2xl flex items-center justify-center mx-auto shadow-lg">
-                <CheckCircle2 className="w-8 h-8" />
+            <div className="text-center py-8 space-y-3">
+              <div className="w-12 h-12 bg-primary/15 text-primary border border-primary/30 rounded-2xl flex items-center justify-center mx-auto shadow-md">
+                <CheckCircle2 className="w-6 h-6" />
               </div>
-              <h3 className="text-2xl font-bold text-white">Feedback Received!</h3>
+              <h3 className="text-lg font-bold text-white">Feedback Received!</h3>
               <p className="text-xs text-text-tertiary max-w-sm mx-auto leading-relaxed">
-                Thank you for contributing to Night X. Our team reads every submission and reviews tool requests weekly.
+                Thank you for contributing to Night X. Our team reviews tool requests and suggestions weekly.
               </p>
               <div className="pt-2">
                 <Button 
@@ -85,18 +84,18 @@ export default function FeedbackPage() {
               </div>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2.5">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
                 <label className="text-xs font-bold text-text-secondary uppercase tracking-wider block">Feedback Category</label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                   {types.map((t) => (
                     <button
                       key={t.id}
                       type="button"
                       onClick={() => setType(t.id)}
-                      className={`flex items-center gap-2.5 p-3.5 rounded-xl border text-xs font-semibold transition-all ${
+                      className={`flex items-center gap-2.5 p-3 rounded-xl border text-xs font-semibold transition-all ${
                         type === t.id
-                          ? 'bg-primary/20 border-primary text-primary-300 shadow-[var(--shadow-raised-sm)]'
+                          ? 'bg-primary/20 border-primary text-primary shadow-sm font-bold'
                           : 'bg-surface-inset border-white/10 hover:border-white/20 text-text-tertiary'
                       }`}
                     >
@@ -107,22 +106,22 @@ export default function FeedbackPage() {
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-text-secondary uppercase tracking-wider block">Your Feedback & Suggestions</label>
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-text-secondary">Your Feedback & Suggestions</label>
                 <Textarea 
                   name="message"
                   required
-                  rows={5}
+                  rows={4}
                   placeholder={
                     type === 'feature' ? "I'd love to see a tool that supports converting..." :
-                    type === 'bug' ? "I encountered an error when trying to upload a file in..." :
-                    "What I like most and what could be faster..."
+                    type === 'bug' ? "I encountered an error when trying to process..." :
+                    "What could be faster or more intuitive..."
                   }
                 />
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-text-secondary uppercase tracking-wider flex justify-between">
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-text-secondary flex justify-between">
                   <span>Your Email <span className="text-text-muted font-normal lowercase">(optional - for follow-up)</span></span>
                 </label>
                 <Input 
@@ -137,10 +136,10 @@ export default function FeedbackPage() {
                 disabled={isSubmitting}
                 isLoading={isSubmitting}
                 variant="primary"
-                className="w-full text-xs font-bold py-3.5"
+                className="w-full text-xs font-bold py-2.5 shadow-md"
               >
-                <Send size={14} className="mr-2" />
-                Submit Feedback
+                <Send size={13} className="mr-1.5" />
+                <span>Submit Feedback</span>
               </Button>
             </form>
           )}

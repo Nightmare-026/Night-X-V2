@@ -238,11 +238,11 @@ export default function ToolPage({ params }: ToolPageProps) {
           'Choose between text or an image watermark.',
           'Adjust position, size, and opacity, then download.'
         ];
-      case 'screenshot-to-pdf':
+      case 'image-to-pdf':
         return [
-          'Upload one or more images (screenshots).',
-          'Rearrange or remove images if necessary.',
-          'Click "Combine to PDF" to generate your document.'
+          'Upload one or more images or screenshots.',
+          'Rearrange or remove pages as needed.',
+          'Click "Generate PDF" to compile your document.'
         ];
       case 'password-generator':
         return [

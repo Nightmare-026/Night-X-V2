@@ -1,81 +1,120 @@
 'use client';
 
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Mail, ShieldAlert, Zap, ArrowRight, Shield } from 'lucide-react';
+import { ArrowLeft, Mail, CheckCircle2, Loader2, ArrowRight } from 'lucide-react';
 import BrandWordmark from '@/components/ui/BrandWordmark';
+import { useToast } from '@/components/ui/Toast';
 
 export default function ForgotPasswordPage() {
+  const [email, setEmail] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const { toast } = useToast();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const res = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      if (res.ok) {
+        setIsSubmitted(true);
+        toast('Password recovery instructions sent!', 'success');
+      } else {
+        setIsSubmitted(true);
+      }
+    } catch {
+      setIsSubmitted(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <div className="relative min-h-screen w-full flex items-center justify-center p-6 overflow-hidden bg-[#030303]">
-      {/* Dynamic Background */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-violet-600/10 blur-[120px] rounded-full animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-600/10 blur-[120px] rounded-full animate-pulse [animation-delay:2s]" />
-      </div>
+    <div className="relative min-h-screen w-full flex items-center justify-center p-6 overflow-hidden bg-[#080A0E]">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-primary/8 blur-[100px] rounded-full pointer-events-none" />
 
       <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative z-10 w-full max-w-[480px]"
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="relative z-10 w-full max-w-[420px]"
       >
-        {/* Branding Hub */}
-        <div className="flex flex-col items-center mb-10">
+        <div className="flex justify-center mb-7">
           <Link href="/" className="inline-block outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl">
             <BrandWordmark size="lg" />
           </Link>
         </div>
 
-        {/* Main Interface Card */}
-        <div className="glass-card bg-black/40 backdrop-blur-2xl border-white/5 p-10 rounded-md shadow-2xl relative overflow-hidden group text-center">
-          <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-violet-500/50 to-transparent" />
-          
-          <div className="w-20 h-20 bg-violet-600/10 border border-violet-500/20 rounded-md flex items-center justify-center mx-auto mb-8 shadow-xl">
-            <ShieldAlert size={32} className="text-violet-500" />
+        <div className="rounded-2xl border border-white/[0.08] bg-surface-card p-6 sm:p-8 shadow-[var(--shadow-raised-md)] relative overflow-hidden">
+          <div className="mb-6 text-center">
+            <h1 className="text-xl sm:text-2xl font-bold text-white mb-1">Reset Password</h1>
+            <p className="text-xs text-text-tertiary">Enter your account email to receive recovery instructions</p>
           </div>
 
-          <div className="mb-10 space-y-4">
-            <h2 className="text-xl font-bold text-white font-outfit uppercase tracking-wider">Access Buffer Locked</h2>
-            <p className="text-xs text-white/40 leading-relaxed uppercase tracking-tighter font-medium">
-              Manual recovery protocols are currently required for this instance. Direct reset cycles are restricted to administrative oversight.
-            </p>
-          </div>
-
-          <div className="space-y-4">
-            <div className="p-5 rounded-md border border-white/5 bg-white/[0.02] text-left group/meta">
-              <div className="flex items-start gap-4">
-                <div className="p-2 rounded bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
-                  <Mail size={16} />
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest mb-1">Support Channel</p>
-                  <a href="mailto:support@night-x.app" className="text-xs font-mono text-cyan-400 hover:text-cyan-300 transition-colors">
-                    support@night-x.app
-                  </a>
+          {isSubmitted ? (
+            <div className="text-center space-y-4 py-4">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto">
+                <CheckCircle2 size={24} />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-sm font-bold text-white">Check Your Inbox</h3>
+                <p className="text-xs text-text-secondary leading-relaxed max-w-xs mx-auto">
+                  If an account exists for <span className="font-semibold text-white">{email}</span>, we have dispatched a secure password reset link.
+                </p>
+              </div>
+              <Link
+                href="/auth/signin"
+                className="btn-primary w-full text-xs font-semibold py-2.5 inline-flex items-center justify-center gap-2 mt-4"
+              >
+                <span>Back to Sign In</span>
+                <ArrowRight size={13} />
+              </Link>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-text-secondary block">Email Address</label>
+                <div className="relative">
+                  <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted">
+                    <Mail className="w-4 h-4" />
+                  </div>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="name@example.com"
+                    className="w-full h-10 bg-surface-inset border border-white/10 rounded-xl pl-9 pr-4 text-xs text-white placeholder:text-text-muted focus:outline-none focus:border-primary/60 shadow-inner transition-all"
+                  />
                 </div>
               </div>
-            </div>
 
-            <Link
-              href="/auth/signin"
-              className="w-full h-12 bg-violet-600 text-white rounded-md font-bold text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-violet-500 transition-all shadow-lg shadow-violet-900/40 group/btn active:scale-[0.98]"
-            >
-              Authenticate Session
-              <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform opacity-50" />
-            </Link>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="btn-primary w-full h-10 text-xs font-bold shadow-md flex items-center justify-center gap-2"
+              >
+                {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Send Reset Link"}
+              </button>
 
-            <Link
-              href="/contact"
-              className="w-full h-12 bg-white/[0.02] border border-white/5 text-white/40 hover:text-white rounded-md font-bold text-[9px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-all"
-            >
-              <ArrowLeft size={12} /> Open Support Portal
-            </Link>
-          </div>
-
-          <div className="mt-10 pt-8 border-t border-white/[0.03] flex items-center justify-center gap-4 text-white/10">
-            <Shield size={12} />
-            <span className="text-[8px] font-bold uppercase tracking-[0.3em]">Identity Governance Protocol</span>
-          </div>
+              <div className="text-center pt-2">
+                <Link
+                  href="/auth/signin"
+                  className="text-xs text-text-tertiary hover:text-white transition-colors inline-flex items-center gap-1.5"
+                >
+                  <ArrowLeft size={13} />
+                  <span>Back to Sign In</span>
+                </Link>
+              </div>
+            </form>
+          )}
         </div>
       </motion.div>
     </div>

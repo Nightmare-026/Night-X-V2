@@ -15,6 +15,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { signIn } from 'next-auth/react';
 import { useToast } from '@/components/ui/Toast';
+import BrandWordmark from '@/components/ui/BrandWordmark';
 
 function SigninForm() {
   const router = useRouter();
@@ -55,7 +56,7 @@ function SigninForm() {
         toast("Welcome back!", "success");
         router.push(redirectPath);
       }
-    } catch (err: any) {
+    } catch {
       setError("An unexpected error occurred. Please try again.");
       toast("Error", "error");
     } finally {
@@ -68,7 +69,7 @@ function SigninForm() {
     setError(null);
     try {
       await signIn('google', { callbackUrl: redirectPath });
-    } catch (err: any) {
+    } catch {
       setError("Google sign in failed.");
       toast("Error", "error");
       setIsLoading(false);
@@ -76,9 +77,9 @@ function SigninForm() {
   };
 
   return (
-    <div className="relative min-h-screen w-full flex items-center justify-center p-6 overflow-hidden bg-[#07080D]">
+    <div className="relative min-h-screen w-full flex items-center justify-center p-6 overflow-hidden bg-[#080A0E]">
       {/* Background decoration */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-primary/8 blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute top-0 left-0 w-full h-full dot-grid opacity-20 pointer-events-none" />
 
       <motion.div 
@@ -87,33 +88,26 @@ function SigninForm() {
         className="relative z-10 w-full max-w-[420px]"
       >
         {/* Logo */}
-        <div className="flex justify-center mb-8">
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-primary to-accent-cyan flex items-center justify-center text-white font-bold text-lg shadow-lg group-hover:scale-105 transition-transform">
-              NX
-            </div>
-            <span className="text-2xl font-black text-white tracking-tight">
-              Night X
-            </span>
+        <div className="flex justify-center mb-7">
+          <Link href="/" className="inline-block outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl">
+            <BrandWordmark size="lg" />
           </Link>
         </div>
 
         {/* Auth Card */}
-        <div className="glass-card p-8 sm:p-10 rounded-3xl border-white/[0.08] bg-[#0E101B]/90 shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
-          
-          <div className="mb-8 text-center">
-            <h1 className="text-2xl font-bold text-white mb-1.5">Welcome Back</h1>
-            <p className="text-xs text-text-tertiary">Sign in to access your tools & dashboard</p>
+        <div className="rounded-2xl border border-white/[0.08] bg-surface-card p-6 sm:p-8 shadow-[var(--shadow-raised-md)] relative overflow-hidden">
+          <div className="mb-6 text-center">
+            <h1 className="text-xl sm:text-2xl font-bold text-white mb-1">Welcome Back</h1>
+            <p className="text-xs text-text-tertiary">Sign in to your private workspace</p>
           </div>
 
           <AnimatePresence mode="wait">
             {error && (
               <motion.div 
-                initial={{ opacity: 0, y: -10 }}
+                initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="mb-6 p-3.5 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-2.5 text-red-400 text-xs leading-relaxed"
+                exit={{ opacity: 0, y: -8 }}
+                className="mb-5 p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-2.5 text-red-400 text-xs leading-relaxed"
               >
                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>{error}</span>
@@ -121,12 +115,12 @@ function SigninForm() {
             )}
           </AnimatePresence>
 
-          <div className="space-y-5">
+          <div className="space-y-4">
             {/* Social Logins */}
             <button 
               onClick={handleGoogleSignIn}
               disabled={isLoading}
-              className="w-full h-11 bg-white text-black rounded-xl font-bold text-xs flex items-center justify-center gap-2.5 hover:bg-white/90 active:scale-[0.98] transition-all disabled:opacity-50 shadow-md"
+              className="w-full h-10 bg-white text-black rounded-xl font-bold text-xs flex items-center justify-center gap-2.5 hover:bg-white/90 active:scale-[0.98] transition-all disabled:opacity-50 shadow-sm"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -144,28 +138,28 @@ function SigninForm() {
             </div>
 
             {/* Email Form */}
-            <form onSubmit={handleEmailSignIn} className="space-y-4">
-              <div className="space-y-1.5">
+            <form onSubmit={handleEmailSignIn} className="space-y-3.5">
+              <div className="space-y-1">
                 <label className="text-xs font-semibold text-text-secondary block">Email Address</label>
                 <div className="relative">
                   <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted">
                     <Mail className="w-4 h-4" />
                   </div>
                   <input 
-                    type="email"
+                    type="email" 
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full h-11 bg-white/[0.03] border border-white/10 rounded-xl pl-10 pr-4 text-xs text-white placeholder:text-text-muted focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 transition-all"
+                    className="w-full h-10 bg-surface-inset border border-white/10 rounded-xl pl-9 pr-4 text-xs text-white placeholder:text-text-muted focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 shadow-inner transition-all"
                     placeholder="name@example.com"
                   />
                 </div>
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <div className="flex justify-between items-center px-0.5">
                   <label className="text-xs font-semibold text-text-secondary">Password</label>
-                  <Link href="/auth/forgot-password" className="text-xs font-semibold text-primary-400 hover:text-primary-300 transition-colors">Forgot password?</Link>
+                  <Link href="/auth/forgot-password" className="text-xs font-semibold text-primary hover:underline transition-colors">Forgot password?</Link>
                 </div>
                 <div className="relative">
                   <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted">
@@ -176,13 +170,14 @@ function SigninForm() {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full h-11 bg-white/[0.03] border border-white/10 rounded-xl pl-10 pr-10 text-xs text-white placeholder:text-text-muted focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 transition-all"
+                    className="w-full h-10 bg-surface-inset border border-white/10 rounded-xl pl-9 pr-10 text-xs text-white placeholder:text-text-muted focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 shadow-inner transition-all"
                     placeholder="Enter your password"
                   />
                   <button 
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3.5 top-1/2 -translate-y-1/2 text-text-muted hover:text-white transition-colors"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -192,18 +187,18 @@ function SigninForm() {
               <button 
                 type="submit"
                 disabled={isLoading}
-                className="btn-primary w-full h-11 text-xs font-bold shadow-lg flex items-center justify-center gap-2 mt-2"
+                className="btn-primary w-full h-10 text-xs font-bold shadow-md flex items-center justify-center gap-2 mt-1"
               >
                 {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sign In to Night X"}
               </button>
             </form>
           </div>
 
-          <div className="mt-8 text-center pt-6 border-t border-white/[0.08]">
+          <div className="mt-6 text-center pt-5 border-t border-white/[0.08]">
             <p className="text-xs text-text-tertiary">
               Don&apos;t have an account?{' '}
-              <Link href="/auth/signup" className="text-primary-400 font-bold hover:text-primary-300 transition-colors inline-flex items-center gap-1">
-                <span>Sign up</span>
+              <Link href="/auth/signup" className="text-primary font-bold hover:underline inline-flex items-center gap-1">
+                <span>Create free account</span>
                 <ArrowRight className="w-3 h-3" />
               </Link>
             </p>
@@ -217,8 +212,8 @@ function SigninForm() {
 export default function SigninPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-[#07080D]">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="min-h-screen flex items-center justify-center bg-[#080A0E]">
+        <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
       </div>
     }>
       <SigninForm />

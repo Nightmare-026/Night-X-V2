@@ -4,73 +4,66 @@ import React, { Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ShieldAlert, ArrowLeft, RefreshCcw, Zap } from 'lucide-react';
+import { ShieldAlert, ArrowLeft, RefreshCcw } from 'lucide-react';
+import BrandWordmark from '@/components/ui/BrandWordmark';
 
 function ErrorContent() {
   const searchParams = useSearchParams();
   const error = searchParams.get('error');
 
   const errorMessages: Record<string, string> = {
-    Configuration: "There is a problem with the server configuration. Please try again later.",
-    AccessDenied: "Access was denied. You may not have permission to view this page.",
+    Configuration: "There is a temporary issue with the authentication service. Please try again shortly.",
+    AccessDenied: "Access was denied. Please verify your credentials or permissions.",
     Verification: "The verification link has expired or has already been used.",
-    Default: "An unexpected authentication error occurred."
+    Default: "An unexpected authentication error occurred. Please sign in again."
   };
 
   const message = error ? (errorMessages[error] || errorMessages.Default) : errorMessages.Default;
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center p-6 bg-background relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 z-0 opacity-10">
-        <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-red-500 blur-[120px]" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-accent-purple blur-[120px]" />
-      </div>
+    <div className="min-h-screen flex flex-col justify-center items-center p-6 bg-[#080A0E] relative overflow-hidden">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-red-500/8 blur-[120px] rounded-full pointer-events-none" />
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
         className="w-full max-w-[420px] relative z-10"
       >
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 mb-4 group">
-            <Zap className="w-8 h-8 text-accent-purple fill-accent-purple/20" />
-            <span className="text-2xl font-bold font-syne text-white">Night X</span>
+        <div className="text-center mb-7">
+          <Link href="/" className="inline-block outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl">
+            <BrandWordmark size="lg" />
           </Link>
-          <h2 className="text-3xl font-bold font-syne text-white">Auth Error</h2>
         </div>
 
-        <div className="bg-white/5 border border-white/10 rounded-3xl p-8 space-y-6 backdrop-blur-xl">
-          <div className="w-20 h-20 bg-red-500/20 text-red-400 rounded-full flex items-center justify-center mx-auto mb-2">
-            <ShieldAlert className="w-10 h-10" />
+        <div className="rounded-2xl border border-white/[0.08] bg-surface-card p-6 sm:p-8 shadow-[var(--shadow-raised-md)] space-y-5 text-center">
+          <div className="w-14 h-14 bg-red-500/10 text-red-400 border border-red-500/20 rounded-2xl flex items-center justify-center mx-auto shadow-inner">
+            <ShieldAlert className="w-7 h-7" />
           </div>
 
-          <div className="space-y-3 text-center">
-            <h3 className="text-xl font-bold text-white">Authentication Failed</h3>
-            <p className="text-white/50 text-sm leading-relaxed">
+          <div className="space-y-1.5">
+            <h1 className="text-xl font-bold text-white">Authentication Failed</h1>
+            <p className="text-text-tertiary text-xs leading-relaxed max-w-xs mx-auto">
               {message}
             </p>
           </div>
 
-          <div className="flex flex-col gap-3 pt-4">
+          <div className="flex flex-col gap-2 pt-2">
             <Link
               href="/auth/signin"
-              className="w-full flex items-center justify-center gap-2 py-4 rounded-xl bg-accent-purple text-white font-bold transition-all hover:scale-[1.02] active:scale-[0.98]"
+              className="btn-primary w-full text-xs font-semibold py-2.5 flex items-center justify-center gap-2"
             >
-              <RefreshCcw size={18} /> Try Signing In Again
+              <RefreshCcw size={14} />
+              <span>Try Signing In Again</span>
             </Link>
             <Link
               href="/"
-              className="w-full flex items-center justify-center gap-2 py-3 text-white/40 hover:text-white transition-colors text-sm"
+              className="btn-secondary w-full text-xs font-semibold py-2.5 flex items-center justify-center gap-2"
             >
-              <ArrowLeft size={16} /> Back to Homepage
+              <ArrowLeft size={14} />
+              <span>Return to Homepage</span>
             </Link>
           </div>
         </div>
-        
-        <p className="text-center mt-8 text-xs text-white/20">
-          Error Code: <span className="font-mono text-white/40">{error || 'Unknown'}</span>
-        </p>
       </motion.div>
     </div>
   );
@@ -78,7 +71,11 @@ function ErrorContent() {
 
 export default function AuthErrorPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-background"><RefreshCcw className="w-8 h-8 animate-spin text-accent-purple" /></div>}>
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-[#080A0E]">
+        <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+      </div>
+    }>
       <ErrorContent />
     </Suspense>
   );

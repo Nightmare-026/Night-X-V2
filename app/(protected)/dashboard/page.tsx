@@ -7,20 +7,19 @@ import AIChat from '@/components/dashboard/AIChat';
 import DashboardClient from '@/components/dashboard/DashboardClient';
 import WelcomeBanner from '@/components/dashboard/WelcomeBanner';
 
-
 export const metadata: Metadata = {
-  title: 'Dashboard | Night X',
-  description: 'Your private Night X dashboard for tools, search, and AI-assisted workflows.',
+  title: 'Workspace Dashboard | Night X',
+  description: 'Your private Night X dashboard for tools, execution history, and AI workflows.',
   robots: 'noindex, nofollow',
 };
 
 function ToolGridSkeleton() {
   return (
-    <div className="w-full">
-      <div className="h-10 w-64 bg-white/5 animate-pulse rounded-full mb-8" />
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div className="w-full space-y-6">
+      <div className="h-9 w-64 bg-white/5 animate-pulse rounded-xl" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
         {[...Array(8)].map((_, i) => (
-          <div key={i} className="glass-card h-64 w-full animate-pulse opacity-50" />
+          <div key={i} className="h-44 rounded-2xl bg-surface-card border border-white/[0.06] animate-pulse" />
         ))}
       </div>
     </div>
@@ -34,30 +33,28 @@ export default async function DashboardPage() {
     redirect('/auth/signin?callbackUrl=/dashboard');
   }
 
+  const firstName = session.user?.name?.split(' ')[0] || 'User';
+
   return (
-    <main className="flex-grow p-6 lg:p-10">
-      <header className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <main className="flex-grow p-5 sm:p-8 lg:p-10 space-y-6">
+      <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-2 border-b border-white/[0.06]">
         <div>
-          <h1 className="text-3xl md:text-4xl font-outfit font-bold text-white tracking-tight mb-2">
-            Welcome back, {session.user?.name?.split(' ')[0]}
+          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+            Welcome back, {firstName}
           </h1>
-          <p className="text-white/40 text-sm font-inter">
-            Explore your tools and AI assisted workflows.
+          <p className="text-xs sm:text-sm text-text-tertiary mt-1">
+            Access your 42 in-browser utilities, saved favorites, and AI assistant.
           </p>
         </div>
         
-        <div className="flex items-center gap-3">
-          <div className="hidden md:flex h-10 items-center gap-2 rounded-md border border-white/[0.05] bg-white/[0.02] px-3 text-xs text-white/30">
-            <span className="flex h-2 w-2 rounded-full bg-green-500" />
-            System Online
-          </div>
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-card border border-white/[0.06] text-xs text-text-muted w-fit">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span>Local Engine Ready</span>
         </div>
       </header>
 
       <Suspense fallback={null}>
-        <div className="mb-8">
-          <WelcomeBanner />
-        </div>
+        <WelcomeBanner />
       </Suspense>
 
       <DashboardClient>
